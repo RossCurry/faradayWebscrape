@@ -1,0 +1,6 @@
+source_env ./.envrc-private
+
+export CLIENT_ID=${CLIENT_ID}
+export CLIENT_SECRET=${CLIENT_SECRET}
+export CLIENT_NAME=${CLIENT_NAME}
+export PORT=${PORT}

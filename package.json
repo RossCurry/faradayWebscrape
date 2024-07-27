@@ -1,0 +1,35 @@
+{
+  "name": "faradayWebScrape",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "use puppeteer to web scrap available music",
+  "main": "index.js",
+  "author": "ross curry <ross.curry@maloon.de>",
+  "license": "MIT",
+  "scripts": {
+    "watch": "./node_modules/typescript/bin/tsc -p . -w",
+    "dev": "node ./dist/index.js"
+  },
+  "dependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/koa": "^2.15.0",
+    "@types/koa-bodyparser": "^4.3.12",
+    "@types/koa-cors": "^0.0.6",
+    "@types/koa-json": "^2.0.23",
+    "@types/koa-logger": "^3.1.5",
+    "@types/koa-router": "^7.4.8",
+    "@types/lodash-es": "^4.17.12",
+    "dotenv": "^16.4.5",
+    "fs-extra": "^11.2.0",
+    "koa": "^2.15.3",
+    "koa-bodyparser": "^4.4.1",
+    "koa-cors": "^0.0.16",
+    "koa-json": "^2.0.2",
+    "koa-logger": "^3.2.1",
+    "koa-router": "^12.0.1",
+    "lodash-es": "^4.17.21",
+    "node-fetch": "^3.3.2",
+    "puppeteer": "^22.14.0",
+    "typescript": "^5.5.4"
+  }
+}
