@@ -1,5 +1,5 @@
 {
-  "name": "faradayWebScrape",
+  "name": "faraday-web-scrape",
   "version": "1.0.0",
   "description": "use puppeteer to web scrap available music",
   "author": "ross curry <ross.curry@maloon.de>",
