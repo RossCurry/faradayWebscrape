@@ -7,6 +7,11 @@ import bodyParser from "koa-bodyparser";
 import url from "url";
 import * as koaStatic from 'koa-static';
 import path from 'node:path';
+import CodeVerifier from "#controllers/spotify/auth/CodeVerifier.js";
+// services
+import MongoDB from '#services/mongodb/index.js';
+import Token from "#controllers/spotify/auth/Token.js";
+// env variables
 import dotenv from 'dotenv';
 dotenv.config();
 const __dirname = url.fileURLToPath(new URL(import.meta.url));
@@ -41,6 +46,12 @@ app.use(router.allowedMethods());
 app.use(bodyParser());
 app.use(json());
 app.use(logger());
+// Some useful services for the app
+app.context.services = {
+    codeVerifier: new CodeVerifier(),
+    mongo: new MongoDB(),
+    token: new Token()
+};
 try {
     app.listen(port, () => {
         console.log("__dirname", __dirname);
