@@ -41,10 +41,6 @@ export default async function PopulatePlaylist(ctx, _next) {
             let responseBody = await response.json();
             const snapshot = responseBody;
             snapshots.push(snapshot);
-            // if (response?.ok){
-            //   console.log('!snapshot -> ', snapshot);
-            // }
-            // throw new Error(`Something unknown went wrong adding tracks to playlist ${JSON.stringify(responseBody)}`)
         }
         catch (error) {
             ctx.body = error;
@@ -52,6 +48,6 @@ export default async function PopulatePlaylist(ctx, _next) {
             throw error;
         }
     }
-    ctx.body = snapshots;
+    ctx.body = JSON.stringify(snapshots);
     ctx.status = 200;
 }

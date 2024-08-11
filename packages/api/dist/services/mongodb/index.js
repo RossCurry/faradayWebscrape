@@ -91,5 +91,28 @@ class MongoDb {
         const flattenedIds = playlistData?.flatMap(album => album.trackIds);
         return flattenedIds;
     }
+    async setUserInfo(userInfo, tokenInfo) {
+        console.log('!setUserInfo -> ', userInfo);
+        const usersCollection = this.db?.collection('users');
+        if (!usersCollection)
+            throw new Error('No users collecion found');
+        const [user] = await usersCollection.find({ id: userInfo.id, href: userInfo.href }).toArray();
+        console.log('!user -> ', user);
+        if (!user) {
+            const insertedDocs = await usersCollection.insertOne({
+                ...userInfo,
+                endpoint: tokenInfo,
+                createdDate: new Date(Date.now()).toISOString()
+            });
+            console.log('!insertedDocs -> ', insertedDocs);
+            return insertedDocs;
+        }
+        const insertedDocs = await usersCollection.updateOne({ _id: user._id }, { $set: {
+                endpoint: tokenInfo,
+                updatedDate: new Date(Date.now()).toISOString()
+            } });
+        console.log('!insertedDocs -> ', insertedDocs);
+        return insertedDocs;
+    }
 }
 export default MongoDb;

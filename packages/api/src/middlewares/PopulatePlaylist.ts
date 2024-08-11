@@ -2,7 +2,6 @@ import Application from 'koa';
 import { ProjectionResultsSingle } from './getAlbumInfo.js';
 import { AppContext } from '../router.js';
 import { getBatches } from '#utils/utils.js';
-// import { userToken } from '../router.js';
 
 type SnapshotResponse = {
   snapshot_id: string
@@ -50,16 +49,12 @@ export default async function PopulatePlaylist(ctx: AppContext, _next: Applicati
         let responseBody = await response.json()
         const snapshot: SnapshotResponse = responseBody
         snapshots.push(snapshot)
-        // if (response?.ok){
-        //   console.log('!snapshot -> ', snapshot);
-        // }
-        // throw new Error(`Something unknown went wrong adding tracks to playlist ${JSON.stringify(responseBody)}`)
       } catch (error) {
         ctx.body = error
         ctx.status = 500
         throw error
       }
     }
-    ctx.body = snapshots
+    ctx.body = JSON.stringify(snapshots)
     ctx.status = 200
 }

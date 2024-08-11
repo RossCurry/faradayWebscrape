@@ -4,6 +4,9 @@ import { connectToDatabase } from "./connection.js"
 import { FaradayItemData } from '#controllers/faraday/getItemData.js'
 import { AppState } from '../../router.js'
 import { SpotifySearchResult } from '#middlewares/getAlbumInfo.js'
+import { SpotifyUserProfile } from '#controllers/spotify/spotify.types.js'
+import { AuthToken } from '#controllers/spotify/auth/Token.js'
+import { update } from 'lodash-es'
 
 class MongoDb {
   db: mongoDB.Db | null = null
@@ -82,7 +85,7 @@ class MongoDb {
     const insertedDocs = await albumCollection.insertMany(newFaradayData)
     return insertedDocs
   }
-
+  
   async getFaradayData(){
     console.log('!getFaradayData -> ');
     const albumCollection = this.db?.collection('albums')
@@ -93,15 +96,42 @@ class MongoDb {
   
   async getPlaylistData(){
     if (!this.db) throw new Error('No DB found')
-    const albumCollection = this.db?.collection('albums')
+      const albumCollection = this.db?.collection('albums')
     if (!albumCollection) throw new Error('No albumCollection found')
-    const albums = await albumCollection?.find({'spotify.trackIds': { '$exists': true } }, {}).toArray()
+      const albums = await albumCollection?.find({'spotify.trackIds': { '$exists': true } }, {}).toArray()
     if (!albums) return []
     const playlistData: { trackIds: string}[] =  albums
-      .filter(album => !!album )
-      .map(album => ( { trackIds: album.spotify.trackIds }))
+    .filter(album => !!album )
+    .map(album => ( { trackIds: album.spotify.trackIds }))
     const flattenedIds = playlistData?.flatMap( album => album.trackIds )
     return flattenedIds
+  }
+  
+  async setUserInfo(userInfo: SpotifyUserProfile, tokenInfo: Omit<AuthToken, 'token_type'>){
+    console.log('!setUserInfo -> ', userInfo);
+    const usersCollection = this.db?.collection('users')
+    if (!usersCollection) throw new Error('No users collecion found')
+    const [user] = await usersCollection.find({ id: userInfo.id, href: userInfo.href }).toArray()
+    console.log('!user -> ', user);
+    if (!user) {
+      const insertedDocs = await usersCollection.insertOne({ 
+        ...userInfo, 
+        endpoint: tokenInfo,
+        createdDate: new Date(Date.now()).toISOString()
+      })
+      console.log('!insertedDocs -> ', insertedDocs);
+      return insertedDocs
+    }
+
+    const insertedDocs = await usersCollection.updateOne(
+      { _id: user._id},
+      { $set: {
+        endpoint: tokenInfo,
+        updatedDate: new Date(Date.now()).toISOString()
+      }}
+    )
+    console.log('!insertedDocs -> ', insertedDocs);
+    return insertedDocs
   }
 }
 

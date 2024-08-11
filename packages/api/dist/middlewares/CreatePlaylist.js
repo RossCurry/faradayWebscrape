@@ -1,6 +1,9 @@
 export default async function CreatePlaylist(ctx, next) {
-    const accessToken = ctx.state.accessToken || ctx.state.userToken.get();
-    const user_id = 'freezealicious';
+    console.log('!CreatePlaylist -> ');
+    const accessToken = ctx.services.token.get();
+    const user_id = ctx.services.token.getUserInfo()?.id;
+    if (!user_id)
+        throw new Error('No user id found for spotify account');
     const url = `https://api.spotify.com/v1/users/${user_id}/playlists`;
     const authString = `Bearer ${accessToken}`;
     const body = {
@@ -16,9 +19,16 @@ export default async function CreatePlaylist(ctx, next) {
                 Authorization: authString
             }
         });
-        if (!response.ok)
-            throw Error(`something went wrong:  ${(await response.json().then(obj => console.log("obj", obj)))}`);
-        const spotifyPlaylist = await response.json();
+        let jsonResponse;
+        console.log('!about to parse -> ', response);
+        try {
+            jsonResponse = await response.json();
+        }
+        catch (error) {
+            throw error;
+        }
+        // if (!response.ok) throw Error(`something went wrong:  ${JSON.stringify(jsonResponse)}`)
+        const spotifyPlaylist = jsonResponse;
         console.log('!spotifyPlaylist -> ', spotifyPlaylist);
         // return spotifyPlaylist as SpotifyPlaylist
         ctx.state.playlist = spotifyPlaylist;
