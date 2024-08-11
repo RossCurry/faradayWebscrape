@@ -1,6 +1,6 @@
 import Application from "koa"
 
-// export async function authPKCE (ctx: Application.ParameterizedContext, _next: Application.Next) {
+// export async function authPKCE (ctx: AppContext, _next: Application.Next) {
 //   const params = new URLSearchParams(ctx.querystring)
 //   const code = params.get('code')
 //   const codeChallenge = codeVerifier.get()

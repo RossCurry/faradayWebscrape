@@ -1,8 +1,9 @@
 import Application from "koa"
 import { URLS } from "../constants.js"
+import { AppContext } from "../../../router.js"
 
 // TODO I need user credentials to do this. I need to set up a redirect app online somewhere.
-export async function getCurrentUser(ctx: Application.ParameterizedContext) {
+export async function getCurrentUser(ctx: AppContext) {
   if (!ctx.state.accessToken) throw new Error('No auth token')
   const authString = `Bearer ${ctx.state.accessToken}`
   const res = await fetch(URLS.GET_CURRENT_USERS_PROFILE, {

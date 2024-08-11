@@ -4,10 +4,11 @@ import * as fs from "fs-extra"
 import * as nodeFs from "fs"
 import { fileURLToPath } from 'url';
 import {  ProjectionResultsSingle } from "./getAlbumInfo.js";
+import { AppContext } from "../router.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export default async function readFromDisk(ctx: Application.ParameterizedContext, next: Application.Next ) {
+export default async function readFromDisk(ctx: AppContext, next: Application.Next) {
   // const searchResults: ProjectionResultsSingle = ctx.state.data.searchResults
   // Check the latest file only
   try {

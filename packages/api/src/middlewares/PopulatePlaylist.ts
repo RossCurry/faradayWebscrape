@@ -1,11 +1,13 @@
 import Application from 'koa';
 import { ProjectionResultsSingle } from './getAlbumInfo.js';
+import { AppContext } from '../router.js';
 // import { userToken } from '../router.js';
 
-export default async function PopulatePlaylist(ctx: Application.ParameterizedContext, _next: Application.Next) {
+export default async function PopulatePlaylist(ctx: AppContext, _next: Application.Next) {
   const spotifyAlbumInfo =  ctx.state.data.spotifyAlbumInfo
+  if (!spotifyAlbumInfo) throw new Error('No spotifyAlbumInfo found')
   const playlist = ctx.state.playlist
-  const playlistId = playlist.id
+  const playlistId = playlist?.id
   const playlistEndpoint = `https://api.spotify.com/v1/playlists/${playlistId}/tracks`
   const body = {
     // example data

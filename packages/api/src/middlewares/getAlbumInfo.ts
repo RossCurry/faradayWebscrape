@@ -1,6 +1,7 @@
 import Application from "koa";
 import { FaradayItemData } from "#controllers/faraday/getItemData.js";
 import { SearchResponse } from "#controllers/spotify/spotify.types.js";
+import { AppContext } from "../router.js";
 
 const spotiBaseUrl = "https://api.spotify.com/v1/"
 const spotiUrl = "https://api.spotify.com/v1/albums/"
@@ -48,6 +49,17 @@ function projectMultipsSearchResults(results: SearchResponse, searchTerm: string
     }
     return projection
   })
+}
+
+export type SpotifySearchResult = {
+  artists: string[],
+  href: string,
+  id:  string,
+  image: SearchResponse["albums"]["items"][number]["images"][number],
+  name:  string,
+  searchTerm:  string,
+  type: 'album',
+  uri:  string,
 }
 /**
  * Return a reduced json structure
@@ -104,19 +116,26 @@ function getBatches(albums: FaradayItemData[]) {
  * Loop over Faraday list and search for a match for each listing.
  * @param ctx 
  */
-export default async function getAlbumInfo(ctx: Application.ParameterizedContext, next: Application.Next) {
-  const faradayAlbums: FaradayItemData[] = ctx.state.data.faraday
+export default async function getAlbumInfoSpotify(ctx: AppContext, next: Application.Next) {
+  console.log('!getAlbumInfoSpotify -> ');
+  const { faraday } = ctx.state.data
+  const faradayAlbums = faraday || [] 
   // TODO check data from faraday against saved data
   // TODO skip search if everything is the same
   // TODO only search differences
-  const skip = true;
-  if (skip) next()
+  // const skip = true;
+  // if (skip) next()
 
   // TODO for testing only search a few albums, 
   // TODO write this data to disk to avoid repeated calls to spoti API
-  const albumInfo = await Promise.all(faradayAlbums.slice(0, 5).map(async (album: FaradayItemData) => {
+  const albumInfo = await Promise.all(faradayAlbums.map(async (album: FaradayItemData) => {
     const authString = `Bearer ${ctx.state.accessToken}`
-    return searchSingleAlbum(album, authString)
+    const faraday = album;
+    const spotify = await searchSingleAlbum(album, authString);
+    return {
+      faraday,
+      spotify
+    }
   }))
   // const batches = getBatches(faradayAlbums)
   // const albumInfo = await Promise.all(batches.map(async (albums: FaradayItemData[]) => {
@@ -124,12 +143,12 @@ export default async function getAlbumInfo(ctx: Application.ParameterizedContext
   //   return  searchMultiplAlbums(albums, authString)
   // }))
   ctx.state.data = {
-    searchResults: albumInfo.filter(info => !!info)
+    searchResults: albumInfo.filter(info => !!info.spotify)
   }
   next()
 }
 
-async function searchSingleAlbum(album: FaradayItemData, authString: string) {
+async function searchSingleAlbum(album: FaradayItemData, authString: string): Promise<SpotifySearchResult | undefined> {
   if (album.isSoldOut || !album.title) return
   const searchTerm = parseAlbumTitle(album.title)
   const limit = 1
