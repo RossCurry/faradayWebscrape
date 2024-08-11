@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Albums</title>
+  <style>
+    .grid {
+      display: grid;
+      grid-template: repeat(4, 1fr) / repeat(4, 1fr);
+      gap: 1em;
+      width: 100dvw;
+      height: 100dvh;
+    }
+    .card {
+      list-style: none;
+    }
+    .card img {
+      object-fit: cover;
+    }
+  </style>
+</head>
+<body>
+  <main id="main">
+    <button id="createPlaylist">Create playlist</button>
+  </main>
+  <script>
+    const currentUrl = window.location.href
+    const accessToken = new URL(currentUrl).searchParams.get('accessToken')
+
+    const button = document.getElementById("createPlaylist")
+    button.addEventListener('click', createPlaylist)
+
+    let spotiAlbums = [];
+    const localConnectEndpoint = 'http://localhost:3000/api/albums'
+    async function getAlbumData(){
+      try {
+        const response = await fetch(localConnectEndpoint, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            // 'Content-Type': 'text/html; charset=utf-8',
+          },
+          mode: 'cors',
+          credentials: 'include', // Use this if you need to include cookies
+        })
+        if (response.ok) {
+          try {
+            const data = await response.json()
+            spotiAlbums = data
+            console.log('spotiAlbums, data', { spotiAlbums, data })
+            populatePage(spotiAlbums)
+          } catch (error) {
+            console.log('Error parsing album data')
+          }
+        } else {
+          throw Error(response)
+        }
+
+        
+      } catch (error) {
+        console.log('!Failed to fetch error -> ', error);
+        console.error(error)
+      }
+    }
+    getAlbumData()
+
+    function populatePage(data){
+      const main = document.getElementById('main')
+      const ul = document.createElement('ul')
+      ul.classList.add('grid')
+      main.append(ul)
+
+      data.forEach(album => {
+        const card = document.createElement('li')
+        card.classList.add('card')
+        const image = document.createElement('img')
+        image.src = album.image.url
+        image.width = album.image.width/3
+        image.height = album.image.height/3
+        image.alt = `${album.type} ${album.name} by ${album.artists.join(', ')}`
+        card.appendChild(image)
+        ul.appendChild(card)
+      })
+    }
+    async function createPlaylist(){
+      const createEndpoint = 'http://localhost:3000/api/playlist/create'
+      try {
+        const response = await fetch(createEndpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            // 'Content-Type': 'text/html; charset=utf-8',
+          },
+          mode: 'cors',
+          credentials: 'include', // Use this if you need to include cookies
+          body: JSON.stringify({ accessToken: accessToken })
+        })
+        if (response.ok) {
+          try {
+            const data = await response.json()
+            console.log('spotiAlbums, data', { data })
+          } catch (error) {
+            console.log('Error parsing album data')
+          }
+        } else {
+          throw Error(response)
+        }
+
+        
+      } catch (error) {
+        console.log('!Failed to fetch error -> ', error);
+        console.error(error)
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,7 +1,15 @@
+
+/**
+ * The auth here is for client credentails only
+ * No user scoped requests can be made
+ * like creating a playlist
+ * https://developer.spotify.com/documentation/web-api/tutorials/client-credentials-flow
+ */
+
 import Application from "koa"
 import fetch from "node-fetch"
 import dotenv from 'dotenv';
-import Token, { AuthToken } from "../auth/Token.js";
+import Token, { AuthToken } from "../../../auth/Token.js";
 dotenv.config();
 
 const clientId = process.env.CLIENT_ID
@@ -36,8 +44,8 @@ export async function getToken() {
 
 export async function getTokenMw(ctx: Application.ParameterizedContext, next: Application.Next) {
   try {
-    if (userToken.has()){
-    // if (false) {
+    if (userToken.has()) {
+      // if (false) {
       ctx.state.accessToken = userToken.get()
     } else {
       const token = await getToken()

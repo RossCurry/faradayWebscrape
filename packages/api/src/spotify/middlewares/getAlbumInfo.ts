@@ -106,7 +106,15 @@ function getBatches(albums: FaradayItemData[]) {
  */
 export default async function getAlbumInfo(ctx: Application.ParameterizedContext, next: Application.Next) {
   const faradayAlbums: FaradayItemData[] = ctx.state.data.faraday
-  const albumInfo = await Promise.all(faradayAlbums.map(async (album: FaradayItemData) => {
+  // TODO check data from faraday against saved data
+  // TODO skip search if everything is the same
+  // TODO only search differences
+  const skip = true;
+  if (skip) next()
+
+  // TODO for testing only search a few albums, 
+  // TODO write this data to disk to avoid repeated calls to spoti API
+  const albumInfo = await Promise.all(faradayAlbums.slice(0,5).map(async (album: FaradayItemData) => {
     const authString = `Bearer ${ctx.state.accessToken}`
     return searchSingleAlbum(album, authString)
   }))

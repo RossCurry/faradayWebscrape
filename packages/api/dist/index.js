@@ -5,6 +5,8 @@ import router from './router.js';
 import cors from "koa-cors";
 import bodyParser from "koa-bodyparser";
 import url from "url";
+import * as koaStatic from 'koa-static';
+import path from 'node:path';
 import dotenv from 'dotenv';
 dotenv.config();
 const __dirname = url.fileURLToPath(new URL(import.meta.url));
@@ -12,6 +14,10 @@ const port = process.env.PORT || 4000;
 if (!port)
     throw new Error("No port specified");
 const app = new Koa();
+// Serve static files from the 'public' directory
+const outputDir = '/Users/ross.curry/ross/faradayWebScrape/packages/api/dist';
+// TODO need a relative solution for this
+app.use(koaStatic.default(path.join(outputDir, 'public')));
 app.use(cors({
     // origin: process.env.PRODUCTION ? process.env.CLIENT_URL : "http://127.0.0.1:5500",
     origin: (ctx) => {
@@ -27,7 +33,7 @@ app.use(cors({
     credentials: true, // Enable cookies to be sent,
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify allowed methods
     headers: ['Content-Type', 'Authorization'], // Specify allowed headers
-    expose: ['location']
+    expose: ['location'] // headers we expose in the response
 }));
 // app.use(cors())
 app.use(router.routes());
