@@ -95,22 +95,22 @@ function projectSingleSearchResults(results: SearchResponse, searchTerm: string)
   return projection
 }
 
-/**
- * Return batches of 50
- * @param albums 
- */
-function getBatches(albums: FaradayItemData[]) {
-  const batches: FaradayItemData[][] = []
-  function recurse(albums: FaradayItemData[]) {
-    if (!albums.length) return
-    const fiftyOrLess = albums.slice(0, 50)
-    const rest = albums.slice(50,)
-    batches.push(fiftyOrLess)
-    recurse(rest)
-  }
-  recurse(albums)
-  return batches
-}
+// /**
+//  * Return batches of 50
+//  * @param albums 
+//  */
+// function getBatches(albums: FaradayItemData[]) {
+//   const batches: FaradayItemData[][] = []
+//   function recurse(albums: FaradayItemData[]) {
+//     if (!albums.length) return
+//     const fiftyOrLess = albums.slice(0, 50)
+//     const rest = albums.slice(50,)
+//     batches.push(fiftyOrLess)
+//     recurse(rest)
+//   }
+//   recurse(albums)
+//   return batches
+// }
 
 /**
  * Loop over Faraday list and search for a match for each listing.

@@ -92,14 +92,16 @@ class MongoDb {
   }
   
   async getPlaylistData(){
-    console.log('!getPlaylistData -> ');
+    if (!this.db) throw new Error('No DB found')
     const albumCollection = this.db?.collection('albums')
-    const albums = await albumCollection?.find({}, {}).toArray()
+    if (!albumCollection) throw new Error('No albumCollection found')
+    const albums = await albumCollection?.find({'spotify.trackIds': { '$exists': true } }, {}).toArray()
     if (!albums) return []
     const playlistData: { trackIds: string}[] =  albums
       .filter(album => !!album )
       .map(album => ( { trackIds: album.spotify.trackIds }))
-    return playlistData?.flatMap( album => album.trackIds )
+    const flattenedIds = playlistData?.flatMap( album => album.trackIds )
+    return flattenedIds
   }
 }
 

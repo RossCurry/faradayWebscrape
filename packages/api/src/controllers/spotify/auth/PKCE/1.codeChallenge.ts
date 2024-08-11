@@ -6,7 +6,7 @@ import { REDIRECTS } from "../authRedirects.constants.js";
 const authorizationEndpoint = "https://accounts.spotify.com/authorize";
 const tokenEndpoint = "https://accounts.spotify.com/api/token";
 const scope = 'user-read-private user-read-email playlist-read-private playlist-read-collaborative playlist-modify-private playlist-modify-public';
-// const redirectUrl = 'http://localhost:3000/redirect'
+// const redirectUrl = 'http://localhost:3000/api/redirect'
 // TODO remove this
 const client_id = 'e58f73ecd6fb4a228d3142621adfd1ab'
 /**

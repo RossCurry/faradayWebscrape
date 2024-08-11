@@ -95,10 +95,10 @@ router.post('/api/playlist/create',
 /**
  * request from UI to send code verification to spoti auth
  */
-router.get('/connect', async (ctx: AppContext, _next: Application.Next) => {
+router.get('/api/connect', async (ctx: AppContext, _next: Application.Next) => {
   const { authUrl: spotifyAuthUrl, codeVerifier: notEncoded } = await redirectToSpotifyAuthorize()
   // We need this for the authTokenRequest
-  ctx.state.codeVerifier.set(notEncoded)
+  ctx.services.codeVerifier.set(notEncoded)
   ctx.set('Content-Type', 'application/json');
   ctx.set('location', spotifyAuthUrl.toString());
   ctx.status = 201 // created
@@ -118,16 +118,16 @@ type PKCE_RES = {
  * We only get the code from the url redirect from Spotify
  * We need the codeChallenge from the previous connect step
  */
-router.get("/redirect", 
+router.get("/api/redirect", 
   async (ctx: AppContext, next: Application.Next) => {
     const params = new URLSearchParams(ctx.querystring)
     const code = params.get('code')
-    const codeChallenge = ctx.state.codeVerifier.get()
+    const codeChallenge = ctx.services.codeVerifier.get()
     if (!code || !codeChallenge) throw new Error('Missing code or codeChallenge from redirect')
     try {
       const token: PKCE_RES = await getTokenPCKE(code, codeChallenge)
       console.log('!getTokenPCKE response -> ', token);
-      ctx.state.userToken.set(token)
+      ctx.services.token.set(token)
       ctx.state.accessToken = token.access_token
     } catch (error) {
       ctx.body = {code} 
@@ -215,6 +215,13 @@ router.post("/api/spotify/tracks",
   getSpotifyTracksInfo, // from spoti api
   setSpotifyTrackInfo
 )
+
+// router.get("/api/spotify/playlistData",
+//   async (ctx, _next) => {
+//     const playlistData =  await ctx.services.mongo.getPlaylistData()
+//     console.log('!playlistData -> ', playlistData);
+//   },
+// )
 
 async function test(ctx: AppParamContext, _next: Application.Next) {
   ctx.body = { foo: 'bar' }
