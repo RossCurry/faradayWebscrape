@@ -4,3 +4,5 @@ export CLIENT_ID=${CLIENT_ID}
 export CLIENT_SECRET=${CLIENT_SECRET}
 export CLIENT_NAME=${CLIENT_NAME}
 export PORT=${PORT}
+export DB_CONN_STRING=connection_string
+export DB_NAME=name_of_db
