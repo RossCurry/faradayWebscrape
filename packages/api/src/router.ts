@@ -12,9 +12,45 @@ import getFaradayStock from '#middlewares/getFaradayStock.js'
 import PopulatePlaylist from '#middlewares/PopulatePlaylist.js'
 import writeToDisk from '#middlewares/writeToDisk.js'
 import CreatePlaylist from '#middlewares/CreatePlaylist.js'
+import MongoDB from '#services/mongodb/index.js'
+import { FaradayItemData } from '#controllers/faraday/getItemData.js'
+
 const router = new Router()
-const codeVerifier = new CodeVerifier()
-export const userToken = new Token()
+// const codeVerifier = new CodeVerifier()
+// export const userToken = new Token()
+
+interface AppState {
+  accessToken?: string,
+  playlist?: Record<string, any>,
+  playlistInfo?: Record<string, any>,
+  data: {
+    spotifyAlbumInfo?: any,
+    searchResults?: any,
+    faraday?: FaradayItemData[]
+  },
+  services: {
+    codeVerifier: CodeVerifier;
+    mongo: MongoDB;
+    token: Token;
+  };
+}
+
+type AppContext = Application.ParameterizedContext<AppState>
+
+const services = {
+  codeVerifier: new CodeVerifier(),
+  mongo: new MongoDB(),
+  token: new Token()
+}
+
+
+router.use(// initialize services
+  (async (ctx: AppContext, next) => {
+    console.log('!initialize services -> ');
+    ctx.services = services
+   await next()
+  })
+)
 
 /**
  * Home
@@ -33,7 +69,7 @@ router.post('/api/playlist/create',
     const accessToken = ctx.body && typeof ctx.body === 'object' && 'accessToken' in ctx.body && ctx.body.accessToken || undefined;
     console.log('!body -> ', ctx.body);
     console.log('!accessToken -> ', accessToken);
-    console.log('!userToken.get() -> ', userToken.get());
+    // console.log('!userToken.get() -> ', userToken.get());
     ctx.state.accessToken = accessToken
     next()
   },
@@ -47,7 +83,7 @@ router.post('/api/playlist/create',
 router.get('/connect', async (ctx: Application.ParameterizedContext, _next: Application.Next) => {
   const { authUrl: spotifyAuthUrl, codeVerifier: notEncoded } = await redirectToSpotifyAuthorize()
   // We need this for the authTokenRequest
-  codeVerifier.set(notEncoded)
+  ctx.state.codeVerifier.set(notEncoded)
   ctx.set('Content-Type', 'application/json');
   ctx.set('location', spotifyAuthUrl.toString());
   ctx.status = 201 // created
@@ -71,12 +107,12 @@ router.get("/redirect",
   async (ctx: Application.ParameterizedContext, next: Application.Next) => {
     const params = new URLSearchParams(ctx.querystring)
     const code = params.get('code')
-    const codeChallenge = codeVerifier.get()
+    const codeChallenge = ctx.state.codeVerifier.get()
     if (!code || !codeChallenge) throw new Error('Missing code or codeChallenge from redirect')
     try {
       const token: PKCE_RES = await getTokenPCKE(code, codeChallenge)
       console.log('!getTokenPCKE response -> ', token);
-      userToken.set(token)
+      ctx.state.userToken.set(token)
       ctx.state.accessToken = token.access_token
     } catch (error) {
       ctx.body = {code} 
@@ -144,8 +180,12 @@ router.get("/oldRoute",
 /**
 * Using this route we cannot make user scoped requests.
 */
-router.get("/api/",
-
+router.get("/api/faraday/refresh",
+  getFaradayStock,
+  (ctx: AppContext, _next: Application.Next) => {
+    console.log('!ctx.state -> ', ctx.state)
+  },
+  // getFaradayStock,
 )
 
 export default router;

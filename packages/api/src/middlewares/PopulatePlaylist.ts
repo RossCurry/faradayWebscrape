@@ -1,6 +1,6 @@
 import Application from 'koa';
 import { ProjectionResultsSingle } from './getAlbumInfo.js';
-import { userToken } from '../router.js';
+// import { userToken } from '../router.js';
 
 export default async function PopulatePlaylist(ctx: Application.ParameterizedContext, _next: Application.Next) {
   const spotifyAlbumInfo =  ctx.state.data.spotifyAlbumInfo
@@ -14,7 +14,7 @@ export default async function PopulatePlaylist(ctx: Application.ParameterizedCon
     uris: spotifyAlbumInfo.map((album: ProjectionResultsSingle) => album!.uri),
     position: 0
   }
-  const accessToken = ctx.state.accessToken || userToken.get()
+  const accessToken = ctx.state.accessToken || ctx.state.userToken.get()
   const authString = `Bearer ${accessToken}`
   console.log('!playlistEndpoint -> ', playlistEndpoint);
   console.log('!authString -> ', authString);

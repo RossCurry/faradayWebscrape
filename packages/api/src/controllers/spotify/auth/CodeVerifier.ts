@@ -3,6 +3,7 @@ export type CodeChallenge = string
 export default class CodeVerifier {
   codeChallenge: string | null
   constructor(){
+    console.log('!CodeVerifier  constructor-> ');
     this.codeChallenge = null
   }
   has(){
