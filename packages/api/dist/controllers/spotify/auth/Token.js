@@ -2,6 +2,7 @@ export default class Token {
     accessToken;
     expiresIn;
     constructor() {
+        console.log('!Token  constructor-> ');
         this.accessToken = null;
         this.expiresIn = null;
     }

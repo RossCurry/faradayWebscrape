@@ -1,6 +1,7 @@
 export default class CodeVerifier {
     codeChallenge;
     constructor() {
+        console.log('!CodeVerifier  constructor-> ');
         this.codeChallenge = null;
     }
     has() {

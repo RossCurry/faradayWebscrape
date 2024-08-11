@@ -1,4 +1,4 @@
-import { userToken } from '../router.js';
+// import { userToken } from '../router.js';
 export default async function PopulatePlaylist(ctx, _next) {
     const spotifyAlbumInfo = ctx.state.data.spotifyAlbumInfo;
     const playlist = ctx.state.playlist;
@@ -11,7 +11,7 @@ export default async function PopulatePlaylist(ctx, _next) {
         uris: spotifyAlbumInfo.map((album) => album.uri),
         position: 0
     };
-    const accessToken = ctx.state.accessToken || userToken.get();
+    const accessToken = ctx.state.accessToken || ctx.state.userToken.get();
     const authString = `Bearer ${accessToken}`;
     console.log('!playlistEndpoint -> ', playlistEndpoint);
     console.log('!authString -> ', authString);

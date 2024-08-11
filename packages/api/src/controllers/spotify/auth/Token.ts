@@ -8,6 +8,7 @@ export default class Token {
   accessToken: string | null
   expiresIn: number | null
   constructor(){
+    console.log('!Token  constructor-> ')
     this.accessToken = null
     this.expiresIn = null
   }

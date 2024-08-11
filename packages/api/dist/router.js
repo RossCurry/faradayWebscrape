@@ -10,9 +10,19 @@ import getFaradayStock from '#middlewares/getFaradayStock.js';
 import PopulatePlaylist from '#middlewares/PopulatePlaylist.js';
 import writeToDisk from '#middlewares/writeToDisk.js';
 import CreatePlaylist from '#middlewares/CreatePlaylist.js';
+import MongoDB from '#services/mongodb/index.js';
 const router = new Router();
-const codeVerifier = new CodeVerifier();
-export const userToken = new Token();
+const services = {
+    codeVerifier: new CodeVerifier(),
+    mongo: new MongoDB(),
+    token: new Token()
+};
+router.use(// initialize services
+(async (ctx, next) => {
+    console.log('!initialize services -> ');
+    ctx.services = services;
+    await next();
+}));
 /**
  * Home
  */
@@ -25,7 +35,7 @@ router.post('/api/playlist/create', readFromDisk, async (ctx, next) => {
     const accessToken = ctx.body && typeof ctx.body === 'object' && 'accessToken' in ctx.body && ctx.body.accessToken || undefined;
     console.log('!body -> ', ctx.body);
     console.log('!accessToken -> ', accessToken);
-    console.log('!userToken.get() -> ', userToken.get());
+    // console.log('!userToken.get() -> ', userToken.get());
     ctx.state.accessToken = accessToken;
     next();
 }, CreatePlaylist, PopulatePlaylist);
@@ -35,7 +45,7 @@ router.post('/api/playlist/create', readFromDisk, async (ctx, next) => {
 router.get('/connect', async (ctx, _next) => {
     const { authUrl: spotifyAuthUrl, codeVerifier: notEncoded } = await redirectToSpotifyAuthorize();
     // We need this for the authTokenRequest
-    codeVerifier.set(notEncoded);
+    ctx.state.codeVerifier.set(notEncoded);
     ctx.set('Content-Type', 'application/json');
     ctx.set('location', spotifyAuthUrl.toString());
     ctx.status = 201; // created
@@ -48,13 +58,13 @@ router.get('/connect', async (ctx, _next) => {
 router.get("/redirect", async (ctx, next) => {
     const params = new URLSearchParams(ctx.querystring);
     const code = params.get('code');
-    const codeChallenge = codeVerifier.get();
+    const codeChallenge = ctx.state.codeVerifier.get();
     if (!code || !codeChallenge)
         throw new Error('Missing code or codeChallenge from redirect');
     try {
         const token = await getTokenPCKE(code, codeChallenge);
         console.log('!getTokenPCKE response -> ', token);
-        userToken.set(token);
+        ctx.state.userToken.set(token);
         ctx.state.accessToken = token.access_token;
     }
     catch (error) {
@@ -112,5 +122,7 @@ getFaradayStock, getAlbumInfo, writeToDisk, CreatePlaylist,
 /**
 * Using this route we cannot make user scoped requests.
 */
-router.get("/api/");
+router.get("/api/faraday/refresh", getFaradayStock, (ctx, _next) => {
+    console.log('!ctx.state -> ', ctx.state);
+});
 export default router;

@@ -1,16 +1,13 @@
 import Koa from "koa";
 import logger from "koa-logger";
 import json from "koa-json";
-import router from './router.js';
 import cors from "koa-cors";
 import bodyParser from "koa-bodyparser";
 import url from "url";
 import * as koaStatic from 'koa-static';
 import path from 'node:path';
-import CodeVerifier from "#controllers/spotify/auth/CodeVerifier.js";
-// services
-import MongoDB from '#services/mongodb/index.js';
-import Token from "#controllers/spotify/auth/Token.js";
+// router
+import router from './router.js';
 // env variables
 import dotenv from 'dotenv';
 dotenv.config();
@@ -47,11 +44,6 @@ app.use(bodyParser());
 app.use(json());
 app.use(logger());
 // Some useful services for the app
-app.context.services = {
-    codeVerifier: new CodeVerifier(),
-    mongo: new MongoDB(),
-    token: new Token()
-};
 try {
     app.listen(port, () => {
         console.log("__dirname", __dirname);
@@ -64,4 +56,3 @@ try {
 catch (error) {
     console.error(error);
 }
-export default router;
