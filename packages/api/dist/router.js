@@ -5,21 +5,29 @@ import readFromDisk from '#middlewares/readFromDisk.js';
 import { redirectToSpotifyAuthorize } from '#controllers/spotify/auth/PKCE/1.codeChallenge.js';
 import { getTokenPCKE } from '#controllers/spotify/auth/PKCE/2.requestUserAuth.js';
 import { getClientCredentialToken } from '#middlewares/auth/clientCredentials/auth.js';
-import getAlbumInfo from '#middlewares/getAlbumInfo.js';
-import getFaradayStock from '#middlewares/getFaradayStock.js';
+import getAlbumInfoSpotify from '#middlewares/getAlbumInfo.js';
+import scrapeFaradayStock from '#middlewares/scrapeFaradayStock.js';
 import PopulatePlaylist from '#middlewares/PopulatePlaylist.js';
 import writeToDisk from '#middlewares/writeToDisk.js';
 import CreatePlaylist from '#middlewares/CreatePlaylist.js';
 import MongoDB from '#services/mongodb/index.js';
-const router = new Router();
+import setFaradayStock from '#middlewares/setFaradayStock.js';
+import getFaradayStock from '#middlewares/getFaradayStock.js';
+import setSpotifyAlbumInfo from '#middlewares/setSpotifyAlbumInfo.js';
+import getSpotifyAlbumInfo from '#middlewares/getSpotifyAlbumInfo.js';
+import getSpotifyTracksInfo from '#middlewares/getSpotifyTracksInfo.js';
+import setSpotifyTrackInfo from '#middlewares/setSpotifyTrackInfo.js';
+// type App = Application<AppState, AppContext>
 const services = {
     codeVerifier: new CodeVerifier(),
     mongo: new MongoDB(),
     token: new Token()
 };
+const router = new Router();
 router.use(// initialize services
 (async (ctx, next) => {
     console.log('!initialize services -> ');
+    ctx.state.data = {};
     ctx.services = services;
     await next();
 }));
@@ -103,7 +111,7 @@ router.get("/callback", (ctx, _next) => {
  */
 router.get("/oldRoute", getClientCredentialToken, 
 // getCurrentUser,
-getFaradayStock, getAlbumInfo, writeToDisk, CreatePlaylist, 
+scrapeFaradayStock, getAlbumInfoSpotify, writeToDisk, CreatePlaylist, 
 // AddToPlaylist,
 () => {
     return;
@@ -122,7 +130,13 @@ getFaradayStock, getAlbumInfo, writeToDisk, CreatePlaylist,
 /**
 * Using this route we cannot make user scoped requests.
 */
-router.get("/api/faraday/refresh", getFaradayStock, (ctx, _next) => {
-    console.log('!ctx.state -> ', ctx.state);
-});
+router.get("/api/faraday/albums", scrapeFaradayStock, setFaradayStock);
+router.post("/api/spotify/albums", getFaradayStock, getClientCredentialToken, getAlbumInfoSpotify, // expensive on requests 200+
+setSpotifyAlbumInfo);
+router.post("/api/spotify/tracks", getSpotifyAlbumInfo, // from db
+getClientCredentialToken, getSpotifyTracksInfo, // from spoti api
+setSpotifyTrackInfo);
+async function test(ctx, _next) {
+    ctx.body = { foo: 'bar' };
+}
 export default router;

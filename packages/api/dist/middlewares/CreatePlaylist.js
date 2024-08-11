@@ -1,6 +1,5 @@
-import { userToken } from '../router.js';
 export default async function CreatePlaylist(ctx, next) {
-    const accessToken = ctx.state.accessToken || userToken.get();
+    const accessToken = ctx.state.accessToken || ctx.state.userToken.get();
     const user_id = 'freezealicious';
     const url = `https://api.spotify.com/v1/users/${user_id}/playlists`;
     const authString = `Bearer ${accessToken}`;

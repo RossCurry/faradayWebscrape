@@ -1,8 +1,8 @@
 import Application from 'koa';
-import { userToken } from '../router.js';
+import { AppContext } from '../router.js';
 
-export default async function CreatePlaylist(ctx: Application.ParameterizedContext, next: Application.Next) {
-  const accessToken = ctx.state.accessToken || userToken.get()
+export default async function CreatePlaylist(ctx: AppContext, next: Application.Next) {
+  const accessToken = ctx.state.accessToken || ctx.state.userToken.get()
   const user_id = 'freezealicious'
   const url = `https://api.spotify.com/v1/users/${user_id}/playlists`
   const authString = `Bearer ${accessToken}`

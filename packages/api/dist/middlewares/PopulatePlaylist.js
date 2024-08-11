@@ -1,8 +1,10 @@
 // import { userToken } from '../router.js';
 export default async function PopulatePlaylist(ctx, _next) {
     const spotifyAlbumInfo = ctx.state.data.spotifyAlbumInfo;
+    if (!spotifyAlbumInfo)
+        throw new Error('No spotifyAlbumInfo found');
     const playlist = ctx.state.playlist;
-    const playlistId = playlist.id;
+    const playlistId = playlist?.id;
     const playlistEndpoint = `https://api.spotify.com/v1/playlists/${playlistId}/tracks`;
     const body = {
         // example data

@@ -1,14 +1,14 @@
 /**
  * Adds data.faraday to ctx.state
  */
-export default async function getFaradayStock(ctx, next) {
-    console.log('!getFaradayStock -> ');
+export default async function getSpotifyAlbumInfo(ctx, next) {
+    console.log('!setSpotifyAlbumInfo -> ');
     try {
         const { mongo } = ctx.services;
         if (!mongo)
             throw new Error('No mongo object found');
-        const faradayData = await mongo.getFaradayData();
-        ctx.state.data.faraday = faradayData;
+        const spotifyAlbums = await mongo.getSpotifyData({ 'spotify.trackIds': { '$exists': false } });
+        ctx.state.data.spotifyAlbumInfo = spotifyAlbums;
     }
     catch (error) {
         console.error('Error in middleware:', error);
