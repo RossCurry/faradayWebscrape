@@ -1,8 +1,8 @@
 // import { userToken } from '../router.js';
 export default async function PopulatePlaylist(ctx, _next) {
-    const spotifyAlbumInfo = ctx.state.data.spotifyAlbumInfo;
-    if (!spotifyAlbumInfo)
-        throw new Error('No spotifyAlbumInfo found');
+    const playlistData = await ctx.services.mongo.getPlaylistData();
+    if (!playlistData.length)
+        throw new Error('No spotify track ids found');
     const playlist = ctx.state.playlist;
     const playlistId = playlist?.id;
     const playlistEndpoint = `https://api.spotify.com/v1/playlists/${playlistId}/tracks`;
@@ -10,7 +10,7 @@ export default async function PopulatePlaylist(ctx, _next) {
         // example data
         // uris: ["spotify:track:4iV5W9uYEdYUVa79Axb7Rh","spotify:track:1301WleyT98MSxVHPZCA6M", "spotify:episode:512ojhOuo1ktJprKbVcKyQ"],
         // TODO albums dont seem to add
-        uris: spotifyAlbumInfo.map((album) => album.uri),
+        uris: playlistData,
         position: 0
     };
     const accessToken = ctx.state.accessToken || ctx.state.userToken.get();

@@ -76,5 +76,16 @@ class MongoDb {
         const faradayData = albums?.map(album => ({ _id: album._id.toString(), ...album.faraday }));
         return faradayData ? faradayData : [];
     }
+    async getPlaylistData() {
+        console.log('!getPlaylistData -> ');
+        const albumCollection = this.db?.collection('albums');
+        const albums = await albumCollection?.find({}, {}).toArray();
+        if (!albums)
+            return [];
+        const playlistData = albums
+            .filter(album => !!album)
+            .map(album => ({ trackIds: album.spotify.trackIds }));
+        return playlistData?.flatMap(album => album.trackIds);
+    }
 }
 export default MongoDb;

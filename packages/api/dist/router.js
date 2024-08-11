@@ -1,7 +1,6 @@
 import Router from "koa-router";
 import CodeVerifier from '#controllers/spotify/auth/CodeVerifier.js';
 import Token from '#controllers/spotify/auth/Token.js';
-import readFromDisk from '#middlewares/readFromDisk.js';
 import { redirectToSpotifyAuthorize } from '#controllers/spotify/auth/PKCE/1.codeChallenge.js';
 import { getTokenPCKE } from '#controllers/spotify/auth/PKCE/2.requestUserAuth.js';
 import { getClientCredentialToken } from '#middlewares/auth/clientCredentials/auth.js';
@@ -34,16 +33,18 @@ router.use(// initialize services
 /**
  * Home
  */
-router.get('/api/albums', readFromDisk, async (ctx, _next) => {
-    const { spotifyAlbumInfo } = ctx.state.data;
-    ctx.body = spotifyAlbumInfo;
-    ctx.status = 200;
-});
-router.post('/api/playlist/create', readFromDisk, async (ctx, next) => {
+// router.get('/api/albums', 
+//   readFromDisk,
+//   async (ctx: AppContext, _next: Application.Next) => {
+//     const { spotifyAlbumInfo } = ctx.state.data;
+//     ctx.body = spotifyAlbumInfo
+//     ctx.status = 200
+//   }
+// )
+router.post('/api/playlist/create', async (ctx, next) => {
     const accessToken = ctx.body && typeof ctx.body === 'object' && 'accessToken' in ctx.body && ctx.body.accessToken || undefined;
     console.log('!body -> ', ctx.body);
     console.log('!accessToken -> ', accessToken);
-    // console.log('!userToken.get() -> ', userToken.get());
     ctx.state.accessToken = accessToken;
     next();
 }, CreatePlaylist, PopulatePlaylist);
@@ -79,24 +80,7 @@ router.get("/redirect", async (ctx, next) => {
         ctx.body = { code };
     }
     next();
-}, 
-// getFaradayStock,
-// TODO dont make so many calls to spoti
-// getAlbumInfo,
-// writeToDisk,
-// TODO read from disk
-readFromDisk, 
-// CreatePlaylist,
-/**
- * This MW should populate the newplaylist
- * @param ctx
- * @param _next
- */
-async (ctx, _next) => {
-    const newPlaylist = ctx.state.playlist;
-    console.log('!newPlaylist -> ', newPlaylist);
-    ctx.redirect(`http://localhost:3000/albums.html?accessToken=${ctx.state.accessToken}`);
-});
+}, CreatePlaylist, PopulatePlaylist);
 /**
  * Seems like we won't use this.
  */
