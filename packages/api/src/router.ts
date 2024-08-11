@@ -1,17 +1,17 @@
 import Application from 'koa'
 import Router from "koa-router"
-import { getTokenMw } from "./spotify/middlewares/auth/clientCredentials/auth.js"
-import { getCurrentUser } from './spotify/users/users.js'
-import getFaradayStock from './spotify/middlewares/getFaradayStock.js'
-import getAlbumInfo, { ProjectionResultsSingle } from './spotify/middlewares/getAlbumInfo.js'
-import writeToDisk from './spotify/middlewares/writeToDisk.js'
-import createPlaylist from './spotify/middlewares/CreatePlaylist.js'
-import { getTokenPCKE } from './spotify/auth/PKCE/2.requestUserAuth.js'
-import { redirectToSpotifyAuthorize } from './spotify/auth/PKCE/1.codeChallenge.js'
-import CodeVerifier from './spotify/auth/CodeVerifier.js'
-import Token from './spotify/auth/Token.js'
-import { SpotifyPlaylist } from './spotify/spotify.types.js'
-import readFromDisk from './spotify/middlewares/readFromDisk.js'
+import CodeVerifier from '#controllers/spotify/auth/CodeVerifier.js'
+import Token from '#controllers/spotify/auth/Token.js'
+import readFromDisk from '#middlewares/readFromDisk.js'
+import { redirectToSpotifyAuthorize } from '#controllers/spotify/auth/PKCE/1.codeChallenge.js'
+import { getTokenPCKE } from '#controllers/spotify/auth/PKCE/2.requestUserAuth.js'
+import { SpotifyPlaylist } from '#controllers/spotify/spotify.types.js'
+import { getClientCredentialToken } from '#middlewares/auth/clientCredentials/auth.js'
+import getAlbumInfo from '#middlewares/getAlbumInfo.js'
+import getFaradayStock from '#middlewares/getFaradayStock.js'
+import PopulatePlaylist from '#middlewares/PopulatePlaylist.js'
+import writeToDisk from '#middlewares/writeToDisk.js'
+import CreatePlaylist from '#middlewares/CreatePlaylist.js'
 const router = new Router()
 const codeVerifier = new CodeVerifier()
 export const userToken = new Token()
@@ -37,44 +37,9 @@ router.post('/api/playlist/create',
     ctx.state.accessToken = accessToken
     next()
   },
-  createPlaylist, 
-  async (ctx: Application.ParameterizedContext, _next: Application.Next) => {
-    const spotifyAlbumInfo =  ctx.state.data.spotifyAlbumInfo
-    const playlist = ctx.state.playlist
-    const playlistId = playlist.id
-    const playlistEndpoint = `https://api.spotify.com/v1/playlists/${playlistId}/tracks`
-    const body = {
-      // example data
-      // uris: ["spotify:track:4iV5W9uYEdYUVa79Axb7Rh","spotify:track:1301WleyT98MSxVHPZCA6M", "spotify:episode:512ojhOuo1ktJprKbVcKyQ"],
-      // TODO albums dont seem to add
-      uris: spotifyAlbumInfo.map((album: ProjectionResultsSingle) => album!.uri),
-      position: 0
-    }
-    const accessToken = ctx.state.accessToken || userToken.get()
-    const authString = `Bearer ${accessToken}`
-    console.log('!playlistEndpoint -> ', playlistEndpoint);
-    console.log('!authString -> ', authString);
-    console.log('!body -> ', body);
-    try {
-      const response = await fetch(playlistEndpoint, {
-        method: 'POST',
-        headers: {
-         'Content-Type': 'application/json',
-          Authorization: authString
-        },
-        body: JSON.stringify(body)
-      })
-      if (response.ok){
-        ctx.body = await response.json()
-        ctx.status = 200
-        return;
-      }
-      throw new Error(`Something unknown went wrong adding tracks to playlist ${JSON.stringify(response)}`)
-    } catch (error) {
-      throw error
-    }
-  }
-)
+  CreatePlaylist,
+  PopulatePlaylist,
+) 
 
 /**
  * request from UI to send code verification to spoti auth
@@ -153,12 +118,12 @@ router.get("/callback", (ctx: Application.ParameterizedContext, _next: Applicati
  * Using this route we cannot make user scoped requests.
  */
 router.get("/oldRoute",
-  getTokenMw,
+  getClientCredentialToken,
   // getCurrentUser,
   getFaradayStock,
   getAlbumInfo,
   writeToDisk,
-  createPlaylist,
+  CreatePlaylist,
   // AddToPlaylist,
   () => {
     return
@@ -175,5 +140,12 @@ router.get("/oldRoute",
       ctx.status = 500
     }
   })
+
+/**
+* Using this route we cannot make user scoped requests.
+*/
+router.get("/api/",
+
+)
 
 export default router;
