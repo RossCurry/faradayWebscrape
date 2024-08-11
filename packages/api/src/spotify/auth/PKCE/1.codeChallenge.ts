@@ -1,10 +1,12 @@
 // const dotenv = require('dotenv')
 // dotenv.config();
 
+import { REDIRECTS } from "../authRedirects.constants.js";
+
 const authorizationEndpoint = "https://accounts.spotify.com/authorize";
 const tokenEndpoint = "https://accounts.spotify.com/api/token";
-const scope = 'user-read-private user-read-email';
-const redirectUrl = 'http://localhost:3000/redirect'
+const scope = 'user-read-private user-read-email playlist-read-private playlist-read-collaborative playlist-modify-private playlist-modify-public';
+// const redirectUrl = 'http://localhost:3000/redirect'
 // TODO remove this
 const client_id = 'e58f73ecd6fb4a228d3142621adfd1ab'
 /**
@@ -33,9 +35,9 @@ export async function redirectToSpotifyAuthorize() {
     scope: scope,
     code_challenge_method: 'S256',
     code_challenge: code_challenge_base64,
-    redirect_uri: redirectUrl,
+    redirect_uri: REDIRECTS.redirect,
   };
 
   authUrl.search = new URLSearchParams(params).toString();
-  return authUrl.toString(); // Redirect the user to the authorization server for login
+  return {authUrl, codeVerifier: code_verifier }; // Redirect the user to the authorization server for login
 }

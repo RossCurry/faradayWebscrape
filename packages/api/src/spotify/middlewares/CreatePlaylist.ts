@@ -1,12 +1,14 @@
 import Application from 'koa';
 import { SpotifyPlaylist } from '../spotify.types.js';
+import {userToken} from '../../router.js'
 
-export default async function CreatePlaylist(ctx: Application.ParameterizedContext, _next: Application.Next) {
+export default async function CreatePlaylist(ctx: Application.ParameterizedContext, next: Application.Next) {
+  const accessToken = ctx.state.accessToken || userToken.get()
   const user_id = 'freezealicious'
   const url = `https://api.spotify.com/v1/users/${user_id}/playlists`
-  const authString = `Bearer ${ctx.state.accessToken}`
+  const authString = `Bearer ${accessToken}`
   const body = {
-    "name": "FaradayTest",
+    "name": "FaradayTest4",
     "description": "FaradayTest",
     "public": true
   }
@@ -22,9 +24,11 @@ export default async function CreatePlaylist(ctx: Application.ParameterizedConte
 
     const spotifyPlaylist = await response.json();
     console.log('!spotifyPlaylist -> ', spotifyPlaylist);
-    return spotifyPlaylist as SpotifyPlaylist
+    // return spotifyPlaylist as SpotifyPlaylist
+    ctx.state.playlist = spotifyPlaylist
   } catch (error) {
     console.error(error)
     throw error
   }
+  next()
 }
