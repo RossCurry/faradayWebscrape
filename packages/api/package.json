@@ -13,7 +13,7 @@
     "#services/*": "./dist/services/*"
   },
   "scripts": {
-    "build": "rm -rf ./packages/api/dist && ./node_modules/typescript/bin/tsc -p .",
+    "build": "pwd && rm -rf ./dist && ./node_modules/typescript/bin/tsc -p . && cp -r ./public ./dist/public",
     "watch": "./node_modules/typescript/bin/tsc -p . -w",
     "dev": "node ./dist/index.js"
   },
