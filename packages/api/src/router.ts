@@ -72,21 +72,19 @@ router.use(// initialize services
 /**
  * Home
  */
-router.get('/api/albums', 
-  readFromDisk,
-  async (ctx: AppContext, _next: Application.Next) => {
-    const { spotifyAlbumInfo } = ctx.state.data;
-    ctx.body = spotifyAlbumInfo
-    ctx.status = 200
-  }
-)
+// router.get('/api/albums', 
+//   readFromDisk,
+//   async (ctx: AppContext, _next: Application.Next) => {
+//     const { spotifyAlbumInfo } = ctx.state.data;
+//     ctx.body = spotifyAlbumInfo
+//     ctx.status = 200
+//   }
+// )
 router.post('/api/playlist/create', 
-  readFromDisk,
   async (ctx: AppContext, next: Application.Next) => {
     const accessToken = ctx.body && typeof ctx.body === 'object' && 'accessToken' in ctx.body && ctx.body.accessToken || undefined;
     console.log('!body -> ', ctx.body);
     console.log('!accessToken -> ', accessToken);
-    // console.log('!userToken.get() -> ', userToken.get());
     ctx.state.accessToken = accessToken
     next()
   },
@@ -136,23 +134,25 @@ router.get("/redirect",
     }
     next()
   },
+  CreatePlaylist,
+  PopulatePlaylist,
   // getFaradayStock,
   // TODO dont make so many calls to spoti
   // getAlbumInfo,
   // writeToDisk,
   // TODO read from disk
-  readFromDisk,
+  // readFromDisk,
   // CreatePlaylist,
   /**
    * This MW should populate the newplaylist
    * @param ctx 
    * @param _next 
    */
-  async (ctx: AppContext, _next: Application.Next) => {
-    const newPlaylist: SpotifyPlaylist | undefined = ctx.state.playlist
-    console.log('!newPlaylist -> ', newPlaylist);
-    ctx.redirect(`http://localhost:3000/albums.html?accessToken=${ctx.state.accessToken}`)
-  }
+  // async (ctx: AppContext, _next: Application.Next) => {
+  //   const newPlaylist: SpotifyPlaylist | undefined = ctx.state.playlist
+  //   console.log('!newPlaylist -> ', newPlaylist);
+  //   ctx.redirect(`http://localhost:3000/albums.html?accessToken=${ctx.state.accessToken}`)
+  // }
 )
 
 /**
