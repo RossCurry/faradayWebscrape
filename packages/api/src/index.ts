@@ -7,28 +7,22 @@ import url from "url"
 import * as koaStatic from 'koa-static';
 import path from 'node:path'
 // router
-import router from './router.js';
-// services
-import CodeVerifier from "#controllers/spotify/auth/CodeVerifier.js";
-import MongoDB from '#services/mongodb/index.js'
-import Token from "#controllers/spotify/auth/Token.js";
+import router, { AppContext, AppState } from './router.js';
 
 // env variables
 import dotenv from 'dotenv';
-import Application from "koa";
 dotenv.config();
 
 const __dirname = url.fileURLToPath(new URL(import.meta.url))
 
-
 const port = process.env.PORT || 4000
 if (!port) throw new Error("No port specified");
 
-const app = new Koa();
+const app = new Koa<AppState, AppContext>();
 
+// TODO need a relative solution for this
 // Serve static files from the 'public' directory
 const outputDir = '/Users/ross.curry/ross/faradayWebScrape/packages/api/dist'
-// TODO need a relative solution for this
 app.use(koaStatic.default(path.join(outputDir, 'public')));
 
 app.use(cors({ 
@@ -54,9 +48,6 @@ app.use(router.allowedMethods())
 app.use(bodyParser())
 app.use(json())
 app.use(logger())
-
-// Some useful services for the app
-
 
 try {
   app.listen(port, () => {

@@ -1,7 +1,7 @@
 import Application from "koa";
 import { FaradayItemData } from "#controllers/faraday/getItemData.js";
 import { SearchResponse } from "#controllers/spotify/spotify.types.js";
-import { AppContext } from "../router.js";
+import { AppContext } from "../../router.js";
 
 const spotiBaseUrl = "https://api.spotify.com/v1/"
 const spotiUrl = "https://api.spotify.com/v1/albums/"

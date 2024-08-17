@@ -10,7 +10,7 @@ export type PKCE_RES = {
   scope: string
 }
 
-export default async function tokenPCKE (ctx: AppContext, next: Application.Next) {
+export default async function getPCKECredentialsToken(ctx: AppContext, next: Application.Next) {
   const params = new URLSearchParams(ctx.querystring)
   const code = params.get('code')
   const codeChallenge = ctx.services.codeVerifier.get()
@@ -21,7 +21,7 @@ export default async function tokenPCKE (ctx: AppContext, next: Application.Next
     ctx.services.token.set(token)
     ctx.state.accessToken = token.access_token
   } catch (error) {
-    ctx.body = {code} 
+    ctx.body = { code }
   }
   next()
 }

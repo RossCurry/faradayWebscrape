@@ -10,7 +10,8 @@
     "#utils/*": "./dist/utils/*", 
     "#middlewares/*": "./dist/middlewares/*",
     "#controllers/*": "./dist/controllers/*",
-    "#services/*": "./dist/services/*"
+    "#services/*": "./dist/services/*",
+    "#router/*": "./dist/router.js"
   },
   "scripts": {
     "build": "pwd && rm -rf ./dist && ./node_modules/typescript/bin/tsc -p . && cp -r ./public ./dist/public",

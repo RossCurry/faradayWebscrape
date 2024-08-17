@@ -9,7 +9,7 @@
 import Application from "koa"
 import fetch from "node-fetch"
 import dotenv from 'dotenv';
-import Token, { AuthToken } from "../../../controllers/spotify/auth/Token.js";
+import Token, { AuthToken } from "../../../services/token/Token.js";
 import { AppContext } from "../../../router.js";
 dotenv.config();
 
@@ -47,7 +47,7 @@ export async function getToken() {
  * Gets client credential token for Spotiy read requests
  * @param ctx sets ctx.state.accessToken
  */
-export async function getClientCredentialToken(ctx: AppContext, next: Application.Next) {
+export default async function getClientCredentialToken(ctx: AppContext, next: Application.Next) {
   try {
     if (userToken.has()) {
       ctx.state.accessToken = userToken.get()

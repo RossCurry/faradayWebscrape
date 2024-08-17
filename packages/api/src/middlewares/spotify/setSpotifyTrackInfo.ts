@@ -1,6 +1,6 @@
 import Application from 'koa'
 import getItemData from '#controllers/faraday/getItemData.js'
-import { AppContext, AppState } from '../router.js'
+import { AppContext, AppState } from '../../router.js'
 
 /**
  * Adds data.faraday to ctx.state
