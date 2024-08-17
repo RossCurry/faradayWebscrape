@@ -1,31 +1,17 @@
 import Application from 'koa'
 import Router from "koa-router"
-import CodeVerifier from '#controllers/spotify/auth/CodeVerifier.js'
-import Token from '#controllers/spotify/auth/Token.js'
-import readFromDisk from '#middlewares/readFromDisk.js'
-import { redirectToSpotifyAuthorize } from '#controllers/spotify/auth/PKCE/1.codeChallenge.js'
-import { getTokenPCKE } from '#controllers/spotify/auth/PKCE/2.requestUserAuth.js'
-import { SpotifyAlbumTracksResponse, SpotifyPlaylist, SpotifyUserProfile } from '#controllers/spotify/spotify.types.js'
-import { getClientCredentialToken } from '#middlewares/auth/clientCredentials/auth.js'
-import getAlbumInfoSpotify, { SpotifySearchResult } from '#middlewares/getAlbumInfo.js'
-import scrapeFaradayStock from '#middlewares/scrapeFaradayStock.js'
-import PopulatePlaylist from '#middlewares/PopulatePlaylist.js'
-import writeToDisk from '#middlewares/writeToDisk.js'
-import CreatePlaylist from '#middlewares/CreatePlaylist.js'
+// services
 import MongoDB from '#services/mongodb/index.js'
+import CodeVerifier from '#services/codeVerifier/CodeVerifier.js'
+import Token from '#services/token/Token.js'
+// controllers
+import { SpotifyAlbumTracksResponse, SpotifyPlaylist } from '#controllers/spotify/spotify.types.js'
 import { FaradayItemData } from '#controllers/faraday/getItemData.js'
-import setFaradayStock from '#middlewares/setFaradayStock.js'
-import getFaradayStock from '#middlewares/getFaradayStock.js'
-import setSpotifyAlbumInfo from '#middlewares/setSpotifyAlbumInfo.js'
-import getSpotifyAlbumInfo from '#middlewares/getSpotifyAlbumInfo.js'
-import getSpotifyTracksInfo from '#middlewares/getSpotifyTracksInfo.js'
-import setSpotifyTrackInfo from '#middlewares/setSpotifyTrackInfo.js'
-import getCurrentUser from '#controllers/spotify/getCurrentUser.js'
-import tokenPCKE from '#middlewares/auth/PKCE/tokenAuth.js'
+// middlewares
+import mw from '#middlewares/index.js'
+// types
+import type { SpotifySearchResult } from '#middlewares/spotify/getAlbumInfo.js'
 
-
-// const codeVerifier = new CodeVerifier()
-// export const userToken = new Token()
 
 export interface AppState extends Application.DefaultState {
   accessToken?: string | null,
@@ -62,7 +48,8 @@ const services = {
 const router = new Router<AppState, AppContext>()
 
 
-router.use(// initialize services
+// initialize services
+router.use(
   (async (ctx, next) => {
     console.log('!initialize services -> ');
     ctx.state.data = {}
@@ -71,82 +58,9 @@ router.use(// initialize services
   })
 )
 
-router.post('/api/playlist/create', 
-  async (ctx: AppContext, next: Application.Next) => {
-    const accessToken = ctx.body && typeof ctx.body === 'object' && 'accessToken' in ctx.body && ctx.body.accessToken || undefined;
-    console.log('!body -> ', ctx.body);
-    console.log('!accessToken -> ', accessToken);
-    ctx.state.accessToken = accessToken
-    next()
-  },
-  CreatePlaylist,
-  PopulatePlaylist,
-) 
-
-/**
- * request from UI to send code verification to spoti auth
- */
-router.get('/api/connect', async (ctx: AppContext, _next: Application.Next) => {
-  const { authUrl: spotifyAuthUrl, codeVerifier: notEncoded } = await redirectToSpotifyAuthorize()
-  // We need this for the authTokenRequest
-  ctx.services.codeVerifier.set(notEncoded)
-  ctx.set('Content-Type', 'application/json');
-  ctx.set('location', spotifyAuthUrl.toString());
-  ctx.status = 201 // created
-})
 
 
-/**
- * We only get the code from the url redirect from Spotify
- * We need the codeChallenge from the previous connect step
- */
-router.get("/api/redirect", 
-  tokenPCKE, // get code
-  getCurrentUser, // get user info
-  CreatePlaylist, // user info needed for playlist creation
-  PopulatePlaylist,
-)
 
-/**
- * Seems like we won't use this.
- */
-router.get("/callback", (ctx: AppContext, _next: Application.Next) => {
-  const params = new URLSearchParams(ctx.querystring)
-  console.log('!callback params -> ', params);
-  console.log('!ctx.req -> ', ctx.req);
-  
-  ctx.body = "hello callback"
-})
-
-
-/**
-* Using this route we cannot make user scoped requests.
-*/
-router.get("/api/faraday/albums",
-  scrapeFaradayStock,
-  setFaradayStock,
-)
-
-router.post("/api/spotify/albums",
-  getFaradayStock,
-  getClientCredentialToken,
-  getAlbumInfoSpotify, // expensive on requests 200+
-  setSpotifyAlbumInfo,
-)
-
-router.post("/api/spotify/tracks",
-  getSpotifyAlbumInfo, // from db
-  getClientCredentialToken, 
-  getSpotifyTracksInfo, // from spoti api
-  setSpotifyTrackInfo
-)
-
-// router.get("/api/spotify/playlistData",
-//   async (ctx, _next) => {
-//     const playlistData =  await ctx.services.mongo.getPlaylistData()
-//     console.log('!playlistData -> ', playlistData);
-//   },
-// )
 
 async function test(ctx: AppParamContext, _next: Application.Next) {
   ctx.body = { foo: 'bar' }

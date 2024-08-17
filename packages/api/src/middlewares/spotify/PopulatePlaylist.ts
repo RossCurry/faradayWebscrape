@@ -1,6 +1,6 @@
 import Application from 'koa';
 import { ProjectionResultsSingle } from './getAlbumInfo.js';
-import { AppContext } from '../router.js';
+import { AppContext } from '../../router.js';
 import { getBatches } from '#utils/utils.js';
 
 type SnapshotResponse = {

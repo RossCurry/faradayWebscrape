@@ -1,12 +1,12 @@
 import mongoDB from 'mongodb'
+import dotenv from 'dotenv';
+dotenv.config();
 
-import { connectToDatabase } from "./connection.js"
 import { FaradayItemData } from '#controllers/faraday/getItemData.js'
 import { AppState } from '../../router.js'
-import { SpotifySearchResult } from '#middlewares/getAlbumInfo.js'
 import { SpotifyUserProfile } from '#controllers/spotify/spotify.types.js'
-import { AuthToken } from '#controllers/spotify/auth/Token.js'
-import { update } from 'lodash-es'
+import { SpotifySearchResult } from '#middlewares/spotify/getAlbumInfo.js';
+import { AuthToken } from '#services/token/Token.js';
 
 class MongoDb {
   db: mongoDB.Db | null = null
@@ -16,8 +16,22 @@ class MongoDb {
   }
   async init(){
     // connect
-    const connection = await connectToDatabase()
+    const connection = await this.connectToDatabase()
     this.db = connection
+  }
+
+  async connectToDatabase(): Promise<mongoDB.Db> {
+    const connectionString  = process.env.DB_CONN_STRING
+    const faradayDB = process.env.DB_NAME
+    if (!connectionString || !faradayDB) throw new Error('No connection string or no DB Name for mongo db');
+  
+    const client: mongoDB.MongoClient = new mongoDB.MongoClient(connectionString);
+    await client.connect();
+    const db: mongoDB.Db = client.db(faradayDB);
+    const albumsCollection: mongoDB.Collection = db.collection('albums');
+       
+    console.log(`Successfully connected to database: ${db.databaseName} and collection: ${albumsCollection.collectionName}`);
+    return db
   }
 
   async setSpotifyData(data: AppState["data"]["searchResults"]){

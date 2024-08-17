@@ -1,4 +1,4 @@
-import { SpotifyUserProfile } from "../spotify.types.js"
+import { SpotifyUserProfile } from "../../controllers/spotify/spotify.types.js"
 
 export type AuthToken = {
   access_token: string | null,
@@ -15,41 +15,41 @@ export default class Token {
   refresh_token: string | undefined
   scope: string | undefined
 
-  constructor(){
+  constructor() {
     console.log('!Token  constructor-> ')
     this.accessToken = null
     this.expiresIn = null
     this.refresh_token = undefined
     this.scope = undefined
     this.currentUser = null
-    
+
   }
-  has(){
+  has() {
     return !!this.accessToken;
   }
-  set(token: AuthToken){
+  set(token: AuthToken) {
     console.log('Token set', token)
     this.accessToken = token.access_token
     this.expiresIn = token.expires_in
     this.refresh_token = token.refresh_token
     this.scope = token.scope
   }
-  get(){
+  get() {
     console.log('Token got', this.accessToken)
     return this.accessToken
   }
-  setUserInfo(userInfo: SpotifyUserProfile){
+  setUserInfo(userInfo: SpotifyUserProfile) {
     this.currentUser = userInfo
   }
-  getUserInfo(){
+  getUserInfo() {
     return this.currentUser
   }
-  getEndpointInfo(): Omit<AuthToken, 'token_type'>{
+  getEndpointInfo(): Omit<AuthToken, 'token_type'> {
     return {
-      access_token : this.accessToken,
-      expires_in : this.expiresIn,
-      refresh_token : this.refresh_token,
-      scope : this.scope,
+      access_token: this.accessToken,
+      expires_in: this.expiresIn,
+      refresh_token: this.refresh_token,
+      scope: this.scope,
     }
   }
 }

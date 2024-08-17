@@ -1,20 +1,17 @@
 import Application from 'koa'
 import getItemData from '#controllers/faraday/getItemData.js'
-import { AppContext, AppState } from '../router.js'
+import { AppContext, AppState } from '../../router.js'
 
 /**
  * Adds data.faraday to ctx.state
  */
-export default async function setSpotifyAlbumInfo(ctx: AppContext, next: Application.Next) {
+export default async function getSpotifyAlbumInfo(ctx: AppContext, next: Application.Next) {
   console.log('!setSpotifyAlbumInfo -> ');
   try {
-    const { searchResults } = ctx.state.data
-    if (!searchResults) throw new Error('No faraday data found')
     const { mongo } = ctx.services
     if (!mongo) throw new Error('No mongo object found')
-    const inserted = await mongo.setSpotifyData(searchResults)
-    ctx.body = JSON.stringify(inserted)
-    ctx.status = 200
+    const spotifyAlbums = await mongo.getSpotifyData({ 'spotify.trackIds' : { '$exists': false }})
+    ctx.state.data.spotifyAlbumInfo = spotifyAlbums
   } catch (error) {
     console.error('Error in middleware:', error);
     ctx.status = 500;

@@ -1,6 +1,6 @@
 import Application from "koa"
 import { AppContext } from "../../router.js"
-import { SpotifyUserProfile } from "./spotify.types.js"
+import { SpotifyUserProfile } from "../../controllers/spotify/spotify.types.js"
 
 // get user info
 export default async function getCurrentUser(ctx: AppContext, next: Application.Next) {

@@ -16,9 +16,9 @@ const port = process.env.PORT || 4000;
 if (!port)
     throw new Error("No port specified");
 const app = new Koa();
+// TODO need a relative solution for this
 // Serve static files from the 'public' directory
 const outputDir = '/Users/ross.curry/ross/faradayWebScrape/packages/api/dist';
-// TODO need a relative solution for this
 app.use(koaStatic.default(path.join(outputDir, 'public')));
 app.use(cors({
     // origin: process.env.PRODUCTION ? process.env.CLIENT_URL : "http://127.0.0.1:5500",
@@ -43,7 +43,6 @@ app.use(router.allowedMethods());
 app.use(bodyParser());
 app.use(json());
 app.use(logger());
-// Some useful services for the app
 try {
     app.listen(port, () => {
         console.log("__dirname", __dirname);

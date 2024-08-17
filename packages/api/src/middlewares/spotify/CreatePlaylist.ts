@@ -1,5 +1,5 @@
 import Application from 'koa';
-import { AppContext } from '../router.js';
+import { AppContext } from '../../router.js';
 
 export default async function CreatePlaylist(ctx: AppContext, next: Application.Next) {
   console.log('!CreatePlaylist -> ');

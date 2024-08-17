@@ -1,7 +1,7 @@
 import Application from "koa";
 import { FaradayItemData } from "#controllers/faraday/getItemData.js";
 import { SearchResponse, SpotifyAlbumTracksResponse } from "#controllers/spotify/spotify.types.js";
-import { AppContext } from "../router.js";
+import { AppContext } from "../../router.js";
 import { SpotifySearchResult } from "./getAlbumInfo.js";
 
 
