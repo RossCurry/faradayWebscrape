@@ -1,16 +1,17 @@
 import Application from 'koa'
 import Router from "koa-router"
+
 // services
 import MongoDB from '#services/mongodb/index.js'
 import CodeVerifier from '#services/codeVerifier/CodeVerifier.js'
 import Token from '#services/token/Token.js'
-// controllers
-import { SpotifyAlbumTracksResponse, SpotifyPlaylist } from '#controllers/spotify/spotify.types.js'
-import { FaradayItemData } from '#controllers/faraday/getItemData.js'
-// middlewares
-import mw from '#middlewares/index.js'
+
 // types
-import type { SpotifySearchResult } from '#middlewares/spotify/getAlbumInfo.js'
+import type { SpotifyAlbumTracksResponse, SpotifyPlaylist, SpotifySearchResult } from '#controllers/spotify/spotify.types.js'
+import type { FaradayItemData } from '#controllers/faraday/getItemData.js'
+
+// routers
+import faradayRouter from '#controllers/faraday/index.js'
 
 
 export interface AppState extends Application.DefaultState {
@@ -27,7 +28,7 @@ export interface AppState extends Application.DefaultState {
     faraday?: FaradayItemData[]
   },
 }
-export interface AppContext extends Application.DefaultContext {
+export interface AppContext extends Application.BaseContext {
   state: AppState,
   services: {
     codeVerifier: CodeVerifier;
@@ -58,9 +59,9 @@ router.use(
   })
 )
 
+router.use(faradayRouter.routes(), faradayRouter.allowedMethods())
 
-
-
+// router.get('/api/faraday/albums', test)
 
 async function test(ctx: AppParamContext, _next: Application.Next) {
   ctx.body = { foo: 'bar' }

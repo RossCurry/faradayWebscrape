@@ -1,6 +1,6 @@
 import Application from "koa";
 import { FaradayItemData } from "#controllers/faraday/getItemData.js";
-import { SearchResponse } from "#controllers/spotify/spotify.types.js";
+import { SearchResponse, SpotifySearchResult } from "#controllers/spotify/spotify.types.js";
 import { AppContext } from "../../router.js";
 
 const spotiBaseUrl = "https://api.spotify.com/v1/"
@@ -51,16 +51,6 @@ function projectMultipsSearchResults(results: SearchResponse, searchTerm: string
   })
 }
 
-export type SpotifySearchResult = {
-  artists: string[],
-  href: string,
-  id:  string,
-  image: SearchResponse["albums"]["items"][number]["images"][number],
-  name:  string,
-  searchTerm:  string,
-  type: 'album',
-  uri:  string,
-}
 /**
  * Return a reduced json structure
  * @param results 

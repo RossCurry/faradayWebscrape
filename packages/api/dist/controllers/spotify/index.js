@@ -6,13 +6,16 @@ mw.spotify.setSpotifyAlbumInfo);
 router.post("/api/spotify/tracks", mw.spotify.getSpotifyAlbumInfo, // from db
 mw.auth.getClientCredentialToken, mw.spotify.getSpotifyTracksInfo, // from spoti api
 mw.spotify.setSpotifyTrackInfo);
-router.post('/api/spotify/playlist/create', async (ctx, next) => {
-    const accessToken = ctx.body && typeof ctx.body === 'object' && 'accessToken' in ctx.body && ctx.body.accessToken || undefined;
-    console.log('!body -> ', ctx.body);
-    console.log('!accessToken -> ', accessToken);
-    ctx.state.accessToken = accessToken;
-    next();
-}, mw.spotify.CreatePlaylist, mw.spotify.PopulatePlaylist);
+router.post('/api/spotify/playlist/create', 
+// TODO add accessToken to ctx.state
+// async (ctx: AppContext, next: Application.Next) => {
+//   const accessToken = ctx.body && typeof ctx.body === 'object' && 'accessToken' in ctx.body && ctx.body.accessToken || undefined;
+//   console.log('!body -> ', ctx.body);
+//   console.log('!accessToken -> ', accessToken);
+//   ctx.state.accessToken = accessToken
+//   next()
+// },
+mw.spotify.CreatePlaylist, mw.spotify.PopulatePlaylist);
 /**
  * main request from UI to send code verification to spoti auth
  * & redirect FE to the spoti auth

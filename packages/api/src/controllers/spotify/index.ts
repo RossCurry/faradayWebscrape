@@ -18,13 +18,14 @@ router.post("/api/spotify/tracks",
 )
 
 router.post('/api/spotify/playlist/create', 
-  async (ctx: AppContext, next: Application.Next) => {
-    const accessToken = ctx.body && typeof ctx.body === 'object' && 'accessToken' in ctx.body && ctx.body.accessToken || undefined;
-    console.log('!body -> ', ctx.body);
-    console.log('!accessToken -> ', accessToken);
-    ctx.state.accessToken = accessToken
-    next()
-  },
+  // TODO add accessToken to ctx.state
+  // async (ctx: AppContext, next: Application.Next) => {
+  //   const accessToken = ctx.body && typeof ctx.body === 'object' && 'accessToken' in ctx.body && ctx.body.accessToken || undefined;
+  //   console.log('!body -> ', ctx.body);
+  //   console.log('!accessToken -> ', accessToken);
+  //   ctx.state.accessToken = accessToken
+  //   next()
+  // },
   mw.spotify.CreatePlaylist,
   mw.spotify.PopulatePlaylist,
 ) 

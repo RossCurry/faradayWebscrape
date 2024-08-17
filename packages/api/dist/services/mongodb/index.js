@@ -62,11 +62,10 @@ class MongoDb {
         console.log('!insertedDocs -> ', insertedDocs.length);
         return insertedDocs;
     }
-    async getSpotifyData(match = {}) {
+    async getSpotifyData(match) {
         console.log('!getSpotifyData -> ');
         const albumCollection = this.db?.collection('albums');
-        const albums = await albumCollection?.find(match, {}).toArray();
-        console.log('!getSpotifyData albums -> ', [albums]);
+        const albums = await albumCollection?.find(match || {}, {}).toArray();
         const spotifyData = albums?.map(album => ({ _id: album._id.toString(), ...album.spotify }));
         return spotifyData ? spotifyData : [];
     }

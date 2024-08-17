@@ -1,3 +1,8 @@
+// TODO have shared between packages in a mono repo
+/**
+ * This file is a direct copy of a file same name from the api package
+ */
+
 export type SearchResponse = 
   {
 
