@@ -4,8 +4,7 @@ dotenv.config();
 
 import { FaradayItemData } from '#controllers/faraday/getItemData.js'
 import { AppState } from '../../router.js'
-import { SpotifyUserProfile } from '#controllers/spotify/spotify.types.js'
-import { SpotifySearchResult } from '#middlewares/spotify/getAlbumInfo.js';
+import { SpotifySearchResult, SpotifyUserProfile } from '#controllers/spotify/spotify.types.js'
 import { AuthToken } from '#services/token/Token.js';
 
 class MongoDb {
@@ -78,11 +77,10 @@ class MongoDb {
     return insertedDocs
   }
 
-  async getSpotifyData(match: Record<string, any> = {}){
+  async getSpotifyData(match?: Record<string, any>){
     console.log('!getSpotifyData -> ');
     const albumCollection = this.db?.collection('albums')
-    const albums = await albumCollection?.find(match, {}).toArray()
-    console.log('!getSpotifyData albums -> ', [albums]);
+    const albums = await albumCollection?.find(match || {}, {}).toArray()
     const spotifyData: Array<SpotifySearchResult & { _id: string }> | undefined = albums?.map(album => ( { _id: album._id.toString(),  ...album.spotify }))
     return spotifyData ? spotifyData : []
   }
