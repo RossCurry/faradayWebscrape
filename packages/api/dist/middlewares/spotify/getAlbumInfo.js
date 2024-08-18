@@ -7,7 +7,12 @@ const exampleAlbumId = "4aawyAB9vmqN3uQ7FjRGTy";
  */
 function parseAlbumTitle(title) {
     const [artist, album] = title.split('-');
-    return encodeURI(`${artist.trim()} ${album.trim()}`);
+    try {
+        return encodeURI(`${artist?.trim()} ${album?.trim()}`);
+    }
+    catch (error) {
+        throw new Error(`Error parsing faraday album info, artist: ${artist} album: ${album}`);
+    }
 }
 /**
  * Return a reduced json structure
@@ -79,7 +84,7 @@ function projectSingleSearchResults(results, searchTerm) {
 export default async function getAlbumInfoSpotify(ctx, next) {
     console.log('!getAlbumInfoSpotify -> ');
     const { faraday } = ctx.state.data;
-    const faradayAlbums = faraday || [];
+    const faradayAlbums = faraday?.cleanItems || [];
     // TODO check data from faraday against saved data
     // TODO skip search if everything is the same
     // TODO only search differences

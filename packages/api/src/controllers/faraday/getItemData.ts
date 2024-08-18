@@ -6,10 +6,15 @@ export type FaradayItemData = {
   id: string,
   title: string,
   productType: string,
-  isSoldOut: boolean
+  isSoldOut: boolean,
+  category: string | undefined,
+  notAvailable?: boolean,
+  sourceContext: string | null
 }
-async function getItemData(): Promise<FaradayItemData[]> {
+export type ScrapedData = { cleanItems: FaradayItemData[], errorItems?: FaradayItemData[]}
+async function getItemData(): Promise<ScrapedData> {
   // Launch the browser and open a new blank page
+  // const showInBrowser = { headless: false } // launch config for debugging
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
   
@@ -33,19 +38,39 @@ async function getItemData(): Promise<FaradayItemData[]> {
   let soldOutCount = 0;
   const itemsData = await Promise.all(gridItems.map(async (item) => {
     const context = await item.evaluate(el => {
-
+      let parseError;
       function parseContext(context:string){
+        if (!context.length) return null
         try {
-          return JSON.parse(context)
+          const cleanString = context.replaceAll('\n', '').replaceAll('\t', '')
+          const parsed = JSON.parse(cleanString)
+          parseError = undefined
+          return parsed
         } catch (error) {
-          console.log('not json', context)
+          parseError = { message: 'not json', context }
         }
       }
 
+      // TODO get category from classList
+
       const context = el.getAttribute('data-current-context')
       const isSoldOut = el.classList.contains('sold-out')
-      const linkInfo = context && parseContext(context)
-      return { ...linkInfo, isSoldOut }
+      const fullCategoryString = Array.from(el.classList.values()).find(val => val.includes('category'))
+      const category = fullCategoryString?.slice(fullCategoryString.indexOf('-') + 1)
+      const linkInfo: { 
+        id: string,
+        title: string,
+        productType: string
+      } = context && parseContext(context)
+      return { 
+        id: linkInfo?.id, 
+        title: linkInfo?.title, 
+        productType: linkInfo?.productType, 
+        isSoldOut: isSoldOut, 
+        category: category, 
+        sourceContext: context,
+        parseError: parseError
+      }
       // return context && typeof context === 'string' ? JSON.parse(context) : null
     },
     // we can pass in vars as values to the browser context - no references or functions though
@@ -53,10 +78,15 @@ async function getItemData(): Promise<FaradayItemData[]> {
     if (context.isSoldOut) ++soldOutCount
     return context;
   }));
-  
+  const cleanItems = itemsData.filter(item => !item.parseError)
+  const errorItems = itemsData.filter(item => item.parseError)
   console.log('!itemsData -> ', itemsData.length, soldOutCount);
+  console.log('!errorItems -> ', { length: errorItems.length, errorItems});
   await browser.close();
-  return itemsData
+  return {
+    cleanItems,
+    errorItems
+  }
 }
 
 export default getItemData

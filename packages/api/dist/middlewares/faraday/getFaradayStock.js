@@ -8,7 +8,7 @@ export default async function getFaradayStock(ctx, next) {
         if (!mongo)
             throw new Error('No mongo object found');
         const faradayData = await mongo.getFaradayData();
-        ctx.state.data.faraday = faradayData;
+        ctx.state.data.faraday = { cleanItems: faradayData };
     }
     catch (error) {
         console.error('Error in middleware:', error);

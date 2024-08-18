@@ -9,7 +9,7 @@ export default async function setFaradayStock(ctx, next) {
         const { mongo } = ctx.services;
         if (!mongo)
             throw new Error('No mongo object found');
-        const inserted = await mongo.setFaradayData(faraday);
+        const inserted = await mongo.setFaradayData(faraday.cleanItems);
         ctx.body = JSON.stringify(inserted);
         ctx.status = 200;
     }

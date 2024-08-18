@@ -3,6 +3,7 @@ import puppeteer from 'puppeteer';
 const FARADAY_URL = 'https://www.thisisfaraday.com/';
 async function getItemData() {
     // Launch the browser and open a new blank page
+    // const showInBrowser = { headless: false } // launch config for debugging
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
     // Navigate the page to a URL.
@@ -20,26 +21,49 @@ async function getItemData() {
     let soldOutCount = 0;
     const itemsData = await Promise.all(gridItems.map(async (item) => {
         const context = await item.evaluate(el => {
+            let parseError;
             function parseContext(context) {
+                if (!context.length)
+                    return null;
                 try {
-                    return JSON.parse(context);
+                    const cleanString = context.replaceAll('\n', '').replaceAll('\t', '');
+                    const parsed = JSON.parse(cleanString);
+                    parseError = undefined;
+                    return parsed;
                 }
                 catch (error) {
-                    console.log('not json', context);
+                    parseError = { message: 'not json', context };
                 }
             }
+            // TODO get category from classList
             const context = el.getAttribute('data-current-context');
             const isSoldOut = el.classList.contains('sold-out');
+            const fullCategoryString = Array.from(el.classList.values()).find(val => val.includes('category'));
+            const category = fullCategoryString?.slice(fullCategoryString.indexOf('-') + 1);
             const linkInfo = context && parseContext(context);
-            return { ...linkInfo, isSoldOut };
+            return {
+                id: linkInfo?.id,
+                title: linkInfo?.title,
+                productType: linkInfo?.productType,
+                isSoldOut: isSoldOut,
+                category: category,
+                sourceContext: context,
+                parseError: parseError
+            };
             // return context && typeof context === 'string' ? JSON.parse(context) : null
         });
         if (context.isSoldOut)
             ++soldOutCount;
         return context;
     }));
+    const cleanItems = itemsData.filter(item => !item.parseError);
+    const errorItems = itemsData.filter(item => item.parseError);
     console.log('!itemsData -> ', itemsData.length, soldOutCount);
+    console.log('!errorItems -> ', { length: errorItems.length, errorItems });
     await browser.close();
-    return itemsData;
+    return {
+        cleanItems,
+        errorItems
+    };
 }
 export default getItemData;

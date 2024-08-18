@@ -5,6 +5,7 @@ import CodeVerifier from '#services/codeVerifier/CodeVerifier.js';
 import Token from '#services/token/Token.js';
 // routers
 import faradayRouter from '#controllers/faraday/index.js';
+import spotifyRouter from '#controllers/spotify/index.js';
 // type App = Application<AppState, AppContext>
 const services = {
     codeVerifier: new CodeVerifier(),
@@ -19,7 +20,9 @@ router.use((async (ctx, next) => {
     ctx.services = services;
     await next();
 }));
+// TODO investigate more if this is best way to extend routes.
 router.use(faradayRouter.routes(), faradayRouter.allowedMethods());
+router.use(spotifyRouter.routes(), spotifyRouter.allowedMethods());
 // router.get('/api/faraday/albums', test)
 async function test(ctx, _next) {
     ctx.body = { foo: 'bar' };
