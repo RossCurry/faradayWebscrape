@@ -8,10 +8,11 @@ import Token from '#services/token/Token.js'
 
 // types
 import type { SpotifyAlbumTracksResponse, SpotifyPlaylist, SpotifySearchResult } from '#controllers/spotify/spotify.types.js'
-import type { FaradayItemData } from '#controllers/faraday/getItemData.js'
+import type { FaradayItemData, ScrapedData } from '#controllers/faraday/getItemData.js'
 
 // routers
 import faradayRouter from '#controllers/faraday/index.js'
+import spotifyRouter from '#controllers/spotify/index.js'
 
 
 export interface AppState extends Application.DefaultState {
@@ -25,7 +26,7 @@ export interface AppState extends Application.DefaultState {
       faraday: FaradayItemData,
       spotify: SpotifySearchResult | undefined
     }>,
-    faraday?: FaradayItemData[]
+    faraday?: ScrapedData
   },
 }
 export interface AppContext extends Application.BaseContext {
@@ -59,7 +60,9 @@ router.use(
   })
 )
 
+// TODO investigate more if this is best way to extend routes.
 router.use(faradayRouter.routes(), faradayRouter.allowedMethods())
+router.use(spotifyRouter.routes(), spotifyRouter.allowedMethods())
 
 // router.get('/api/faraday/albums', test)
 

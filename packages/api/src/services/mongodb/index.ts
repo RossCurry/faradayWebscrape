@@ -1,4 +1,4 @@
-import mongoDB from 'mongodb'
+import mongoDB, { Db, ObjectId } from 'mongodb'
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -85,18 +85,67 @@ class MongoDb {
     return spotifyData ? spotifyData : []
   }
 
+  // TODO divide this into more methods
   async setFaradayData(data: FaradayItemData[]){
-    const prevStock = await this.getFaradayData()
-    const prevStockIds = data.map( d => d.id)
     console.log('!setFaradayData -> ', data.length);
+    const prevStock = await this.getFaradayData()
+    console.log('!prevStock -> ', prevStock.length);
+    const prevStockIds = prevStock.map( d => d.id)
     const albumCollection = this.db?.collection('albums')
     if (!albumCollection) throw new Error('No album collecion found')
-    const filteredResults = data.filter( d => prevStockIds.includes(d.id) )
+    const newData = data.filter( d => !prevStockIds.includes(d.id) )
     // TODO maybe we don't always just want to add on, or I need date info
-    const newFaradayData = filteredResults.map( d => ({ faraday: d, createdDate: new Date(Date.now()).toISOString() }))
-    const insertedDocs = await albumCollection.insertMany(newFaradayData)
-    return insertedDocs
+    const newFaradayData = newData.map( d => ({ faraday: d, createdDate: new Date().toISOString() }))
+
+    /**
+     * Insert new data
+     */
+    let insertedDocs;
+    if (newFaradayData.length){
+      console.log('!Inserting docuemnts -> ', newFaradayData.length);
+      // This avoids: MongoInvalidArgumentError: Invalid BulkOperation, Batch cannot be empty
+      insertedDocs = await albumCollection.insertMany(newFaradayData)
+    }
+    
+    /**
+     * Update current data
+     */
+    const needsUpdate = prevStock.filter( prevItem => {
+      const currentItem = data.find( currentItem => currentItem.id === prevItem.id) 
+      if (currentItem){
+        const needsUpdate = currentItem.isSoldOut !== prevItem.isSoldOut || currentItem.category !== prevItem.category 
+        return needsUpdate
+      }
+      return false
+    })
+    const stockToUpdate = needsUpdate.map( prevItem => {
+      const currentItem = data.find( currentItem => currentItem.id === prevItem.id) 
+      if (currentItem) return { _id: prevItem._id, ...currentItem }
+      return { _id: prevItem._id, notAvailable: true }
+    })
+
+    let updatedDocs;
+    if (stockToUpdate.length){
+      console.log('!Updating docuemnts -> ', stockToUpdate.length);
+      // This avoids: MongoInvalidArgumentError: Invalid BulkOperation, Batch cannot be empty
+      updatedDocs = await Promise.all(stockToUpdate.map( async (stock) => {
+       const { _id, ...rest } = stock
+       const updatedDoc = await albumCollection.updateOne(
+        { _id: new ObjectId(_id) }, 
+        { $set: { 
+          faraday: rest,
+          updatedDate: new Date().toISOString()
+        }})
+       return updatedDoc
+     }))
+    }
+
+    return { 
+      insertedDocs,
+      updatedDocs
+    }
   }
+
   
   async getFaradayData(){
     console.log('!getFaradayData -> ');
