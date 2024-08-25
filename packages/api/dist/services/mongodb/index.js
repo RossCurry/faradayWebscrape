@@ -30,6 +30,7 @@ class MongoDb {
         if (!albumCollection)
             throw new Error('No album collecion found');
         const faradayData = await this.getFaradayData();
+        let notMatchedCount = 0;
         const insertedDocs = await Promise.all(await faradayData.map(async (album) => {
             const matched = data?.find(searchResult => searchResult.faraday.id === album.id);
             if (matched) {
@@ -38,8 +39,10 @@ class MongoDb {
                         updatedDate: new Date(Date.now()).toISOString()
                     } });
             }
+            else
+                notMatchedCount++;
         }));
-        console.log('!insertedDocs -> ', insertedDocs.length);
+        console.log('!insertedDocs -> ', { notMatchedCount, insertedDocs: insertedDocs.length });
         return insertedDocs;
     }
     async setSpotifyTrackData(data) {
@@ -67,6 +70,25 @@ class MongoDb {
         const albumCollection = this.db?.collection('albums');
         const albums = await albumCollection?.find(match || {}, {}).toArray();
         const spotifyData = albums?.map(album => ({ _id: album._id.toString(), ...album.spotify }));
+        return spotifyData ? spotifyData : [];
+    }
+    async getSpotifyAlbumData(match) {
+        console.log('!getSpotifyAlbumData -> ');
+        const albumProjection = {
+            'spotify.artists': 1,
+            'spotify.href': 1,
+            'spotify.id': 1,
+            'spotify.image': 1,
+            'spotify.name': 1,
+            'faraday.category': 1,
+            'faraday.isSoldOut': 1,
+        };
+        const albumCollection = this.db?.collection('albums');
+        const albums = await albumCollection?.find(match || {}, { projection: albumProjection }).toArray();
+        console.log('!albums.length -> ', albums?.length);
+        const spotifyData = albums?.map(album => ({ _id: album._id.toString(), ...album.spotify, ...album.faraday }));
+        const albumsNoName = albums?.filter(album => !album?.spotify?.name).length;
+        console.log('!albumsNoName -> ', albumsNoName);
         return spotifyData ? spotifyData : [];
     }
     // TODO divide this into more methods
@@ -129,6 +151,13 @@ class MongoDb {
         console.log('!getFaradayData -> ');
         const albumCollection = this.db?.collection('albums');
         const albums = await albumCollection?.find({}, {}).toArray();
+        const faradayData = albums?.map(album => ({ _id: album._id.toString(), ...album.faraday }));
+        return faradayData ? faradayData : [];
+    }
+    async getFaradayDataMissingSpotifyInfo() {
+        console.log('!getFaradayDataMissingSpotifyInfo -> ');
+        const albumCollection = this.db?.collection('albums');
+        const albums = await albumCollection?.find({ spotify: { $exists: false } }, {}).toArray();
         const faradayData = albums?.map(album => ({ _id: album._id.toString(), ...album.faraday }));
         return faradayData ? faradayData : [];
     }

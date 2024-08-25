@@ -6,6 +6,7 @@ import getSpotifyTracksInfo from "./getSpotifyTracksInfo.js";
 import PopulatePlaylist from "./PopulatePlaylist.js";
 import setSpotifyAlbumInfo from "./setSpotifyAlbumInfo.js";
 import setSpotifyTrackInfo from "./setSpotifyTrackInfo.js";
+import searchSingleTitle from "./searchSingleTitle.js"
 
 export default {
   CreatePlaylist,
@@ -16,4 +17,5 @@ export default {
   PopulatePlaylist,
   setSpotifyAlbumInfo,
   setSpotifyTrackInfo,
+  searchSingleTitle
 }

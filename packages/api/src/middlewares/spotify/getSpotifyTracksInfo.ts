@@ -19,11 +19,19 @@ export default async function getSpotifyTracksInfo(ctx: AppContext, next: Applic
     const authString = `Bearer ${ctx.state.accessToken}`
     console.log('!album -> ', album);
     if (album.id){
-      const spotifyTracks: SpotifyAlbumTracksResponse = await searchTracksSingleAlbum(album.id, authString);
-      return {
-        album,
-        tracks: spotifyTracks,
+      const spotifyTracks = await searchTracksSingleAlbum(album.id, authString);
+      if (!spotifyTracks) return undefined
+      if ('error' in spotifyTracks){
+        console.log('!spotifyTracks error -> ', spotifyTracks);
+        return undefined
       }
+      const trackData = {
+        album,
+        tracks: spotifyTracks as SpotifyAlbumTracksResponse,
+      }
+      // TODO add to DB as we get the data one by one, otherwise the rate limit kills the request
+      await ctx.services.mongo.setSpotifyTrackData([{ album: trackData.album, tracks: trackData.tracks}])
+      return trackData
     }
   }))
   console.log('!trackInfo -> ', trackInfo.filter(info => !!info));
@@ -33,7 +41,7 @@ export default async function getSpotifyTracksInfo(ctx: AppContext, next: Applic
   next()
 }
 
-async function searchTracksSingleAlbum(albumId: string, authString: string): Promise<SpotifyAlbumTracksResponse> {
+async function searchTracksSingleAlbum(albumId: string, authString: string): Promise<SpotifyAlbumTracksResponse | { error?: Record<string, unknown>}> {
   console.log('!albumId, typeof albumId -> ', albumId, typeof albumId);
   const getTracksURL = `https://api.spotify.com/v1/albums/${albumId}/tracks`
   const url = new URL(getTracksURL)
@@ -46,11 +54,15 @@ async function searchTracksSingleAlbum(albumId: string, authString: string): Pro
       },
     })
     if (!res) throw new Error("No response")
+    const searchResults = await res.json() as unknown as SpotifyAlbumTracksResponse
     if (res.ok) {
-      const searchResults = await res.json() as unknown as SpotifyAlbumTracksResponse
       return searchResults
     }
-    throw new Error(`Error parsing response from URL: ${getTracksURL} res: ${JSON.stringify(res)}`)
+    if ('error' in searchResults){
+      return { error: searchResults }
+    }
+
+    throw new Error(`Error parsing response from URL: ${getTracksURL} res: ${JSON.stringify(res)} parsedRes: ${JSON.stringify(searchResults)}`)
   } catch (error) {
     throw error
   }

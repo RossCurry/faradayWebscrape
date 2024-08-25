@@ -7,7 +7,7 @@ export default async function CreatePlaylist(ctx, next) {
     const url = `https://api.spotify.com/v1/users/${user_id}/playlists`;
     const authString = `Bearer ${accessToken}`;
     const body = {
-        "name": `Faraday Agosto 2024`,
+        "name": `Faraday Agosto 2024 - new`,
         "description": "FaradayTest",
         "public": true
     };

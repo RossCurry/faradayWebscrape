@@ -90,50 +90,65 @@ export default async function getAlbumInfoSpotify(ctx, next) {
     // TODO only search differences
     // const skip = true;
     // if (skip) next()
-    // TODO for testing only search a few albums, 
-    // TODO write this data to disk to avoid repeated calls to spoti API
-    const albumInfo = await Promise.all(faradayAlbums.map(async (album) => {
-        const authString = `Bearer ${ctx.state.accessToken}`;
-        const faraday = album;
-        const spotify = await searchSingleAlbum(album, authString);
-        return {
-            faraday,
-            spotify
+    try {
+        // TODO for testing only search a few albums, 
+        const albumInfo = await Promise.all(faradayAlbums.map(async (album) => {
+            const authString = `Bearer ${ctx.state.accessToken}`;
+            const faraday = album;
+            const spotify = await searchSingleAlbum(album, authString);
+            return {
+                faraday,
+                spotify
+            };
+        }));
+        // const batches = getBatches(faradayAlbums)
+        // const albumInfo = await Promise.all(batches.map(async (albums: FaradayItemData[]) => {
+        //   const authString = `Bearer ${ctx.state.accessToken}`
+        //   return  searchMultiplAlbums(albums, authString)
+        // }))
+        ctx.state.data = {
+            searchResults: albumInfo.filter(info => !!info.spotify)
         };
-    }));
-    // const batches = getBatches(faradayAlbums)
-    // const albumInfo = await Promise.all(batches.map(async (albums: FaradayItemData[]) => {
-    //   const authString = `Bearer ${ctx.state.accessToken}`
-    //   return  searchMultiplAlbums(albums, authString)
-    // }))
-    ctx.state.data = {
-        searchResults: albumInfo.filter(info => !!info.spotify)
-    };
-    next();
+        ctx.status = 200;
+        next();
+    }
+    catch (error) {
+        ctx.body = { message: 'Something went wrong searching spotify searchSingleAlbum', error };
+        ctx.status = 500;
+    }
 }
-async function searchSingleAlbum(album, authString) {
-    if (album.isSoldOut || !album.title)
-        return;
-    const searchTerm = parseAlbumTitle(album.title);
-    const limit = 1;
-    const url = new URL(spotiBaseUrl + 'search');
-    url.searchParams.append('q', searchTerm);
-    url.searchParams.append('type', 'album');
-    url.searchParams.append('type', 'artist');
-    url.searchParams.append('limit', `${limit}`);
-    const res = await fetch(url.toString(), {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `${authString}`,
-        },
-    });
-    if (!res)
-        throw new Error("No response");
-    if (res.ok) {
+export async function searchSingleAlbum(album, authString) {
+    try {
+        // if (album.isSoldOut || !album.title) return
+        const searchTerm = parseAlbumTitle(album.title);
+        const limit = 1;
+        const url = new URL(spotiBaseUrl + 'search');
+        url.searchParams.append('q', searchTerm);
+        url.searchParams.append('type', 'album');
+        url.searchParams.append('type', 'artist');
+        url.searchParams.append('limit', `${limit}`);
+        console.log('!searchSingleAlbum URL -> ', url.toString());
+        const res = await fetch(url.toString(), {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `${authString}`,
+            },
+        });
+        if (!res)
+            throw new Error("No response");
         const searchResults = await res.json();
-        const projection = projectSingleSearchResults(searchResults, searchTerm);
-        return projection;
+        console.log('! searchSingleAlbum searchResults -> ', searchResults);
+        if (res.ok) {
+            const projection = projectSingleSearchResults(searchResults, searchTerm);
+            return projection;
+        }
+        if ('error' in res) {
+            throw new Error(JSON.stringify(res));
+        }
+    }
+    catch (error) {
+        throw error;
     }
 }
 // TODO don't use, not working as expected

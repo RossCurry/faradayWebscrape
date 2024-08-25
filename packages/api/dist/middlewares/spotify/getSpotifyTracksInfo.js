@@ -14,10 +14,19 @@ export default async function getSpotifyTracksInfo(ctx, next) {
         console.log('!album -> ', album);
         if (album.id) {
             const spotifyTracks = await searchTracksSingleAlbum(album.id, authString);
-            return {
+            if (!spotifyTracks)
+                return undefined;
+            if ('error' in spotifyTracks) {
+                console.log('!spotifyTracks error -> ', spotifyTracks);
+                return undefined;
+            }
+            const trackData = {
                 album,
                 tracks: spotifyTracks,
             };
+            // TODO add to DB as we get the data one by one, otherwise the rate limit kills the request
+            await ctx.services.mongo.setSpotifyTrackData([{ album: trackData.album, tracks: trackData.tracks }]);
+            return trackData;
         }
     }));
     console.log('!trackInfo -> ', trackInfo.filter(info => !!info));
@@ -40,11 +49,14 @@ async function searchTracksSingleAlbum(albumId, authString) {
         });
         if (!res)
             throw new Error("No response");
+        const searchResults = await res.json();
         if (res.ok) {
-            const searchResults = await res.json();
             return searchResults;
         }
-        throw new Error(`Error parsing response from URL: ${getTracksURL} res: ${JSON.stringify(res)}`);
+        if ('error' in searchResults) {
+            return { error: searchResults };
+        }
+        throw new Error(`Error parsing response from URL: ${getTracksURL} res: ${JSON.stringify(res)} parsedRes: ${JSON.stringify(searchResults)}`);
     }
     catch (error) {
         throw error;

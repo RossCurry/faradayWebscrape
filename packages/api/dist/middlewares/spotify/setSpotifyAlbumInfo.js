@@ -5,6 +5,7 @@ export default async function setSpotifyAlbumInfo(ctx, next) {
     console.log('!setSpotifyAlbumInfo -> ');
     try {
         const { searchResults } = ctx.state.data;
+        console.log('!Spotify searchResults -> ', searchResults?.length);
         if (!searchResults)
             throw new Error('No faraday data found');
         const { mongo } = ctx.services;

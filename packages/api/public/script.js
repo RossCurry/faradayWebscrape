@@ -1,4 +1,4 @@
-const localConnectEndpoint = 'http://localhost:3000/api/connect'
+const localConnectEndpoint = 'http://localhost:3000/api/spotify/connect'
 const spotiAlbums = []
 
 async function connectToSpoti(){

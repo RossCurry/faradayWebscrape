@@ -37,6 +37,9 @@ async function getItemData(): Promise<ScrapedData> {
   
   let soldOutCount = 0;
   const itemsData = await Promise.all(gridItems.map(async (item) => {
+    /**
+     * Browser context. methods are executed in the browser, not node
+     */
     const context = await item.evaluate(el => {
       let parseError;
       function parseContext(context:string){
@@ -56,6 +59,7 @@ async function getItemData(): Promise<ScrapedData> {
       const context = el.getAttribute('data-current-context')
       const isSoldOut = el.classList.contains('sold-out')
       const fullCategoryString = Array.from(el.classList.values()).find(val => val.includes('category'))
+      // remove 'category-' from the string
       const category = fullCategoryString?.slice(fullCategoryString.indexOf('-') + 1)
       const linkInfo: { 
         id: string,
@@ -67,7 +71,7 @@ async function getItemData(): Promise<ScrapedData> {
         title: linkInfo?.title, 
         productType: linkInfo?.productType, 
         isSoldOut: isSoldOut, 
-        category: category, 
+        category: category || fullCategoryString, 
         sourceContext: context,
         parseError: parseError
       }
@@ -79,7 +83,7 @@ async function getItemData(): Promise<ScrapedData> {
     return context;
   }));
   const cleanItems = itemsData.filter(item => !item.parseError)
-  const errorItems = itemsData.filter(item => item.parseError)
+  const errorItems = itemsData.filter(item => !!item.parseError)
   console.log('!itemsData -> ', itemsData.length, soldOutCount);
   console.log('!errorItems -> ', { length: errorItems.length, errorItems});
   await browser.close();

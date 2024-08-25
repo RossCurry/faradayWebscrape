@@ -10,5 +10,6 @@ export default async function scrapeFaradayStock(ctx: AppContext, next: Applicat
   ctx.state.data = {
     faraday: data
   }
+  ctx.status = 200
   next()
 }

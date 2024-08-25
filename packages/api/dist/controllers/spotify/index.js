@@ -2,7 +2,7 @@ import Router from 'koa-router';
 import mw from '#middlewares/index.js';
 import { redirectToSpotifyAuthorize } from './auth/PKCE/1.codeChallenge.js';
 const spotifyRouter = new Router();
-spotifyRouter.post("/api/spotify/albums", mw.faraday.getFaradayStock, mw.auth.getClientCredentialToken, mw.spotify.getAlbumInfoSpotify, // expensive on requests 200+
+spotifyRouter.post("/api/spotify/albums", mw.faraday.getFaradayStockMissingSpotifyInfo, mw.auth.getClientCredentialToken, mw.spotify.getAlbumInfoSpotify, // expensive on requests 200+
 mw.spotify.setSpotifyAlbumInfo);
 spotifyRouter.post("/api/spotify/tracks", mw.spotify.getSpotifyAlbumInfo, // from db
 mw.auth.getClientCredentialToken, mw.spotify.getSpotifyTracksInfo, // from spoti api
@@ -38,4 +38,8 @@ spotifyRouter.get("/api/spotify/redirect", mw.auth.getPCKECredentialsToken, // g
 mw.spotify.getCurrentUser, // get user info
 mw.spotify.CreatePlaylist, // user info needed for playlist creation
 mw.spotify.PopulatePlaylist);
+/**
+ * Testing spotfiy search single album
+ */
+spotifyRouter.get("/api/spotify/search", mw.auth.getClientCredentialToken, mw.spotify.searchSingleTitle);
 export default spotifyRouter;

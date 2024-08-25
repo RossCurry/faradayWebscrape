@@ -6,7 +6,6 @@
  */
 import fetch from "node-fetch";
 import dotenv from 'dotenv';
-import Token from "../../../services/token/Token.js";
 dotenv.config();
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
@@ -16,7 +15,6 @@ const authHeaders = {
 };
 const body = "grant_type=client_credentials";
 const tokenEndpoint = "https://accounts.spotify.com/api/token";
-export const userToken = new Token();
 export async function getToken() {
     try {
         const response = await fetch(tokenEndpoint, {
@@ -40,12 +38,12 @@ export async function getToken() {
  */
 export default async function getClientCredentialToken(ctx, next) {
     try {
-        if (userToken.has()) {
-            ctx.state.accessToken = userToken.get();
+        if (ctx.services.token.has()) {
+            ctx.state.accessToken = ctx.services.token.get();
         }
         else {
             const token = await getToken();
-            userToken.set(token);
+            ctx.services.token.set(token);
             ctx.state.accessToken = token.access_token;
         }
         console.log('!getTokenMw ctx.state.accessToken -> ', ctx.state.accessToken);

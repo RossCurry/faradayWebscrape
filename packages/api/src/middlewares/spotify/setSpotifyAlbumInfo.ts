@@ -9,6 +9,7 @@ export default async function setSpotifyAlbumInfo(ctx: AppContext, next: Applica
   console.log('!setSpotifyAlbumInfo -> ');
   try {
     const { searchResults } = ctx.state.data
+    console.log('!Spotify searchResults -> ', searchResults?.length);
     if (!searchResults) throw new Error('No faraday data found')
     const { mongo } = ctx.services
     if (!mongo) throw new Error('No mongo object found')

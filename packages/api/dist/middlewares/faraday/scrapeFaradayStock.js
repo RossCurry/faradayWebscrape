@@ -7,5 +7,6 @@ export default async function scrapeFaradayStock(ctx, next) {
     ctx.state.data = {
         faraday: data
     };
+    ctx.status = 200;
     next();
 }
