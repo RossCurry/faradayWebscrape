@@ -17,8 +17,8 @@ faradayRouter.get("/api/faraday/albums",
     const { mongo } = ctx.services
     if (!mongo) throw new Error('No mongo object found')
     try {
-      const spotifyData = await mongo.getSpotifyData()
-      console.log('!spotifyData -> ', spotifyData.length);
+      const spotifyData = await mongo.getSpotifyAlbumData()
+      console.log('!spotifyData length-> ', spotifyData.length);
       ctx.status = 200
       ctx.body = spotifyData;
     } catch (error) {
@@ -28,5 +28,17 @@ faradayRouter.get("/api/faraday/albums",
     }
   }
 )
+
+// faradayRouter.post("/api/faraday/update",
+//   // (ctx, _next) => {
+//   //   ctx.body = 'all good'
+//   //   ctx.status = 200
+//   // }
+//   mw.faraday.scrapeFaradayStock,
+//   mw.faraday.setFaradayStock,
+//   // TODO add spotify scrape
+
+// )
+
 
 export default faradayRouter

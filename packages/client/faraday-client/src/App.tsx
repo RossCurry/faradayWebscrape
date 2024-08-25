@@ -40,7 +40,6 @@ function App() {
             {albumCollection.map( (album, i) => {
               console.log('album', album)
               return <AlbumItem key={i + '-' + album.id} album={album}/>
-              // return <li key={i + '-' + album.id} className={styles.albumItem}>{album.name}</li>
             })}
           </ul>}
         </section>
