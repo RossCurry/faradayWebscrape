@@ -16,6 +16,19 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  position: relative;
+}
+
+
+.albumItemSoldOut {
+  content: '';
+  position: absolute;
+  width: 40px;
+  aspect-ratio: 1/1;
+  border-radius: 50%;
+  background-color: red;
+  top: 0;
+  right: 0;
 }
 
 /* .albumItem img {

@@ -14,7 +14,7 @@ export default async function PopulatePlaylist(ctx, _next) {
     console.log('!batches.length -> ', batches.length);
     // TODO this needs to be sequential
     const snapshots = [];
-    for (const [i, uriBatch] of batches.entries()) {
+    for await (const [i, uriBatch] of batches.entries()) {
         const body = {
             // example data
             // uris: ["spotify:track:4iV5W9uYEdYUVa79Axb7Rh","spotify:track:1301WleyT98MSxVHPZCA6M", "spotify:episode:512ojhOuo1ktJprKbVcKyQ"],
@@ -27,8 +27,8 @@ export default async function PopulatePlaylist(ctx, _next) {
         console.log('!playlistEndpoint -> ', playlistEndpoint);
         console.log('!authString -> ', authString);
         console.log('!uriBatch -> ', uriBatch.length);
-        console.log('!position -> ', body.position);
-        console.log('!JSON.stringif(body) -> ', JSON.stringify(body));
+        // console.log('!position -> ', body.position);
+        // console.log('!JSON.stringif(body) -> ', JSON.stringify(body));
         try {
             const response = await fetch(playlistEndpoint, {
                 method: 'POST',

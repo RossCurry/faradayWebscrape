@@ -187,7 +187,8 @@ class MongoDb {
             const insertedDocs = await usersCollection.insertOne({
                 ...userInfo,
                 endpoint: tokenInfo,
-                createdDate: new Date(Date.now()).toISOString()
+                createdDate: new Date(Date.now()).toISOString(),
+                playlists: []
             });
             console.log('!insertedDocs -> ', insertedDocs);
             return insertedDocs;
@@ -198,6 +199,13 @@ class MongoDb {
             } });
         console.log('!insertedDocs -> ', insertedDocs);
         return insertedDocs;
+    }
+    async setUsersPlaylist(userUri, spotifyPlaylist) {
+        console.log('setUsersPlaylist', userUri, spotifyPlaylist);
+        const usersCollection = this.db?.collection('users');
+        if (!usersCollection)
+            throw new Error('No users collecion found');
+        const updated = await usersCollection.findOneAndUpdate({ uri: userUri }, { $push: { playlists: spotifyPlaylist } });
     }
 }
 export default MongoDb;

@@ -4,7 +4,7 @@ dotenv.config();
 
 import { FaradayItemData } from '#controllers/faraday/getItemData.js'
 import { AppState } from '../../router.js'
-import { SpotifySearchResult, SpotifyUserProfile } from '#controllers/spotify/spotify.types.js'
+import { SpotifyPlaylist, SpotifySearchResult, SpotifyUserProfile } from '#controllers/spotify/spotify.types.js'
 import { AuthToken } from '#services/token/Token.js';
 import spotify from '#middlewares/spotify/index.js';
 
@@ -208,7 +208,8 @@ class MongoDb {
       const insertedDocs = await usersCollection.insertOne({ 
         ...userInfo, 
         endpoint: tokenInfo,
-        createdDate: new Date(Date.now()).toISOString()
+        createdDate: new Date(Date.now()).toISOString(),
+        playlists: []
       })
       console.log('!insertedDocs -> ', insertedDocs);
       return insertedDocs
@@ -223,6 +224,13 @@ class MongoDb {
     )
     console.log('!insertedDocs -> ', insertedDocs);
     return insertedDocs
+  }
+
+  async setUsersPlaylist(userUri: SpotifyUserProfile["uri"], spotifyPlaylist: SpotifyPlaylist){
+    console.log('setUsersPlaylist', userUri, spotifyPlaylist)
+    const usersCollection: mongoDB.Collection<SpotifyUserProfile> | undefined = this.db?.collection('users')
+    if (!usersCollection) throw new Error('No users collecion found')
+    const updated = await usersCollection.findOneAndUpdate({ uri: userUri }, { $push: { playlists: spotifyPlaylist }})
   }
 }
 
