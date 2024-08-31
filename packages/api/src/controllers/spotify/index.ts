@@ -50,8 +50,8 @@ spotifyRouter.get('/api/spotify/connect', async (ctx: AppContext, _next: Applica
  * We only get the code from the url redirect from Spotify
  * We need the codeChallenge from the previous connect step
  */
-spotifyRouter.get("/api/spotify/redirect", 
-  mw.auth.getPCKECredentialsToken, // get code
+spotifyRouter.post("/api/spotify/redirect", 
+  mw.auth.getPCKECredentialsToken, // use code from url
   mw.spotify.getCurrentUser, // get user info
   mw.spotify.CreatePlaylist, // user info needed for playlist creation
   mw.spotify.PopulatePlaylist,

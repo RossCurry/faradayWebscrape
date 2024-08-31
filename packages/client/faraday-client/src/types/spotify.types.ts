@@ -640,4 +640,6 @@ export type SearchResponse =
     searchTerm:  string,
     type: 'album',
     uri:  string,
+    isSoldOut: boolean,
+    category?: string
   }

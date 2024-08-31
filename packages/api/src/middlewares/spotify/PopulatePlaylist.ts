@@ -21,7 +21,7 @@ export default async function PopulatePlaylist(ctx: AppContext, _next: Applicati
   console.log('!batches.length -> ', batches.length);
   // TODO this needs to be sequential
   const snapshots: SnapshotResponse[] = []
-    for (const [i, uriBatch] of batches.entries()){
+    for await (const [i, uriBatch] of batches.entries()){
 
       const body = {
         // example data
@@ -35,8 +35,8 @@ export default async function PopulatePlaylist(ctx: AppContext, _next: Applicati
       console.log('!playlistEndpoint -> ', playlistEndpoint);
       console.log('!authString -> ', authString);
       console.log('!uriBatch -> ', uriBatch.length);
-      console.log('!position -> ', body.position);
-      console.log('!JSON.stringif(body) -> ', JSON.stringify(body));
+      // console.log('!position -> ', body.position);
+      // console.log('!JSON.stringif(body) -> ', JSON.stringify(body));
       try {
         const response = await fetch(playlistEndpoint, {
           method: 'POST',
