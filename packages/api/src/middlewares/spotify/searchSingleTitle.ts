@@ -17,7 +17,7 @@ export default async function searchSingleTitle(ctx: AppContext, next: Applicati
     const searchItem = { title: searchString }
     const spotify = await searchSingleAlbum(searchItem, authString);
     console.log('!searchSingleAlbum result -> ', spotify);
-    ctx.body = { result: spotify }
+    ctx.body = { result: spotify || 'none found' }
     ctx.status = 200
     next()
   } catch (error) {
