@@ -1,5 +1,6 @@
 node_modules
 .envrc-private
 ../../node_modules
-dist
+dist/*
 .env
+packages/api/dist
