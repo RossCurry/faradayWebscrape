@@ -3,15 +3,15 @@
  * @param ctx
  */
 export default async function getSpotifyTracksInfo(ctx, next) {
+    // TODO might have to run this consecutively
     console.log('!getSpotifyTracksInfo -> ');
     const { spotifyAlbumInfo } = ctx.state.data;
     const spotifyAlbums = spotifyAlbumInfo || [];
     console.log('!getSpotifyTracksInfo spotifyAlbums.length -> ', spotifyAlbums.length);
     // TODO filter those that have track info
     // const withNoTrackData = spotifyAlbums.filter()
-    const trackInfo = await Promise.all(spotifyAlbums.map(async (album) => {
+    const allTracksInfo = await Promise.all(spotifyAlbums.map(async (album) => {
         const authString = `Bearer ${ctx.state.accessToken}`;
-        console.log('!album -> ', album);
         if (album.id) {
             const spotifyTracks = await searchTracksSingleAlbum(album.id, authString);
             if (!spotifyTracks)
@@ -29,9 +29,9 @@ export default async function getSpotifyTracksInfo(ctx, next) {
             return trackData;
         }
     }));
-    console.log('!trackInfo -> ', trackInfo.filter(info => !!info));
+    console.log('!trackInfo -> ', allTracksInfo.filter(info => !!info));
     ctx.state.data = {
-        spotifyTrackInfo: trackInfo.filter(info => !!info)
+        spotifyTrackInfo: allTracksInfo.filter(info => !!info)
     };
     next();
 }

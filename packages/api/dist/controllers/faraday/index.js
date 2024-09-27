@@ -1,7 +1,7 @@
 import Router from "koa-router";
 import mw from '#middlewares/index.js';
 const faradayRouter = new Router();
-faradayRouter.post("/api/faraday/albums", mw.faraday.scrapeFaradayStock, mw.faraday.setFaradayStock);
+faradayRouter.post("/api/faraday/albums/update", mw.faraday.scrapeFaradayStock, mw.faraday.setFaradayStock);
 /**
  * Return a json list of faraday albums available on spotify
  */

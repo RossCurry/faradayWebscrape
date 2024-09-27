@@ -9,15 +9,15 @@ import { AppContext } from "../../router.js";
  * @param ctx 
  */
 export default async function getSpotifyTracksInfo(ctx: AppContext, next: Application.Next) {
+  // TODO might have to run this consecutively
   console.log('!getSpotifyTracksInfo -> ');
   const { spotifyAlbumInfo } = ctx.state.data
   const spotifyAlbums = spotifyAlbumInfo || []
   console.log('!getSpotifyTracksInfo spotifyAlbums.length -> ', spotifyAlbums.length);
   // TODO filter those that have track info
   // const withNoTrackData = spotifyAlbums.filter()
-  const trackInfo = await Promise.all(spotifyAlbums.map(async (album: SpotifySearchResult) => {
+  const allTracksInfo = await Promise.all(spotifyAlbums.map(async (album: SpotifySearchResult) => {
     const authString = `Bearer ${ctx.state.accessToken}`
-    console.log('!album -> ', album);
     if (album.id){
       const spotifyTracks = await searchTracksSingleAlbum(album.id, authString);
       if (!spotifyTracks) return undefined
@@ -34,9 +34,9 @@ export default async function getSpotifyTracksInfo(ctx: AppContext, next: Applic
       return trackData
     }
   }))
-  console.log('!trackInfo -> ', trackInfo.filter(info => !!info));
+  console.log('!trackInfo -> ', allTracksInfo.filter(info => !!info));
   ctx.state.data = {
-    spotifyTrackInfo: trackInfo.filter(info => !!info)
+    spotifyTrackInfo: allTracksInfo.filter(info => !!info)
   }
   next()
 }
