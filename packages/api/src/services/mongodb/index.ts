@@ -40,6 +40,7 @@ class MongoDb {
     if (!albumCollection) throw new Error('No album collecion found')
       
     const faradayData = await this.getFaradayData()
+    let matchedCount = 0
     let notMatchedCount = 0
     const insertedDocs = await Promise.all(await faradayData.map(async (album) => {
       const matched = data?.find(searchResult => searchResult.faraday.id === album.id)
@@ -51,10 +52,14 @@ class MongoDb {
             updatedDate: new Date(Date.now()).toISOString()
           }}
         )
+        matchedCount++
       } else notMatchedCount++
     }))
-    console.log('!insertedDocs -> ', {notMatchedCount, insertedDocs: insertedDocs.length});
-    return insertedDocs
+    console.log('!insertedDocs -> ', {notMatchedCount, matchedCount});
+    return {
+      notMatchedCount, 
+      matchedCount
+    }
   }
   async setSpotifyTrackData(data: AppState["data"]["spotifyTrackInfo"]){
     console.log('!setSpotifyData -> ', data?.length);
@@ -180,8 +185,13 @@ class MongoDb {
   async getFaradayDataMissingSpotifyInfo(){
     console.log('!getFaradayDataMissingSpotifyInfo -> ');
     const albumCollection = this.db?.collection('albums')
-    const albums = await albumCollection?.find({ spotify: { $exists: false }}, {}).toArray()
+    const match = {
+      spotify: { $exists: false },
+      $or: [ { notFound: { $exists: false } }, { notFound: false } ]
+    }
+    const albums = await albumCollection?.find(match, {}).toArray()
     const faradayData: Array<FaradayItemData & { _id: string }> | undefined =  albums?.map(album => ( { _id: album._id.toString(),  ...album.faraday }))
+    console.log('!getFaradayDataMissingSpotifyInfo length -> ', faradayData?.length);
     return faradayData ? faradayData : []
   }
   
@@ -231,6 +241,13 @@ class MongoDb {
     const usersCollection: mongoDB.Collection<SpotifyUserProfile> | undefined = this.db?.collection('users')
     if (!usersCollection) throw new Error('No users collecion found')
     const updated = await usersCollection.findOneAndUpdate({ uri: userUri }, { $push: { playlists: spotifyPlaylist }})
+  }
+
+  async setFaradayIdAsNotFound(faradayId: FaradayItemData["id"]){
+    console.log('!setFaradayIdAsNotFound -> ', faradayId);
+    const albumCollection = this.db?.collection('albums')
+    const updated = await albumCollection?.updateOne({ "faraday.id": faradayId }, { $set: { notFound: true }})
+    return updated
   }
 }
 

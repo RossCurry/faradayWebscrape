@@ -16,7 +16,7 @@
   "scripts": {
     "build": "pwd && rm -rf ./dist && ./node_modules/typescript/bin/tsc -p . && cp -r ./public ./dist/public",
     "watch": "./node_modules/typescript/bin/tsc -p . -w",
-    "dev": "node ./dist/index.js"
+    "dev": "nodemon ./dist/index.js"
   },
   "dependencies": {
     "@types/fs-extra": "^11.0.4",

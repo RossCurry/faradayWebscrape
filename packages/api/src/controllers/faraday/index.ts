@@ -4,7 +4,7 @@ import Application from 'koa';
 import type { AppContext, AppState } from "../../router.js";
 const faradayRouter = new Router<AppState, AppContext>()
 
-faradayRouter.post("/api/faraday/albums",
+faradayRouter.post("/api/faraday/albums/update",
   mw.faraday.scrapeFaradayStock,
   mw.faraday.setFaradayStock,
 )

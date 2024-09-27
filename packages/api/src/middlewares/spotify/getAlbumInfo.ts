@@ -13,7 +13,12 @@ const exampleAlbumId = "4aawyAB9vmqN3uQ7FjRGTy"
  * @param title Expect format 'artist - album' 
  */
 function parseAlbumTitle(title: string) {
-  const [artist, album] = title.split('-')
+  console.log('!parseAlbumTitle -> ', title);
+  // const [artist, album] = title.split('-')
+  const words = decodeURIComponent(title).split(' ')
+  const divisionIndex = words.indexOf('-')
+  const artist = words.slice(0,divisionIndex).join(' ')
+  const album = words.slice(divisionIndex + 1).join(' ')
   try {
     return {
       artist: artist?.trim(),
@@ -93,27 +98,46 @@ function projectSingleSearchResults(results: SearchResponse, searchTerm: string)
 }
 
 /**
- * Find best match from search results & return a reduced json structure
- * @param results 
- * @param searchTerm 
+ * Tries to match results found from Spotify with original search artist and album
  */
-function matchAndProjectSingleSearchResults(itemsArr: SearchResponse["albums"]["items"], searchTerm: string) {
-  // console.log('!searchTerm PRE-> ', searchTerm.split(' '));
-  const [artist, album] = searchTerm.split(' ')
-  console.log('![artist, album] -> ', [artist, album]);
-  const [, artistName] = artist.split('artist:')
-  const [, albumName] = album.split('album:')
-  const decodedArtistName = decodeURI(artistName).trim().toLowerCase()
-  const decodedAlbumName = decodeURI(albumName).trim().toLowerCase()
-  // const { albums } = results;
-  const possibleResults: Array<SearchResponse["albums"]["items"][number]> = []
-  const filteredResults = itemsArr.filter(searchResult => {
+function matchResults(itemsArr: SearchResponse["albums"]["items"], albumAndArtist: ParsedTitle): SearchResponse["albums"]["items"] {
+  console.log('!matchResults -> ', itemsArr.length);
+
+  const { album, artist } = albumAndArtist
+  const decodedArtistName = artist.trim().toLowerCase()
+  const decodedAlbumName = album.trim().toLowerCase()
+  console.log('!decodedArtistName -> ', decodedArtistName);
+  console.log('!decodedAlbumName -> ', decodedAlbumName);
+
+  const matchedArtistOrAlbum = itemsArr.filter(searchResult => {
+    // console.log('!searchResult -> ', searchResult.name);
     const isAlbum = searchResult.name.toLowerCase() === decodedAlbumName
-    const hasArtist = searchResult.artists.some(artist => artist.name.toLowerCase() === decodedArtistName)
+    const hasArtist = searchResult.artists.some(artist => {
+      return artist.name.toLowerCase() === decodedArtistName
+    })
     return isAlbum || hasArtist
   })
-  console.log('!matchAndProjectSingleSearchResults filteredResults -> ', filteredResults);
 
+  console.log('!matchResults filteredResults len -> ', matchedArtistOrAlbum.length);
+  // If we get too many results for album or artist match, filter again matching both
+  if (matchedArtistOrAlbum.length > 1){
+    return matchedArtistOrAlbum.filter(searchResult => {
+      const isAlbum = searchResult.name.toLowerCase() === decodedAlbumName
+      const hasArtist = searchResult.artists.some(artist => artist.name.toLowerCase() === decodedArtistName)
+      return isAlbum && hasArtist
+    }) as SearchResponse["albums"]["items"]
+  }
+
+  return matchedArtistOrAlbum as SearchResponse["albums"]["items"]
+}
+
+// TODO figure out what to do with so many match results, at the moment I just take the first one
+/**
+ * Gets final projection from matched results
+ */
+function getProjection(filteredResults:  SearchResponse["albums"]["items"], searchTerm: string){
+  console.log('!getProjection(filteredResults len-> ', filteredResults.length );
+  if (!filteredResults.length) return
   const [item] = filteredResults
   if (!item) return
   const {
@@ -133,7 +157,7 @@ function matchAndProjectSingleSearchResults(itemsArr: SearchResponse["albums"]["
     id,
     image,
     name,
-    searchTerm,
+    searchTerm: searchTerm,
     type,
     uri,
   }
@@ -157,16 +181,27 @@ function matchAndProjectSingleSearchResults(itemsArr: SearchResponse["albums"]["
 //   return batches
 // }
 
+type ParsedTitle = {
+  album: string,
+  artist: string,
+}
 
-
+/**
+ * Searches for a single album on Spotify, using pagination to search through all the results.
+ * @param album 
+ * @param authString 
+ * @returns 
+ */
 export async function searchSingleAlbum(album: { title: string }, authString: string): Promise<SpotifySearchResult | undefined> {
+  console.log('!searchSingleAlbum -> ', album.title);
   try {
     // if (album.isSoldOut || !album.title) return
     const parsedTitle = parseAlbumTitle(album.title)
-    const searchTerm = `artist:${parsedTitle.artist}` + ' ' + (parsedTitle.album ? `album:${parsedTitle.album}` : '')
+    console.log('!parsedTitle -> ', parsedTitle);
+    const searchTerm = encodeURIComponent(`artist:${parsedTitle.artist}` + ' ' + (parsedTitle.album ? `album:${parsedTitle.album}` : ''))
     const limit = 50
     const url = new URL(spotiBaseUrl + 'search')
-    url.searchParams.append('q', encodeURIComponent(searchTerm))
+    url.searchParams.append('q', searchTerm)
     url.searchParams.append('type', 'album')
     // url.searchParams.append('type', 'artist')
     // url.searchParams.append('market', 'es')
@@ -185,34 +220,47 @@ export async function searchSingleAlbum(album: { title: string }, authString: st
       throw new Error(JSON.stringify(res))
     }
     const searchResults = await res.json() as unknown as SearchResponse
-    console.log('!searchResults.albums.next -> ', searchResults.albums.next);
-    let projection: ReturnType<typeof matchAndProjectSingleSearchResults> | undefined;
+    console.log('!res.ok -> ', res.ok);
+    if (!res.ok) throw new Error(`Faraday.title: ${album.title} | Error status: ${(res.status)}: ${(res.statusText)}`)
+    console.log('!searchResults has pagination -> ', !!searchResults.albums.next);
+    let projection: ReturnType<typeof getProjection> | undefined;
     if (res.ok) {
-      projection = matchAndProjectSingleSearchResults(searchResults.albums.items, searchTerm)
+      const matchedResults = matchResults(searchResults.albums.items, parsedTitle)
+      projection = getProjection(matchedResults, searchTerm)
+      // projection = matchAndProjectSingleSearchResults(searchResults.albums.items, parsedTitle)
       if (projection) return projection
       else {
         let paginationURL: string | null = searchResults.albums.next
         // const allSearchResults: SearchResponse["albums"]["items"] = [...searchResults.albums.items]
         while (typeof paginationURL === 'string'){
           console.log('!while loop -> ', paginationURL);
-          const paginationRes = await fetch(paginationURL, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `${authString}`,
-            },
-          })
-          const paginationResults = await paginationRes.json() as unknown as SearchResponse
-          console.log('!paginationResults -> ', paginationResults.albums.items.length);
-          console.log('!paginationResults -> ', typeof paginationResults.albums.next);
-          paginationURL = paginationResults.albums.next
-          projection = matchAndProjectSingleSearchResults(paginationResults.albums.items, searchTerm)
-          if (projection) return projection
+          try {
+            const paginationRes = await fetch(paginationURL, {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `${authString}`,
+              },
+            })
+            if ('error' in paginationRes){
+              throw new Error(JSON.stringify(paginationRes))
+            }
+            const paginationResults = await paginationRes.json() as unknown as SearchResponse
+            console.log('!paginationResults -> ', paginationResults.albums.items.length);
+            console.log('!paginationResults -> ', typeof paginationResults.albums.next);
+            paginationURL = paginationResults.albums.next
+            // projection = matchAndProjectSingleSearchResults(paginationResults.albums.items, searchTerm)
+            const matchedResults = matchResults(paginationResults.albums.items, parsedTitle)
+            projection = getProjection(matchedResults, searchTerm)
+            if (projection) return projection
+          } catch (error) {
+            throw error
+          }
         }
       }
     }
-    return
   } catch (error) {
+    console.error(error)
     throw error
   }
 }
@@ -246,6 +294,10 @@ async function searchMultiplAlbums(albums: FaradayItemData[], authString: string
   }
 }
 
+type AlbumsInfo = {
+  faraday: FaradayItemData;
+  spotify: SpotifySearchResult | undefined;
+}
 /**
  * Loop over Faraday list and search for a match for each listing.
  * @param ctx 
@@ -257,28 +309,40 @@ export default async function getAlbumInfoSpotify(ctx: AppContext, next: Applica
 // TODO check data from faraday against saved data
 // TODO skip search if everything is the same
 // TODO only search differences
-// const skip = true;
-// if (skip) next()
 
+  // Dont use map, as the concurrent approach burns the rate limit.
   try {
-    // TODO for testing only search a few albums, 
-    const albumInfo = await Promise.all(faradayAlbums.map(async (album: FaradayItemData) => {
+    // TODO for testing only search a few albums,
+    const albumsInfo: AlbumsInfo[] = []
+    for (const album of faradayAlbums){
+      console.log('!Current album search -> ', album.title);
       const authString = `Bearer ${ctx.state.accessToken}`
       const faraday = album;
       const spotify = await searchSingleAlbum(album, authString);
-      return {
+      console.log('!searchSingleAlbum result-> ', spotify);
+      // If we dont find any result, set it as not found in the DB so as not to search for it again
+      if (!spotify) {
+        await ctx.services.mongo.setFaradayIdAsNotFound(faraday.id);
+        continue
+      };
+      // set directly in the DB - hitting all sort of rate limits 😂
+      await ctx.services.mongo.setSpotifyData([{
         faraday,
         spotify
-      }
-    }))
-    // const batches = getBatches(faradayAlbums)
-    // const albumInfo = await Promise.all(batches.map(async (albums: FaradayItemData[]) => {
-    //   const authString = `Bearer ${ctx.state.accessToken}`
-    //   return  searchMultiplAlbums(albums, authString)
-    // }))
-    ctx.state.data = {
-      searchResults: albumInfo.filter(info => !!info.spotify)
+      }])
+      albumsInfo.push({
+        faraday,
+        spotify
+      })
     }
+
+    // TODO 
+    // const filteredSearchResults = albumsInfo.filter(info => !!info.spotify)
+    console.log('!getAlbumInfoSpotify albumsInfo len -> ', albumsInfo.length);
+    ctx.state.data = {
+      searchResults: albumsInfo
+    }
+    ctx.body = { updated: albumsInfo.length, albumsInfo }
     ctx.status = 200
     next()
   } catch (error) {
