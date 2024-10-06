@@ -1,0 +1,62 @@
+/* 
+table {}
+thead {}
+tbody {}
+tr {}
+td {} 
+*/
+
+/* reset margins and padding */
+.table_albums {
+  border-spacing: 0;
+  margin: 0 auto;
+}
+.table_albums tr,
+.table_albums td
+{
+  margin: 0;
+  padding: 0;
+}
+
+.table_albums .albumRows {
+  background: inherit;
+  text-align: left;
+}
+.table_albums .albumRows:hover {
+  background: rgba(201, 201, 200, 0.411);
+}
+
+.rowDataImg {
+  width: 4rem;
+  aspect-ratio: 1/1;
+  /* for bg-image */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+}
+
+.rowDataAvailability,
+.rowDataAlbum,
+.rowDataArtist {
+  padding-left: 1em;
+}
+
+.rowDataAlbum p {
+  margin: 0;
+  padding: 0;
+}
+.rowDataAlbum p:first-child {
+  font-weight: 800;
+}
+
+.rowDataAvailability {
+  content: '';
+  width: 100%;
+  aspect-ratio: 1/1;
+  border-radius: 50%;
+  /* background-color: rgb(38, 208, 81); */
+}
+.unavailable {
+  background-color: rgb(208, 44, 38);
+}

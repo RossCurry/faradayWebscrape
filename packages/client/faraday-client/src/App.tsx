@@ -5,6 +5,7 @@ import { SpotifySearchResult } from './types/spotify.types'
 import styles from './app.module.css'
 import { connectToSpoti, createPlaylist } from './services'
 import { useParams, useSearchParams } from 'react-router-dom'
+import Table from './components/Table/Table'
 
 const baseUrlDev = 'http://localhost:3000'
 
@@ -49,6 +50,9 @@ function App() {
         {code && <button onClick={() => createPlaylist(code, playlistTitle || placeholder)}>Create Playlist</button>}
         <section id='albumCollection'>
           <h2>grid section</h2>
+          {albumCollection &&
+            <Table data={albumCollection} />
+          }
           {albumCollection && <ul className={styles.albumCollectionList}>
             {albumCollection.map( (album, i) => {
               return <AlbumItem key={i + '-' + album.id} album={album}/>
