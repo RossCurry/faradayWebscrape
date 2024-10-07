@@ -100,7 +100,7 @@ export default function Table({ data }: { data: SpotifySearchResult[] }) {
       // TODO I need price data
       {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        accessorFn: _row => 'e15',
+        accessorFn: row => row.price,
         id: 'price',
         cell: info => info.getValue(),
         header: () => <span>Price</span>,

@@ -102,6 +102,7 @@ class MongoDb {
       'spotify.name': 1,
       'faraday.category': 1,
       'faraday.isSoldOut': 1,
+      'faraday.price': 1,
     }
     const albumCollection = this.db?.collection('albums')
     const albums = await albumCollection?.find(match || {}, { projection: albumProjection }).toArray()
@@ -140,7 +141,10 @@ class MongoDb {
     const needsUpdate = prevStock.filter( prevItem => {
       const currentItem = data.find( currentItem => currentItem.id === prevItem.id) 
       if (currentItem){
-        const needsUpdate = currentItem.isSoldOut !== prevItem.isSoldOut || currentItem.category !== prevItem.category 
+        const newAvailablility = currentItem.isSoldOut !== prevItem.isSoldOut
+        const newCategory = currentItem.category !== prevItem.category 
+        const newPrice = currentItem.price !== prevItem.price
+        const needsUpdate = newAvailablility || newCategory || newPrice
         return needsUpdate
       }
       return false

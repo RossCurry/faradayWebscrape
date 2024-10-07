@@ -15,11 +15,35 @@ async function getItemData() {
     await page.waitForSelector('.grid-item');
     // Log page title
     console.log(await page.title());
-    // Get items
-    const gridItems = await page.$$('.grid-item');
-    console.log('!gridItems.length -> ', gridItems.length);
+    // Get items page 1
+    const gridItemsPage1 = await page.$$('.grid-item');
+    console.log('!gridItemsPage1.length -> ', gridItemsPage1.length);
+    const itemsPage1 = await getItems(gridItemsPage1);
+    // Click the anchor tag to navigate to the next page
+    await Promise.all([
+        page.click('a.list-pagination-next '), // Replace with the appropriate selector
+        page.waitForNavigation({ waitUntil: 'networkidle0' }), // Wait for navigation to complete
+        page.waitForSelector('.grid-item')
+    ]);
+    // Get items page 2
+    const gridItemsPage2 = await page.$$('.grid-item');
+    console.log('!gridItemsPage2.length -> ', gridItemsPage2.length);
+    const itemsPage2 = await getItems(gridItemsPage2);
+    const itemsData = itemsPage1.concat(itemsPage2);
+    const cleanItems = itemsData.filter(item => !item.parseError);
+    const errorItems = itemsData.filter(item => !!item.parseError);
+    console.log('!itemsData -> ', itemsData.length);
+    console.log('!errorItems -> ', { length: errorItems.length, errorItems });
+    await browser.close();
+    return {
+        cleanItems,
+        errorItems
+    };
+}
+export default getItemData;
+async function getItems(gridItems) {
     let soldOutCount = 0;
-    const itemsData = await Promise.all(gridItems.map(async (item) => {
+    return await Promise.all(gridItems.map(async (item) => {
         /**
          * Browser context. methods are executed in the browser, not node
          */
@@ -38,7 +62,8 @@ async function getItemData() {
                     parseError = { message: 'not json', context };
                 }
             }
-            // TODO get category from classList
+            const [priceEl] = el.getElementsByClassName('product-price');
+            const price = priceEl?.textContent?.replaceAll('\n', '').replace('€', '').trim();
             const context = el.getAttribute('data-current-context');
             const isSoldOut = el.classList.contains('sold-out');
             const fullCategoryString = Array.from(el.classList.values()).find(val => val.includes('category'));
@@ -52,6 +77,7 @@ async function getItemData() {
                 isSoldOut: isSoldOut,
                 category: category || fullCategoryString,
                 sourceContext: context,
+                price: price || '',
                 parseError: parseError
             };
             // return context && typeof context === 'string' ? JSON.parse(context) : null
@@ -60,14 +86,4 @@ async function getItemData() {
             ++soldOutCount;
         return context;
     }));
-    const cleanItems = itemsData.filter(item => !item.parseError);
-    const errorItems = itemsData.filter(item => !!item.parseError);
-    console.log('!itemsData -> ', itemsData.length, soldOutCount);
-    console.log('!errorItems -> ', { length: errorItems.length, errorItems });
-    await browser.close();
-    return {
-        cleanItems,
-        errorItems
-    };
 }
-export default getItemData;

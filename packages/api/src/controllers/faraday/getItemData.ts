@@ -9,7 +9,9 @@ export type FaradayItemData = {
   isSoldOut: boolean,
   category: string | undefined,
   notAvailable?: boolean,
-  sourceContext: string | null
+  sourceContext: string | null,
+  price: string,
+  parseError?: { message: 'not json', context: string },
 }
 export type ScrapedData = { cleanItems: FaradayItemData[], errorItems?: FaradayItemData[]}
 async function getItemData(): Promise<ScrapedData> {
@@ -31,12 +33,43 @@ async function getItemData(): Promise<ScrapedData> {
   console.log(await page.title());
   
   
-  // Get items
-  const gridItems = await page.$$('.grid-item');
-  console.log('!gridItems.length -> ', gridItems.length);
-  
-  let soldOutCount = 0;
-  const itemsData = await Promise.all(gridItems.map(async (item) => {
+  // Get items page 1
+  const gridItemsPage1 = await page.$$('.grid-item');
+  console.log('!gridItemsPage1.length -> ', gridItemsPage1.length);
+
+  const itemsPage1 = await getItems(gridItemsPage1)
+
+  // Click the anchor tag to navigate to the next page
+  await Promise.all([
+    page.click('a.list-pagination-next '), // Replace with the appropriate selector
+    page.waitForNavigation({ waitUntil: 'networkidle0' }), // Wait for navigation to complete
+    page.waitForSelector('.grid-item')
+  ]);
+
+  // Get items page 2
+  const gridItemsPage2 = await page.$$('.grid-item');
+  console.log('!gridItemsPage2.length -> ', gridItemsPage2.length);
+  const itemsPage2 = await getItems(gridItemsPage2)
+
+  const itemsData = itemsPage1.concat(itemsPage2)
+
+  const cleanItems = itemsData.filter(item => !item.parseError)
+  const errorItems = itemsData.filter(item => !!item.parseError)
+  console.log('!itemsData -> ', itemsData.length);
+  console.log('!errorItems -> ', { length: errorItems.length, errorItems});
+  await browser.close();
+  return {
+    cleanItems,
+    errorItems
+  }
+}
+
+export default getItemData
+
+
+async function getItems(gridItems: puppeteer.ElementHandle<Element>[]) {
+  let soldOutCount = 0
+  return await Promise.all(gridItems.map(async (item) => {
     /**
      * Browser context. methods are executed in the browser, not node
      */
@@ -53,8 +86,8 @@ async function getItemData(): Promise<ScrapedData> {
           parseError = { message: 'not json', context }
         }
       }
-
-      // TODO get category from classList
+      const [priceEl] = el.getElementsByClassName('product-price')
+      const price = priceEl?.textContent?.replaceAll('\n', '').replace('€', '').trim()
 
       const context = el.getAttribute('data-current-context')
       const isSoldOut = el.classList.contains('sold-out')
@@ -66,6 +99,7 @@ async function getItemData(): Promise<ScrapedData> {
         title: string,
         productType: string
       } = context && parseContext(context)
+
       return { 
         id: linkInfo?.id, 
         title: linkInfo?.title, 
@@ -73,6 +107,7 @@ async function getItemData(): Promise<ScrapedData> {
         isSoldOut: isSoldOut, 
         category: category || fullCategoryString, 
         sourceContext: context,
+        price: price || '',
         parseError: parseError
       }
       // return context && typeof context === 'string' ? JSON.parse(context) : null
@@ -82,15 +117,4 @@ async function getItemData(): Promise<ScrapedData> {
     if (context.isSoldOut) ++soldOutCount
     return context;
   }));
-  const cleanItems = itemsData.filter(item => !item.parseError)
-  const errorItems = itemsData.filter(item => !!item.parseError)
-  console.log('!itemsData -> ', itemsData.length, soldOutCount);
-  console.log('!errorItems -> ', { length: errorItems.length, errorItems});
-  await browser.close();
-  return {
-    cleanItems,
-    errorItems
-  }
 }
-
-export default getItemData
