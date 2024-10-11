@@ -4,7 +4,7 @@ dotenv.config();
 
 import { FaradayItemData } from '#controllers/faraday/getItemData.js'
 import { AppState } from '../../router.js'
-import { SpotifyPlaylist, SpotifySearchResult, SpotifyUserProfile } from '#controllers/spotify/spotify.types.js'
+import { SpotifyAlbum, SpotifyPlaylist, SpotifySearchResult, SpotifyUserProfile } from '#controllers/spotify/spotify.types.js'
 import { AuthToken } from '#services/token/Token.js';
 import spotify from '#middlewares/spotify/index.js';
 
@@ -34,6 +34,11 @@ class MongoDb {
     return db
   }
 
+  /**
+   * Sets Spotify data from faraday webscrape data 
+   * @param data 
+   * @returns 
+   */
   async setSpotifyData(data: AppState["data"]["searchResults"]){
     console.log('!setSpotifyData -> ', data?.length);
     const albumCollection = this.db?.collection('albums')
@@ -82,6 +87,29 @@ class MongoDb {
     }))
     console.log('!insertedDocs -> ', insertedDocs.length);
     return insertedDocs
+  }
+
+  // Updates a single album with new properties we might want
+  async updateSpotifyAlbumFields(albumProperties: Partial<SpotifyAlbum> & { id: SpotifyAlbum["id"]}){
+    console.log('!updateSpotifyAlbumFields -> ', albumProperties);
+    const albumCollection = this.db?.collection('albums')
+    if (!albumCollection) throw new Error('No album collecion found')
+    const { id, ...fieldsToUpdate } = albumProperties;
+    const match = { 'spotify.id': id }
+    const update = Object.entries(fieldsToUpdate).reduce(
+      (update: Record<string, unknown>, [key, value]) => {
+      update[`spotify.${key}`] = value
+      return update
+    }, {})
+    const insertedDoc = await albumCollection.updateOne(
+        match,
+        { $set: { 
+          ...update,
+          updatedDate: new Date(Date.now()).toISOString()
+        }}
+      )
+    console.log('!insertedDoc -> ', insertedDoc);
+    return insertedDoc
   }
 
   async getSpotifyData(match?: Record<string, any>){

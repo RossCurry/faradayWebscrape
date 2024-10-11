@@ -7,11 +7,13 @@ import PopulatePlaylist from "./PopulatePlaylist.js";
 import setSpotifyAlbumInfo from "./setSpotifyAlbumInfo.js";
 import setSpotifyTrackInfo from "./setSpotifyTrackInfo.js";
 import searchSingleTitle from "./searchSingleTitle.js"
+import getAlbumsAndSetProperties from "./getAlbumsAndSetProperties.js"
 
 export default {
   CreatePlaylist,
   getAlbumInfoSpotify,
   getCurrentUser,
+  getAlbumsAndSetProperties,
   getSpotifyAlbumInfo,
   getSpotifyTracksInfo,
   PopulatePlaylist,
