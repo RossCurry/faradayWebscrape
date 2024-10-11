@@ -287,6 +287,18 @@ class MongoDb {
     const updated = await albumCollection?.updateOne({ "faraday.id": faradayId }, { $set: { notFound: true }})
     return updated
   }
+  
+  async getSpotifyTracksListByAlbumId(albumId: SpotifyAlbum["id"]){
+    console.log('!getSpotifyTracksListByAlbumId -> ', albumId);
+    const albumCollection = this.db?.collection('albums')
+    const match = { 'spotify.id': albumId }
+    const projection = { 'spotify.trackInfo.items': 1, _id: 0}
+    const albumInfo = await albumCollection?.findOne(match, { projection })
+    const tracks = albumInfo?.spotify.trackInfo
+    return tracks
+  }
+
+
 }
 
 export default MongoDb;

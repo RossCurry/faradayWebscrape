@@ -49,4 +49,24 @@ mw.spotify.PopulatePlaylist);
  * Testing spotfiy search single album
  */
 spotifyRouter.get("/api/spotify/search", mw.auth.getClientCredentialToken, mw.spotify.searchSingleTitle);
+/**
+ * Return a json list of spotify track info available by album id
+ */
+spotifyRouter.get("/api/spotify/album/:id/tracks", async (ctx, _next) => {
+    const { mongo } = ctx.services;
+    if (!mongo)
+        throw new Error('No mongo object found');
+    try {
+        const { id } = ctx.params;
+        console.log('!path -> ', id);
+        const spotifyData = await mongo.getSpotifyTracksListByAlbumId(id);
+        ctx.status = 200;
+        ctx.body = { tracklist: spotifyData };
+    }
+    catch (error) {
+        console.error('Error in middleware:', error);
+        ctx.status = 500;
+        ctx.body = 'Internal Server Error';
+    }
+});
 export default spotifyRouter;
