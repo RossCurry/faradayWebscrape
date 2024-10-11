@@ -7,7 +7,52 @@ const spotiBaseUrl = "https://api.spotify.com/v1/"
 const spotiUrl = "https://api.spotify.com/v1/albums/"
 const exampleAlbumId = "4aawyAB9vmqN3uQ7FjRGTy"
 
+function convertToEnglishAlphabet(str: string) {
+  // Normalize the string to decompose special characters
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); 
+}
 
+function parseNoHyphenFound(words: string[]){
+  console.log('!parseNoHyphenFound -> ');
+  // Try and find a word with hyphen
+  let hyphenIndex;
+  let artist;
+  let album;
+  const hasHyphen = words.filter((word, index) => {
+    const hasHyphen = word.includes('-')
+    if (hasHyphen) hyphenIndex = index
+    return hasHyphen
+  })
+  console.log('!hasHyphen -> ', hasHyphen);
+  if (hasHyphen.length === 1 && hyphenIndex){
+    artist = words.slice(0,hyphenIndex).join(' ')
+    album = words.slice(hyphenIndex).join(' ').replace('-', '')
+    console.log('!hasHyphen album -> ', album, artist);
+    return {
+      artist: artist?.trim(),
+      album: album?.trim()
+    }
+  }
+}
+
+function parseWordsNotSeparated(words: string[]){
+  console.log('!parseWordsNotSeparated -> ');
+  const split = words.map( word => {
+    // First, handle the case where there are no spaces but a camelCase or PascalCase structure
+    const camelCaseSplit = word.replace(/([a-z])([A-Z])/g, '$1 $2');
+    // Then, split the string by spaces
+    const res = camelCaseSplit.split(' ');
+    return res;
+  }).flat()
+  // No hyphen so Just guess, first word is artist
+  const halfWay = Math.floor(split.length/2)
+  let artist = split.slice(0,halfWay).join(' ');
+  let album = split.slice(halfWay).join(' ')
+  return {
+    artist: artist?.trim(),
+    album: album?.trim()
+  }
+}
 /**
  * Return album title
  * @param title Expect format 'artist - album' 
@@ -15,15 +60,30 @@ const exampleAlbumId = "4aawyAB9vmqN3uQ7FjRGTy"
 function parseAlbumTitle(title: string) {
   console.log('!parseAlbumTitle -> ', title);
   // const [artist, album] = title.split('-')
-  const words = decodeURIComponent(title).split(' ')
+  // decode, split and normalise letters
+  const words = decodeURIComponent(title)
+    .split(' ')
+    .map(word => convertToEnglishAlphabet(word))
   const divisionIndex = words.indexOf('-')
-  const artist = words.slice(0,divisionIndex).join(' ')
-  const album = words.slice(divisionIndex + 1).join(' ')
+  console.log('!divisionIndex -> ', divisionIndex);
+  let artist;
+  let album
+  let parsed;
   try {
-    return {
-      artist: artist?.trim(),
-      album: album?.trim()
+    if (divisionIndex > -1){
+      // Happy path
+      artist = words.slice(0,divisionIndex).join(' ')
+      album = words.slice(divisionIndex + 1).join(' ')
+      return {
+        artist: artist?.trim(),
+        album: album?.trim()
+      }
     }
+    parsed = parseNoHyphenFound(words)
+    if (!parsed) {
+      parsed = parseWordsNotSeparated(words)
+    }
+    if (parsed) return parsed
   } catch (error) {
     throw new Error(`Error parsing faraday album info, artist: ${artist} album: ${album}`)
   }
@@ -110,22 +170,41 @@ function matchResults(itemsArr: SearchResponse["albums"]["items"], albumAndArtis
   console.log('!decodedAlbumName -> ', decodedAlbumName);
 
   const matchedArtistOrAlbum = itemsArr.filter(searchResult => {
-    // console.log('!searchResult -> ', searchResult.name);
+    console.log('!matched single result album name -> ', searchResult.name);
+    console.log('!matched single result artists name -> ', searchResult.artists.map(a => a.name));
     const isAlbum = searchResult.name.toLowerCase() === decodedAlbumName
     const hasArtist = searchResult.artists.some(artist => {
-      return artist.name.toLowerCase() === decodedArtistName
+      return convertToEnglishAlphabet(artist.name).toLowerCase() === decodedArtistName
     })
     return isAlbum || hasArtist
   })
 
+  console.log('!matchedArtistOrAlbum -> ', matchedArtistOrAlbum);
   console.log('!matchResults filteredResults len -> ', matchedArtistOrAlbum.length);
-  // If we get too many results for album or artist match, filter again matching both
+  // If we get too many results for album or artist match, 
+  // filter again by matching artists names and giving a score
   if (matchedArtistOrAlbum.length > 1){
-    return matchedArtistOrAlbum.filter(searchResult => {
+    const scores = matchedArtistOrAlbum.map((searchResult, i) => {
       const isAlbum = searchResult.name.toLowerCase() === decodedAlbumName
-      const hasArtist = searchResult.artists.some(artist => artist.name.toLowerCase() === decodedArtistName)
-      return isAlbum && hasArtist
-    }) as SearchResponse["albums"]["items"]
+      const artistSingleNames = decodedArtistName.split(' ')
+      let score = 0
+      searchResult.artists.forEach((artist) => {
+        // try and get a score from individual matches
+        const splitNames = convertToEnglishAlphabet(artist.name).toLowerCase().split(' ')
+        // see if any match
+        splitNames.forEach(name => {
+          if (artistSingleNames.includes(name)) score++
+        })
+      })
+      const matchScore = [i , score]
+      return matchScore
+    })
+    // sort by scores
+    scores.sort((a, b) => b[1] - a[1])
+    const [bestMatch] = scores
+    const bestMatchIndex = bestMatch[0]
+    // Return best score result. expects an array
+    return [matchedArtistOrAlbum[bestMatchIndex]]
   }
 
   return matchedArtistOrAlbum as SearchResponse["albums"]["items"]
@@ -148,7 +227,11 @@ function getProjection(filteredResults:  SearchResponse["albums"]["items"], sear
     uri,
     artists,
     images,
-    genres
+    genres,
+    album_type,
+    total_tracks,
+    release_date,
+    popularity
   } = item;
 
   const [image] = images
@@ -161,7 +244,11 @@ function getProjection(filteredResults:  SearchResponse["albums"]["items"], sear
     searchTerm: searchTerm,
     type,
     uri,
-    genres
+    genres,
+    albumType: album_type,
+    totalTracks: total_tracks,
+    releaseDate: release_date,
+    popularity
   }
   return projection
 }
@@ -197,7 +284,6 @@ type ParsedTitle = {
 export async function searchSingleAlbum(album: { title: string }, authString: string): Promise<SpotifySearchResult | undefined> {
   console.log('!searchSingleAlbum -> ', album.title);
   try {
-    // if (album.isSoldOut || !album.title) return
     const parsedTitle = parseAlbumTitle(album.title)
     console.log('!parsedTitle -> ', parsedTitle);
     const searchTerm = encodeURIComponent(`artist:${parsedTitle.artist}` + ' ' + (parsedTitle.album ? `album:${parsedTitle.album}` : ''))
@@ -205,61 +291,43 @@ export async function searchSingleAlbum(album: { title: string }, authString: st
     const url = new URL(spotiBaseUrl + 'search')
     url.searchParams.append('q', searchTerm)
     url.searchParams.append('type', 'album')
-    // url.searchParams.append('type', 'artist')
-    // url.searchParams.append('market', 'es')
+    url.searchParams.append('type', 'artist')
     url.searchParams.append('limit', `${limit}`)
+    
     console.log('!searchTerm -> ', searchTerm);
     console.log('!searchSingleAlbum URL -> ', url.toString());
-    const res = await fetch(url.toString(), {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `${authString}`,
-      },
-    })
-    if (!res) throw new Error("No response")
-    if ('error' in res){
-      throw new Error(JSON.stringify(res))
-    }
-    const searchResults = await res.json() as unknown as SearchResponse
-    console.log('!res.ok -> ', res.ok);
-    if (!res.ok) throw new Error(`Faraday.title: ${album.title} | Error status: ${(res.status)}: ${(res.statusText)}`)
-    console.log('!searchResults has pagination -> ', !!searchResults.albums.next);
-    let projection: ReturnType<typeof getProjection> | undefined;
-    if (res.ok) {
-      const matchedResults = matchResults(searchResults.albums.items, parsedTitle)
-      projection = getProjection(matchedResults, searchTerm)
-      // projection = matchAndProjectSingleSearchResults(searchResults.albums.items, parsedTitle)
-      if (projection) return projection
-      else {
-        let paginationURL: string | null = searchResults.albums.next
-        // const allSearchResults: SearchResponse["albums"]["items"] = [...searchResults.albums.items]
-        while (typeof paginationURL === 'string'){
-          console.log('!while loop -> ', paginationURL);
-          try {
-            const paginationRes = await fetch(paginationURL, {
-              method: 'GET',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `${authString}`,
-              },
-            })
-            if ('error' in paginationRes){
-              throw new Error(JSON.stringify(paginationRes))
-            }
-            const paginationResults = await paginationRes.json() as unknown as SearchResponse
-            console.log('!paginationResults -> ', paginationResults.albums.items.length);
-            console.log('!paginationResults -> ', typeof paginationResults.albums.next);
-            paginationURL = paginationResults.albums.next
-            // projection = matchAndProjectSingleSearchResults(paginationResults.albums.items, searchTerm)
-            const matchedResults = matchResults(paginationResults.albums.items, parsedTitle)
-            projection = getProjection(matchedResults, searchTerm)
-            if (projection) return projection
-          } catch (error) {
-            throw error
-          }
-        }
+
+    // Pagination
+    const errors = []
+    let albumURL: string = url.toString()
+    while (albumURL) {
+      const res = await fetch(albumURL, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `${authString}`,
+        },
+      })
+
+      // Spotify Network Errors
+      if (!res) throw new Error("No response")
+        
+      if ('error' in res){
+        // TODO add handling for specific error cases
+        throw new Error(JSON.stringify(res))
       }
+
+      if (!res.ok) {
+        throw new Error(`Faraday.title: ${album.title} | Error status: ${(res.status)}: ${(res.statusText)}`)
+      }
+
+      // Parse results
+      const searchResults = await res.json() as unknown as SearchResponse
+
+      const matchedResults = matchResults(searchResults.albums.items, parsedTitle)
+      const projection = getProjection(matchedResults, searchTerm)
+      if (projection) return projection
+      albumURL = searchResults.albums.next // might also be undefined
     }
   } catch (error) {
     console.error(error)

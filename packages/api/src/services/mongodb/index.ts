@@ -131,6 +131,10 @@ class MongoDb {
       'faraday.category': 1,
       'faraday.isSoldOut': 1,
       'faraday.price': 1,
+      'spotify.albumType': 1,
+      'spotify.totalTracks': 1,
+      'spotify.releaseDate': 1,
+      'spotify.popularity': 1,
     }
     const albumCollection = this.db?.collection('albums')
     const albums = await albumCollection?.find(match || {}, { projection: albumProjection }).toArray()
@@ -217,6 +221,7 @@ class MongoDb {
   async getFaradayDataMissingSpotifyInfo(){
     console.log('!getFaradayDataMissingSpotifyInfo -> ');
     const albumCollection = this.db?.collection('albums')
+    // const match = { notFound: true }
     const match = {
       spotify: { $exists: false },
       $or: [ { notFound: { $exists: false } }, { notFound: false } ]
