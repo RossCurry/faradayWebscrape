@@ -3,7 +3,7 @@
  * Artista, album title, disponible, genero, precio
  */
 
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { SpotifySearchResult } from '../../types/spotify.types'
 import {
   ColumnDef,
@@ -22,10 +22,13 @@ import {
   price,
   releaseDate,
 } from './sections/columns/columns'
+import { getTrackList as getTracklist } from './sections/columns/services'
 
 export default function Table({ data }: { data: SpotifySearchResult[] }) {
-  console.log('!example data', data[0])
   const [tracklistVisible, setTrackListVisible] = useState<{ albumId: string | null }>({ albumId: null })
+  const tableAlbumsRef = useRef<HTMLTableElement>(null)
+  const [tracklistNumTracks, setTracklistNumTracks] = useState<number>(0)
+  const [tracklist, setTracklist] = useState<Record<string, any>[] | null>(null)
   const [sorting, setSorting] = useState<SortingState>([])
   const columns = React.useMemo(
     () => [
@@ -57,12 +60,34 @@ export default function Table({ data }: { data: SpotifySearchResult[] }) {
     // isMultiSortEvent: (e) => true, //Make all clicks multi-sort - default requires `shift` key
     // maxMultiSortColCount: 3, // only allow 3 columns to be sorted at once - default is Infinity
   })
+
+  /**
+   * Css variable useEffect. 
+   * Sets num of tracks which sets height of tracklist
+   * calc(var(--trackListNumTracks) * var(--trackListRowHeight))
+   */
+  useEffect(() => {
+    let refCopy: HTMLTableElement | undefined;
+    if (tableAlbumsRef.current){
+      // Copy for cleanup
+      refCopy = tableAlbumsRef.current
+      // Set a CSS variable when the component mounts
+      tableAlbumsRef.current.style.setProperty('--trackListNumTracks', `${tracklistNumTracks}`);
+
+    }
+    // Cleanup function to reset the variable if needed
+    return () => {
+      refCopy?.style.removeProperty('--trackListNumTracks');
+    };
+  }, [tracklistNumTracks]);
+
   return (
     <div className="p-2">
       <div className="h-2" />
       <table
         id='table_albums'
         className={styles.table_albums}
+        ref={tableAlbumsRef}
       >
         <thead>
           {table.getHeaderGroups().map(headerGroup => (
@@ -108,21 +133,34 @@ export default function Table({ data }: { data: SpotifySearchResult[] }) {
           {table
             .getRowModel()
             // TODO Pagination if you want
-            .rows.slice(0, 10)
-            // .rows
+            // .rows.slice(0, 10)
+            .rows
             .map(row => {
               // Each row is actually going to be 2 rows
               // 1. the tanStack data row (album)
               // 2. the track info for the album
 
               const albumId = row.original.id
-              const handleOnClick = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
+              const handleOnClick = async (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
                 console.log('!click', row.original.id)
+                const doNothing = tracklistVisible.albumId === albumId
                 // Toggle
-                setTrackListVisible({ albumId: tracklistVisible.albumId === albumId ? null : albumId })
+                setTrackListVisible({ albumId: doNothing ? null : albumId })
                 // Scroll to view
                 // TODO give it margin
                 // e.currentTarget.scrollIntoView({ behavior: 'smooth'})
+                // Sets the height for the dropdown
+                setTracklistNumTracks(row.original.totalTracks)
+                if (doNothing){
+                  setTracklist(null)
+                } else {
+                  const tracklist = await getTracklist(albumId)
+                  setTimeout(async () => {
+                    console.log('This runs after the current I/O tasks.');
+                    // console.log('! return trackList', tracklist)
+                    setTracklist(tracklist)
+                  }, 0);
+                }
               }
               return (
                 <>
@@ -141,10 +179,34 @@ export default function Table({ data }: { data: SpotifySearchResult[] }) {
                   </tr>
                   <tr
                     className={`
-                    ${styles.albumTrackList} 
-                    ${tracklistVisible.albumId === albumId ? styles.albumTrackListOpen : ''} 
-                  `}>
-                    <td colSpan={row.getVisibleCells().length} >hello</td>
+                      ${styles.tableRowWidth}
+                    `}
+                  >
+                    <td 
+                      colSpan={row.getVisibleCells().length}
+                    >
+                      <div 
+                        className={`
+                          ${styles.albumTrackList}
+                          ${tracklistVisible.albumId === albumId ? styles.albumTrackListOpen : ''}
+                        `}
+                      >
+                        
+                        {!tracklist && Array.from({ length: row.original.totalTracks}).map(() => {
+                          return (
+                            <div style={{ height: 'var(--trackListRowHeight)'}}>work</div>
+                          )
+                        })}
+                        { tracklist && tracklist.map((track: Record<string, any>[]) => {
+                          console.log('!track', track)
+                          return(
+                            <div style={{ height: 'var(--trackListRowHeight)'}}>
+                              {track.name}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </td>
                   </tr>
                 </>
               )

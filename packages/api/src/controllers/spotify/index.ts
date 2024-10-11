@@ -73,4 +73,26 @@ spotifyRouter.get("/api/spotify/search",
   mw.spotify.searchSingleTitle
 )
 
+/**
+ * Return a json list of spotify track info available by album id
+ */
+spotifyRouter.get("/api/spotify/album/:id/tracks",
+  async (ctx: AppContext & { params: Record<string, unknown> }, _next: Application.Next) => {
+    const { mongo } = ctx.services
+    if (!mongo) throw new Error('No mongo object found')
+    try {
+      const { id } = ctx.params
+      console.log('!path -> ', id);
+      const spotifyData = await mongo.getSpotifyTracksListByAlbumId(id as string)
+      ctx.status = 200
+      ctx.body = { tracklist: spotifyData };
+    } catch (error) {
+      console.error('Error in middleware:', error);
+      ctx.status = 500;
+      ctx.body = 'Internal Server Error';
+    }
+  }
+)
+
+
 export default spotifyRouter;
