@@ -15,100 +15,25 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import styles from './Table.module.css'
+import {
+  image,
+  albumAndArtist,
+  category,
+  price,
+  releaseDate,
+} from './sections/columns/columns'
 
 export default function Table({ data }: { data: SpotifySearchResult[] }) {
-  console.log('!data', data)
+  console.log('!example data', data[0])
   const [sorting, setSorting] = React.useState<SortingState>([])
-  const columns = React.useMemo<ColumnDef<SpotifySearchResult>[]>(
+  const columns = React.useMemo(
     () => [
-      {
-        accessorFn: row => row.image.url,
-        id: 'image',
-        cell: info => {
-          return (
-            <div
-              className={styles.rowDataImg}
-              style={{
-                backgroundImage: `url(${info.getValue()})`
-              }}
-            />
-          )
-        },
-        header: () => <span>Img</span>,
-        sortUndefined: 'last', //force undefined values to the end
-        sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
-      },
-      {
-        accessorFn: row => row,
-        id: 'albumInfo',
-        cell: info => {
-          console.log('!info.getValue()', info.getValue())
-          const { name, artists } = info.getValue() as SpotifySearchResult
-          const artist = artists.join(', ')
-          const album = name
-          return (
-            <div className={styles.rowDataAlbum}>
-              <p>{album}</p>
-              <p>{artist}</p>
-            </div>
-          )
-        },
-        header: () => <span>Album</span>,
-        sortUndefined: 'last', //force undefined values to the end
-        sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
-      },
-      // {
-      //   accessorFn: row => row.name,
-      //   id: 'album',
-      //   cell: info => <span className={styles.rowDataAlbum}>{info.getValue() as string}</span>,
-      //   header: () => <span>Album</span>,
-      //   sortUndefined: 'last', //force undefined values to the end
-      //   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
-      // },
-      // {
-      //   accessorFn: row => row.artists,
-      //   id: 'artists',
-      //   cell: info => <span className={styles.rowDataArtist}>{info.getValue() as string}</span>,
-      //   header: () => <span>Artist</span>,
-      //   sortUndefined: 'last', //force undefined values to the end
-      //   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
-      // },
-      {
-        accessorFn: row => row.isSoldOut,
-        id: 'isSoldOut',
-        cell: info => {
-          const isSoldOut = !!info.getValue()
-          return (
-            <span className={`${styles.rowDataAvailability} ${isSoldOut ? styles.unavailable : ''}`}>
-
-            </span>
-          )
-        },
-        header: () => <span>Available</span>,
-        sortUndefined: 'last', //force undefined values to the end
-        sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
-      },
-      // TODO I need genre data 
-      {
-        accessorFn: row => row.category,
-        id: 'genre',
-        cell: info => info.getValue() || 'not specified',
-        header: () => <span>Genre</span>,
-        sortUndefined: 'last', //force undefined values to the end
-        sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
-      },
-      // TODO I need price data
-      {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        accessorFn: row => row.price,
-        id: 'price',
-        cell: info => info.getValue(),
-        header: () => <span>Price</span>,
-        sortUndefined: 'last', //force undefined values to the end
-        sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
-      },
-    ],
-    []
+      image,
+      albumAndArtist,
+      category,
+      releaseDate,
+      price,
+    ], []
   )
   const table = useReactTable({
     columns,
@@ -167,8 +92,8 @@ export default function Table({ data }: { data: SpotifySearchResult[] }) {
                           header.getContext()
                         )}
                         {{
-                          asc: ' 🔼',
-                          desc: ' 🔽',
+                          asc: ' ↑',
+                          desc: ' ↓',
                         }[header.column.getIsSorted() as string] ?? null}
                       </div>
                     )}

@@ -1,0 +1,45 @@
+.rowDataImg {
+  width: 7rem;
+  aspect-ratio: 1/1;
+  /* for bg-image */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+}
+
+.rowDataAvailability,
+.rowDataAlbum,
+.rowDataArtist {
+  padding-left: 1em;
+}
+
+.rowDataAlbum p {
+  margin: 0;
+  padding: 0;
+}
+.rowDataAlbum p:first-child {
+  font-weight: 800;
+}
+
+.rowDataAvailability {
+  content: '';
+  width: 100%;
+  aspect-ratio: 1/1;
+  border-radius: 50%;
+  /* background-color: rgb(38, 208, 81); */
+}
+.unavailable {
+  background-color: rgb(208, 44, 38);
+}
+
+.albumItemSoldOut {
+  content: '';
+  position: absolute;
+  width: 40px;
+  aspect-ratio: 1/1;
+  border-radius: 50%;
+  background-color: red;
+  top: 0;
+  right: 0;
+}
