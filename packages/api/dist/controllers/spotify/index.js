@@ -2,6 +2,8 @@ import Router from 'koa-router';
 import mw from '#middlewares/index.js';
 import { redirectToSpotifyAuthorize } from './auth/PKCE/1.codeChallenge.js';
 const spotifyRouter = new Router();
+// Temporary Route to update missing genre field for existing
+spotifyRouter.post("/api/spotify/albums/update/properties", mw.faraday.getFaradayStockMissingSpotifyInfo, mw.auth.getClientCredentialToken, mw.spotify.getAlbumsAndSetProperties);
 spotifyRouter.post("/api/spotify/albums/update", mw.faraday.getFaradayStockMissingSpotifyInfo, mw.auth.getClientCredentialToken, mw.spotify.getAlbumInfoSpotify, // expensive on requests 200+
 mw.spotify.setSpotifyAlbumInfo);
 spotifyRouter.post("/api/spotify/tracks/update", mw.spotify.getSpotifyAlbumInfo, // from db

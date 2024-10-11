@@ -24,6 +24,11 @@ class MongoDb {
         console.log(`Successfully connected to database: ${db.databaseName} and collection: ${albumsCollection.collectionName}`);
         return db;
     }
+    /**
+     * Sets Spotify data from faraday webscrape data
+     * @param data
+     * @returns
+     */
     async setSpotifyData(data) {
         console.log('!setSpotifyData -> ', data?.length);
         const albumCollection = this.db?.collection('albums');
@@ -69,6 +74,25 @@ class MongoDb {
         }));
         console.log('!insertedDocs -> ', insertedDocs.length);
         return insertedDocs;
+    }
+    // Updates a single album with new properties we might want
+    async updateSpotifyAlbumFields(albumProperties) {
+        console.log('!updateSpotifyAlbumFields -> ', albumProperties);
+        const albumCollection = this.db?.collection('albums');
+        if (!albumCollection)
+            throw new Error('No album collecion found');
+        const { id, ...fieldsToUpdate } = albumProperties;
+        const match = { 'spotify.id': id };
+        const update = Object.entries(fieldsToUpdate).reduce((update, [key, value]) => {
+            update[`spotify.${key}`] = value;
+            return update;
+        }, {});
+        const insertedDoc = await albumCollection.updateOne(match, { $set: {
+                ...update,
+                updatedDate: new Date(Date.now()).toISOString()
+            } });
+        console.log('!insertedDoc -> ', insertedDoc);
+        return insertedDoc;
     }
     async getSpotifyData(match) {
         console.log('!getSpotifyData -> ');

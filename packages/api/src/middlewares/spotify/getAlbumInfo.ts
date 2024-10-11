@@ -147,7 +147,8 @@ function getProjection(filteredResults:  SearchResponse["albums"]["items"], sear
     type,
     uri,
     artists,
-    images
+    images,
+    genres
   } = item;
 
   const [image] = images
@@ -160,6 +161,7 @@ function getProjection(filteredResults:  SearchResponse["albums"]["items"], sear
     searchTerm: searchTerm,
     type,
     uri,
+    genres
   }
   return projection
 }

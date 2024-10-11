@@ -109,7 +109,7 @@ function getProjection(filteredResults, searchTerm) {
     const [item] = filteredResults;
     if (!item)
         return;
-    const { id, href, name, type, uri, artists, images } = item;
+    const { id, href, name, type, uri, artists, images, genres } = item;
     const [image] = images;
     const projection = {
         artists: artists.map((artist) => artist.name),
@@ -120,6 +120,7 @@ function getProjection(filteredResults, searchTerm) {
         searchTerm: searchTerm,
         type,
         uri,
+        genres
     };
     return projection;
 }

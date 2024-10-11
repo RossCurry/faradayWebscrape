@@ -5,6 +5,14 @@ import router, { AppContext, AppState } from "../../router.js";
 import { redirectToSpotifyAuthorize } from './auth/PKCE/1.codeChallenge.js';
 const spotifyRouter = new Router<AppState, AppContext>()
 
+// Temporary Route to update missing genre field for existing
+spotifyRouter.post("/api/spotify/albums/update/properties",
+  mw.faraday.getFaradayStockMissingSpotifyInfo,
+  mw.auth.getClientCredentialToken,
+  mw.spotify.getAlbumsAndSetProperties, // get and set genre
+  // mw.spotify.setSpotifyAlbumInfo,
+)
+
 spotifyRouter.post("/api/spotify/albums/update",
   mw.faraday.getFaradayStockMissingSpotifyInfo,
   mw.auth.getClientCredentialToken,
