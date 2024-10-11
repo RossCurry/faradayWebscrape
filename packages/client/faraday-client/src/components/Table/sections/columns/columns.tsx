@@ -26,9 +26,8 @@ export const image: AccessorColumnDef<SpotifySearchResult, { url:  SpotifySearch
       </>
     )
   },
-  header: () => <span>{''}</span>,
-  sortUndefined: 'last', //force undefined values to the end
-  sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
+  header: () => null,
+  enableSorting: false
 }
 
 export const albumAndArtist: AccessorColumnDef<SpotifySearchResult, SpotifySearchResult> = {

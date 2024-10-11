@@ -20,9 +20,32 @@ td {}
 }
 
 .table_albums .albumRows {
-  background: inherit;
+  /* background: inherit; */
+  background: forestgreen;
   text-align: left;
 }
 .table_albums .albumRows:hover {
   background: rgba(201, 201, 200, 0.411);
+}
+
+
+/* Album Track list styles */
+/* Container start state */
+.table_albums .albumTrackList {
+  /* This will have height 0 => auto transition */
+  background-color: antiquewhite;
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 500ms;
+}
+
+/* Child start state */
+.table_albums .albumTrackList > td {
+  /* start value of hidden */
+  overflow: hidden; 
+}
+
+/* Container open state */
+.table_albums .albumTrackList.albumTrackListOpen {
+  grid-template-rows: 1fr;
 }
