@@ -641,5 +641,11 @@ export type SearchResponse =
     type: 'album',
     uri:  string,
     isSoldOut: boolean,
-    category?: string
+    category?: string,
+    popularity: number,
+    price: string,
+    releaseDate: string | undefined,
+    albumType: string,
+    totalTracks: number,
+    genres: string[]
   }

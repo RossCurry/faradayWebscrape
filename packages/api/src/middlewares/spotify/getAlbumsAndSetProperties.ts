@@ -3,7 +3,7 @@ import { AppContext } from "#router/";
 import { SpotifyAlbum } from "#controllers/spotify/spotify.types.js";
 // import { AppContext } from "../../router.js";
 
-export default async function getAlbumsAndSetProperties(ctx: AppContext, next: Application.Next) {
+export default async function getAlbumsAndSetProperties(ctx: AppContext, _next: Application.Next) {
   // TODO get properties to set from the params/query/body
   const spotfiyAlbums = await ctx.services.mongo.getSpotifyData()
   let updatedCount = 0

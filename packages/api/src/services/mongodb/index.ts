@@ -135,6 +135,7 @@ class MongoDb {
       'spotify.totalTracks': 1,
       'spotify.releaseDate': 1,
       'spotify.popularity': 1,
+      'spotify.genres': 1,
     }
     const albumCollection = this.db?.collection('albums')
     const albums = await albumCollection?.find(match || {}, { projection: albumProjection }).toArray()

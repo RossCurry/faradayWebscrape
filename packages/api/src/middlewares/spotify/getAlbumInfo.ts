@@ -57,7 +57,7 @@ function parseWordsNotSeparated(words: string[]){
  * Return album title
  * @param title Expect format 'artist - album' 
  */
-function parseAlbumTitle(title: string) {
+function parseAlbumTitle(title: string): ParsedTitle {
   console.log('!parseAlbumTitle -> ', title);
   // const [artist, album] = title.split('-')
   // decode, split and normalise letters
@@ -69,6 +69,7 @@ function parseAlbumTitle(title: string) {
   let artist;
   let album
   let parsed;
+  const error = new Error(`Error parsing faraday album info, artist: ${artist} album: ${album}`)
   try {
     if (divisionIndex > -1){
       // Happy path
@@ -83,9 +84,11 @@ function parseAlbumTitle(title: string) {
     if (!parsed) {
       parsed = parseWordsNotSeparated(words)
     }
-    if (parsed) return parsed
-  } catch (error) {
-    throw new Error(`Error parsing faraday album info, artist: ${artist} album: ${album}`)
+
+    if (!parsed) throw error
+    return parsed
+  } catch (e) {
+    throw error
   }
 }
 

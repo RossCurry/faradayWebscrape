@@ -62,6 +62,7 @@ function parseAlbumTitle(title) {
     let artist;
     let album;
     let parsed;
+    const error = new Error(`Error parsing faraday album info, artist: ${artist} album: ${album}`);
     try {
         if (divisionIndex > -1) {
             // Happy path
@@ -76,11 +77,12 @@ function parseAlbumTitle(title) {
         if (!parsed) {
             parsed = parseWordsNotSeparated(words);
         }
-        if (parsed)
-            return parsed;
+        if (!parsed)
+            throw error;
+        return parsed;
     }
-    catch (error) {
-        throw new Error(`Error parsing faraday album info, artist: ${artist} album: ${album}`);
+    catch (e) {
+        throw error;
     }
 }
 /**
