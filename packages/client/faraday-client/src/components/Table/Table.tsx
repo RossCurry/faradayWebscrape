@@ -3,7 +3,7 @@
  * Artista, album title, disponible, genero, precio
  */
 
-import React from 'react'
+import React, { useState } from 'react'
 import { SpotifySearchResult } from '../../types/spotify.types'
 import {
   ColumnDef,
@@ -25,7 +25,8 @@ import {
 
 export default function Table({ data }: { data: SpotifySearchResult[] }) {
   console.log('!example data', data[0])
-  const [sorting, setSorting] = React.useState<SortingState>([])
+  const [tracklistVisible, setTrackListVisible] = useState<{ albumId: string | null }>({ albumId: null })
+  const [sorting, setSorting] = useState<SortingState>([])
   const columns = React.useMemo(
     () => [
       image,
@@ -107,23 +108,45 @@ export default function Table({ data }: { data: SpotifySearchResult[] }) {
           {table
             .getRowModel()
             // TODO Pagination if you want
-            // .rows.slice(0, 10)
-            .rows
+            .rows.slice(0, 10)
+            // .rows
             .map(row => {
-              console.log('row', row.id)
+              // Each row is actually going to be 2 rows
+              // 1. the tanStack data row (album)
+              // 2. the track info for the album
+
+              const albumId = row.original.id
+              const handleOnClick = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
+                console.log('!click', row.original.id)
+                // Toggle
+                setTrackListVisible({ albumId: tracklistVisible.albumId === albumId ? null : albumId })
+                // Scroll to view
+                // TODO give it margin
+                // e.currentTarget.scrollIntoView({ behavior: 'smooth'})
+              }
               return (
-                <tr key={row.id} className={styles.albumRows}>
-                  {row.getVisibleCells().map(cell => {
-                    return (
-                      <td key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </td>
-                    )
-                  })}
-                </tr>
+                <>
+                  <tr key={row.id} className={styles.albumRows} onClick={handleOnClick}>
+                    {row.getVisibleCells().map(cell => {
+                      return (
+
+                        <td key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </td>
+                      )
+                    })}
+                  </tr>
+                  <tr
+                    className={`
+                    ${styles.albumTrackList} 
+                    ${tracklistVisible.albumId === albumId ? styles.albumTrackListOpen : ''} 
+                  `}>
+                    <td colSpan={row.getVisibleCells().length} >hello</td>
+                  </tr>
+                </>
               )
             })}
         </tbody>
