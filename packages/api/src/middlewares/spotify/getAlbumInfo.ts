@@ -214,6 +214,7 @@ function matchResults(itemsArr: SearchResponse["albums"]["items"], albumAndArtis
 }
 
 // TODO figure out what to do with so many match results, at the moment I just take the first one
+export type SpotifySearchProjection = ReturnType<typeof getProjection>
 /**
  * Gets final projection from matched results
  */
@@ -284,7 +285,7 @@ type ParsedTitle = {
  * @param authString 
  * @returns 
  */
-export async function searchSingleAlbum(album: { title: string }, authString: string): Promise<SpotifySearchResult | undefined> {
+export async function searchSingleAlbum(album: { title: string }, authString: string): Promise<SpotifySearchProjection | undefined> {
   console.log('!searchSingleAlbum -> ', album.title);
   try {
     const parsedTitle = parseAlbumTitle(album.title)
@@ -369,7 +370,7 @@ async function searchMultiplAlbums(albums: FaradayItemData[], authString: string
 
 type AlbumsInfo = {
   faraday: FaradayItemData;
-  spotify: SpotifySearchResult | undefined;
+  spotify: SpotifySearchProjection | undefined;
 }
 /**
  * Loop over Faraday list and search for a match for each listing.

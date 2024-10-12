@@ -120,6 +120,13 @@ class MongoDb {
     return spotifyData ? spotifyData : []
   }
   
+  /**
+   * This is the main GET for the landing page.
+   * At the moment, just return everything
+   * Will have to figure out a limit
+   * @param match 
+   * @returns 
+   */
   async getSpotifyAlbumData(match?: Record<keyof SpotifySearchResult, any>){
     console.log('!getSpotifyAlbumData -> ');
     const albumProjection = {
@@ -136,14 +143,44 @@ class MongoDb {
       'spotify.releaseDate': 1,
       'spotify.popularity': 1,
       'spotify.genres': 1,
+      'spotify.trackInfo.items.artists': 1,
+      // 'spotify.trackInfo.items.available_markets': 1,
+      // 'spotify.trackInfo.items.disc_number': 1,
+      'spotify.trackInfo.items.duration_ms': 1,
+      // 'spotify.trackInfo.items.explicit': 1,
+      // 'spotify.trackInfo.items.external_urls': 1,
+      // 'spotify.trackInfo.items.href': 1,
+      'spotify.trackInfo.items.id': 1,
+      'spotify.trackInfo.items.name': 1,
+      'spotify.trackInfo.items.preview_url': 1,
+      'spotify.trackInfo.items.track_number': 1,
+      'spotify.trackInfo.items.type': 1,
+      'spotify.trackInfo.items.uri': 1,
+      // 'spotify.trackInfo.items.is_local': 1,
     }
     const albumCollection = this.db?.collection('albums')
-    const albums = await albumCollection?.find(match || {}, { projection: albumProjection }).toArray()
+    const notFoundMatch = {
+      ...match,
+      $or: [{notFound: false}, {notFound: {$exists: false}}],
+      // TODO remove
+      'faraday.isSoldOut': false
+    }
+    const albums = await albumCollection?.find(notFoundMatch || {}, { projection: albumProjection, limit: 30 }).toArray()
     console.log('!albums.length -> ', albums?.length);
-    const spotifyData: Array<Partial<SpotifySearchResult> & { _id: string }> | undefined = albums?.map(album => ( { _id: album._id.toString(),  ...album.spotify, ...album.faraday }))
-    const albumsNoName = albums?.filter(album => !album?.spotify?.name).length
-    console.log('!albumsNoName -> ', albumsNoName);
-    return spotifyData ? spotifyData : []
+    // TODO improve this return type
+    const spotifyData: Array<Partial<any> & { _id: string }> | undefined = (albums || []).map(album => ( { _id: album._id.toString(),  ...album.spotify, ...album.faraday }))
+    /**
+     * ReMap the trackInfo data.
+     */
+    const reMapped = spotifyData.map( datum => {
+      const { trackInfo, ...rest } = datum
+      return {
+        ...rest,
+        trackList: trackInfo?.items || [],
+        totalTracks: trackInfo?.items.length
+      }
+    })
+    return reMapped
   }
 
   // TODO divide this into more methods

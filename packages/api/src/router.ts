@@ -13,6 +13,7 @@ import type { FaradayItemData, ScrapedData } from '#controllers/faraday/getItemD
 // routers
 import faradayRouter from '#controllers/faraday/index.js'
 import spotifyRouter from '#controllers/spotify/index.js'
+import { SpotifySearchProjection } from '#middlewares/spotify/getAlbumInfo.js'
 
 
 export interface AppState extends Application.DefaultState {
@@ -24,7 +25,7 @@ export interface AppState extends Application.DefaultState {
     spotifyAlbumInfo?: SpotifySearchResult[],
     searchResults?: Array<{
       faraday: FaradayItemData,
-      spotify: SpotifySearchResult | undefined
+      spotify: SpotifySearchProjection | undefined
     }>,
     faraday?: ScrapedData
   },
