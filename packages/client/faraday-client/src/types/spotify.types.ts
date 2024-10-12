@@ -649,7 +649,7 @@ export type SearchResponse =
     totalTracks: number,
     genres: string[],
     trackList: {
-      artists: string[],
+      artists: SpotifyArtist[],
       duration_ms: number,
       id: string,
       name: string,
@@ -658,4 +658,12 @@ export type SearchResponse =
       type: string,
       uri: string,
     }[]
+  }
+
+  export type SpotifyArtist = {
+    href: string, 
+    id: string,
+    name: string,
+    type: string,
+    uri: string
   }

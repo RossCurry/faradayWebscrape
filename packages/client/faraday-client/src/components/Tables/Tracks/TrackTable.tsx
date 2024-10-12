@@ -1,6 +1,5 @@
 /**
- * Columnas
- * Artista, album title, disponible, genero, precio
+ * Columnas: TBC
  */
 
 import React, { useEffect, useRef, useState } from 'react'
@@ -14,29 +13,24 @@ import {
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
-import styles from './AlbumTable.module.css'
+import styles from './TrackTable.module.css'
 import {
-  image,
-  albumAndArtist,
-  category,
-  price,
-  releaseDate,
-} from './sections/columns/columns'
-import TrackTable, { TrackListData } from '../Tracks/TrackTable'
+  title,
+  artists,
+  duration,
+  trackNumber
+} from './columns/columns'
 
-export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
-  const [tracklistVisible, setTrackListVisible] = useState<{ albumId: string | null }>({ albumId: null })
-  const tableAlbumsRef = useRef<HTMLTableElement>(null)
-  const [tracklistNumTracks, setTracklistNumTracks] = useState<number>(0)
-  const [tracklist, setTracklist] = useState<TrackListData[] | null>(null)
+export type TrackListData = SpotifySearchResult["trackList"][number]
+export default function TrackTable({ data }: { data: TrackListData[] }) {
+  const tableTracksRef = useRef<HTMLTableElement>(null)
   const [sorting, setSorting] = useState<SortingState>([])
   const columns = React.useMemo(
     () => [
-      image,
-      albumAndArtist,
-      category,
-      releaseDate,
-      price,
+      trackNumber,
+      title,
+      // artists,
+      duration,
     ], []
   )
   const table = useReactTable({
@@ -66,28 +60,14 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
    * Sets num of tracks which sets height of tracklist
    * calc(var(--trackListNumTracks) * var(--trackListRowHeight))
    */
-  useEffect(() => {
-    let refCopy: HTMLTableElement | undefined;
-    if (tableAlbumsRef.current) {
-      // Copy for cleanup
-      refCopy = tableAlbumsRef.current
-      // Set a CSS variable when the component mounts
-      tableAlbumsRef.current.style.setProperty('--trackListNumTracks', `${tracklistNumTracks}`);
-
-    }
-    // Cleanup function to reset the variable if needed
-    return () => {
-      refCopy?.style.removeProperty('--trackListNumTracks');
-    };
-  }, [tracklistNumTracks]);
 
   return (
     <div className="p-2">
       <div className="h-2" />
       <table
-        id='table_albums'
-        className={styles.table_albums}
-        ref={tableAlbumsRef}
+        id='table_tracks'
+        className={styles.table_tracks}
+        ref={tableTracksRef}
       >
         <thead>
           {table.getHeaderGroups().map(headerGroup => (
@@ -132,34 +112,13 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
         <tbody>
           {table
             .getRowModel()
-            // TODO Pagination if you want
-            // .rows.slice(0, 10)
             .rows
             .map(row => {
-              // Each row is actually going to be 2 rows
-              // 1. the tanStack data row (album)
-              // 2. the track info for the album
-
-              const albumId = row.original.id
-              const handleOnClick = async (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
-                console.log('!click', row.original.id)
-                // TODO otra solucion
-                // TODO give it margin        
-                // e.currentTarget.scrollIntoView({ behavior: 'smooth' , 
-                //   block: 'start', inline: 'start'
-                // })
-                // Toggle
-                setTrackListVisible({ albumId: tracklistVisible.albumId === albumId ? null : albumId })
-                // Sets the height for the dropdown
-                setTracklistNumTracks(row.original.totalTracks)
-                setTracklist(row.original.trackList)
-              }
               return (
                 <>
-                  <tr key={row.id} className={styles.albumRows} onClick={handleOnClick}>
+                  <tr key={row.id} className={styles.albumRows}>
                     {row.getVisibleCells().map(cell => {
                       return (
-
                         <td key={cell.id}>
                           {flexRender(
                             cell.column.columnDef.cell,
@@ -168,38 +127,6 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
                         </td>
                       )
                     })}
-                  </tr>
-                  <tr
-                    className={`
-                      ${styles.tableRowWidth}
-                    `}
-                  >
-                    <td
-                      colSpan={row.getVisibleCells().length}
-                    >
-                      <div
-                        className={`
-                          ${styles.albumTrackList}
-                          ${tracklistVisible.albumId === albumId ? styles.albumTrackListOpen : ''}
-                        `}
-                      >
-
-                        {/* {Array.from({ length: row.original.totalTracks}).map(() => {
-                          return (
-                            <div style={{ height: 'var(--trackListRowHeight)'}}>work</div>
-                          )
-                        })} */}
-                        {tracklist && <TrackTable data={tracklist} key={row.original.id} />}
-                        {/* {tracklist && tracklist.map((trackData) => {
-                          console.log('!track', trackData)
-                          return (
-                            <div style={{ height: 'var(--trackListRowHeight)' }}>
-                              {trackData.name}
-                            </div>
-                          )
-                        })} */}
-                      </div>
-                    </td>
                   </tr>
                 </>
               )
