@@ -626,6 +626,7 @@ export type SearchResponse =
     email: string;
   };
   
+  // TODO I need a type package to share between FE & BE. Avoid duplicates
   export type SpotifySearchResult = {
     artists: string[],
     href: string,
@@ -635,7 +636,17 @@ export type SearchResponse =
     searchTerm:  string,
     type: 'album',
     uri:  string,
+    isSoldOut: boolean,
+    category?: string,
+    popularity: number,
+    price: string,
+    releaseDate: string | undefined,
+    albumType: string,
+    totalTracks: number,
     genres: string[]
+    tracklist: {
+      
+    }
   }
 
   export type SpotifyAlbum = {

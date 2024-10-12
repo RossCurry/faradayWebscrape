@@ -143,12 +143,14 @@ export default function Table({ data }: { data: SpotifySearchResult[] }) {
               const albumId = row.original.id
               const handleOnClick = async (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
                 console.log('!click', row.original.id)
+                // TODO otra solucion
+                // TODO give it margin        
+                // e.currentTarget.scrollIntoView({ behavior: 'smooth' , 
+                //   block: 'start', inline: 'start'
+                // })
                 const doNothing = tracklistVisible.albumId === albumId
                 // Toggle
                 setTrackListVisible({ albumId: doNothing ? null : albumId })
-                // Scroll to view
-                // TODO give it margin
-                // e.currentTarget.scrollIntoView({ behavior: 'smooth'})
                 // Sets the height for the dropdown
                 setTracklistNumTracks(row.original.totalTracks)
                 if (doNothing){
@@ -192,19 +194,19 @@ export default function Table({ data }: { data: SpotifySearchResult[] }) {
                         `}
                       >
                         
-                        {!tracklist && Array.from({ length: row.original.totalTracks}).map(() => {
+                        {Array.from({ length: row.original.totalTracks}).map(() => {
                           return (
                             <div style={{ height: 'var(--trackListRowHeight)'}}>work</div>
                           )
                         })}
-                        { tracklist && tracklist.map((track: Record<string, any>[]) => {
+                        {/* { tracklist && tracklist.map((track: Record<string, any>[]) => {
                           console.log('!track', track)
                           return(
                             <div style={{ height: 'var(--trackListRowHeight)'}}>
                               {track.name}
                             </div>
                           )
-                        })}
+                        })} */}
                       </div>
                     </td>
                   </tr>

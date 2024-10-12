@@ -181,7 +181,6 @@ function matchResults(itemsArr, albumAndArtist) {
     }
     return matchedArtistOrAlbum;
 }
-// TODO figure out what to do with so many match results, at the moment I just take the first one
 /**
  * Gets final projection from matched results
  */
