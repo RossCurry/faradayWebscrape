@@ -647,5 +647,15 @@ export type SearchResponse =
     releaseDate: string | undefined,
     albumType: string,
     totalTracks: number,
-    genres: string[]
+    genres: string[],
+    trackList: {
+      artists: string[],
+      duration_ms: number,
+      id: string,
+      name: string,
+      preview_url: string,
+      track_number: 1,
+      type: string,
+      uri: string,
+    }[]
   }

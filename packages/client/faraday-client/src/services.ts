@@ -1,6 +1,9 @@
+import { SpotifySearchResult } from "./types/spotify.types"
+
 const localConnectEndpoint = 'http://localhost:3000/api/spotify/connect'
 // TODO change endpoint to suit purpose
 const localPlaylistEndpoint = 'http://localhost:3000/api/spotify/redirect'
+export const baseUrlDev = 'http://localhost:3000'
 
 export async function connectToSpoti(){
   try {
@@ -52,5 +55,19 @@ export async function createPlaylist(code: string, playlistTitle: string){
     }    
   } catch (error) {
     console.log('!Failed fetch to create playlist -> ', error);
+  }
+}
+
+
+export async function getAvailableAlbums(){
+  const getAlbumsPath = '/api/faraday/albums'
+  const response = await fetch(baseUrlDev + getAlbumsPath)
+  if (response.ok){
+    const jsonRes: SpotifySearchResult[] = await response.json()
+    return jsonRes
+    // const sortedOnFE = jsonRes.filter(album => !!album?.name)
+    // console.log('getAvailableAlbums: I no longer need sorting',jsonRes.length === sortedOnFE.length, jsonRes.length, sortedOnFE.length) 
+    // TODO this should be sorted on the BE
+    // setAlbumCollection(sortedOnFE)
   }
 }

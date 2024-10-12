@@ -1,9 +1,9 @@
 import { AccessorColumnDef } from "@tanstack/react-table"
-import { SpotifySearchResult } from "../../../../types/spotify.types"
+import { SpotifySearchResult } from "../../../../../types/spotify.types"
 import styles from './columns.module.css'
 
 
-export const image: AccessorColumnDef<SpotifySearchResult, { url:  SpotifySearchResult["image"]["url"], isSoldOut: SpotifySearchResult["isSoldOut"]}> = {
+export const image: AccessorColumnDef<SpotifySearchResult, { url: SpotifySearchResult["image"]["url"], isSoldOut: SpotifySearchResult["isSoldOut"] }> = {
   accessorFn: ({ isSoldOut, image }) => {
     return {
       url: image.url,
@@ -99,7 +99,7 @@ export const price: AccessorColumnDef<SpotifySearchResult, SpotifySearchResult["
     const value = info.getValue() || ''
     const onSale = value.toLowerCase().includes('sale')
     const i = value.indexOf(':')
-    const price = onSale ? value.substring(i+1,i+6) : value
+    const price = onSale ? value.substring(i + 1, i + 6) : value
     return (
       <div>{price}</div>
     )
