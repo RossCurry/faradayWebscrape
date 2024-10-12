@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react'
-import { SpotifySearchResult } from '../../types/spotify.types'
+import { SpotifySearchResult } from '../../../types/spotify.types'
 import {
   ColumnDef,
   flexRender,
@@ -14,7 +14,7 @@ import {
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
-import styles from './Table.module.css'
+import styles from './AlbumTable.module.css'
 import {
   image,
   albumAndArtist,
@@ -22,13 +22,12 @@ import {
   price,
   releaseDate,
 } from './sections/columns/columns'
-import { getTrackList as getTracklist } from './sections/columns/services'
 
 export default function Table({ data }: { data: SpotifySearchResult[] }) {
   const [tracklistVisible, setTrackListVisible] = useState<{ albumId: string | null }>({ albumId: null })
   const tableAlbumsRef = useRef<HTMLTableElement>(null)
   const [tracklistNumTracks, setTracklistNumTracks] = useState<number>(0)
-  const [tracklist, setTracklist] = useState<Record<string, any>[] | null>(null)
+  const [tracklist, setTracklist] = useState<SpotifySearchResult["trackList"] | null>(null)
   const [sorting, setSorting] = useState<SortingState>([])
   const columns = React.useMemo(
     () => [
@@ -68,7 +67,7 @@ export default function Table({ data }: { data: SpotifySearchResult[] }) {
    */
   useEffect(() => {
     let refCopy: HTMLTableElement | undefined;
-    if (tableAlbumsRef.current){
+    if (tableAlbumsRef.current) {
       // Copy for cleanup
       refCopy = tableAlbumsRef.current
       // Set a CSS variable when the component mounts
@@ -148,21 +147,11 @@ export default function Table({ data }: { data: SpotifySearchResult[] }) {
                 // e.currentTarget.scrollIntoView({ behavior: 'smooth' , 
                 //   block: 'start', inline: 'start'
                 // })
-                const doNothing = tracklistVisible.albumId === albumId
                 // Toggle
-                setTrackListVisible({ albumId: doNothing ? null : albumId })
+                setTrackListVisible({ albumId: tracklistVisible.albumId === albumId ? null : albumId })
                 // Sets the height for the dropdown
                 setTracklistNumTracks(row.original.totalTracks)
-                if (doNothing){
-                  setTracklist(null)
-                } else {
-                  const tracklist = await getTracklist(albumId)
-                  setTimeout(async () => {
-                    console.log('This runs after the current I/O tasks.');
-                    // console.log('! return trackList', tracklist)
-                    setTracklist(tracklist)
-                  }, 0);
-                }
+                setTracklist(row.original.trackList)
               }
               return (
                 <>
@@ -184,29 +173,29 @@ export default function Table({ data }: { data: SpotifySearchResult[] }) {
                       ${styles.tableRowWidth}
                     `}
                   >
-                    <td 
+                    <td
                       colSpan={row.getVisibleCells().length}
                     >
-                      <div 
+                      <div
                         className={`
                           ${styles.albumTrackList}
                           ${tracklistVisible.albumId === albumId ? styles.albumTrackListOpen : ''}
                         `}
                       >
-                        
-                        {Array.from({ length: row.original.totalTracks}).map(() => {
+
+                        {/* {Array.from({ length: row.original.totalTracks}).map(() => {
                           return (
                             <div style={{ height: 'var(--trackListRowHeight)'}}>work</div>
                           )
-                        })}
-                        {/* { tracklist && tracklist.map((track: Record<string, any>[]) => {
+                        })} */}
+                        {tracklist && tracklist.map((track) => {
                           console.log('!track', track)
-                          return(
-                            <div style={{ height: 'var(--trackListRowHeight)'}}>
+                          return (
+                            <div style={{ height: 'var(--trackListRowHeight)' }}>
                               {track.name}
                             </div>
                           )
-                        })} */}
+                        })}
                       </div>
                     </td>
                   </tr>

@@ -12,6 +12,7 @@ td {}
   margin: 0 auto;
   --trackListRowHeight: 3rem;
   --trackListNumTracks: 3;
+  width: calc(100% - 4rem)
 }
 .table_albums tr,
 .table_albums td

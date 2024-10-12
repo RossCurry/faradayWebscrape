@@ -644,9 +644,16 @@ export type SearchResponse =
     albumType: string,
     totalTracks: number,
     genres: string[]
-    tracklist: {
-      
-    }
+    trackList: {
+      artists: string[],
+      duration_ms: number,
+      id: string,
+      name: string,
+      preview_url: string,
+      track_number: 1,
+      type: string,
+      uri: string,
+    }[]
   }
 
   export type SpotifyAlbum = {
