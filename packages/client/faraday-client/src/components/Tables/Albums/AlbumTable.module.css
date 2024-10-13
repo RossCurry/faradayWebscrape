@@ -10,10 +10,11 @@ td {}
 .table_albums {
   border-spacing: 0;
   margin: 0 auto;
-  --trackListRowHeight: 3rem;
+  --trackListRowHeight: 4rem;
   --trackListNumTracks: 3;
-  width: calc(100% - 4rem)
+  width: calc(100% - 4rem);
 }
+
 .table_albums tr,
 .table_albums td
 {

@@ -146,7 +146,7 @@ class MongoDb {
             // TODO remove
             'faraday.isSoldOut': false
         };
-        const albums = await albumCollection?.find(notFoundMatch || {}, { projection: albumProjection, limit: 30 }).toArray();
+        const albums = await albumCollection?.find(notFoundMatch || {}, { projection: albumProjection, limit: undefined }).toArray();
         console.log('!albums.length -> ', albums?.length);
         // TODO improve this return type
         const spotifyData = (albums || []).map(album => ({ _id: album._id.toString(), ...album.spotify, ...album.faraday }));

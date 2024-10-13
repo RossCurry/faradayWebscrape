@@ -8,6 +8,7 @@ td {}
 
 /* reset margins and padding */
 .table_tracks {
+  display: table;
   border-spacing: 0;
   margin: 0 auto;
   --trackListRowHeight: 3rem;
@@ -15,43 +16,33 @@ td {}
   width: calc(100% - 4rem)
 }
 
-.table_tracks th {
-  text-align: left;
+.table_tracks tr {
+  display: table-row;
 }
 
+.table_tracks th {
+  display: table-header;
+  text-align: left;
+  cursor: pointer;
+}
+
+.table_tracks td {
+  display: table-cell;
+}
+
+.table_tracks th,
 .table_tracks tr,
 .table_tracks td
 {
   margin: 0;
   padding: 0;
-  cursor: pointer;
+  cursor: default;
 }
 
-.table_tracks .albumRows {
+.table_tracks .trackRows {
   background: inherit;
   text-align: left;
 }
-.table_tracks .albumRows:hover {
+/* .table_tracks .albumRows:hover {
   background: rgba(201, 201, 200, 0.411);
-}
-
-
-/* Album Track list styles */
-/* Table row wrapper to match table row width */
-.table_tracks .tableRowWidth {
-  display: table-row;
-  background-color: rgba(229, 141, 26, 0.25);
-}
-
-/* Container start state */
-.table_tracks .albumTrackList {
-  background-color: rgba(200, 124, 23, 0.634);
-  max-height: 0;  /* Start at 0 height for the collapsed state */
-  overflow: hidden; /* Hide content when collapsed */
-  transition: max-height 500ms ease; /* Transition the height */
-}
-
-/* Container open state */
-.table_tracks .albumTrackList.albumTrackListOpen {
-  max-height: calc(var(--trackListNumTracks) * var(--trackListRowHeight)); /* Allow it to expand */
-}
+} */

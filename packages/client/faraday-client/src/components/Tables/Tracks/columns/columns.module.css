@@ -1,45 +1,32 @@
-.rowDataImg {
-  width: 7rem;
+.table_tracks td.trackRowDataImg {
+  /* width: 2rem; */
+}
+
+.trackRowDataImg {
+  width: 2rem;
   aspect-ratio: 1/1;
+  content: '';
   /* for bg-image */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   position: relative;
+  padding: 0;
+  margin: 0;
 }
 
-.rowDataAvailability,
-.rowDataAlbum,
-.rowDataArtist {
-  padding-left: 1em;
+.rowDataTrack {
+  padding-left: 0em;
 }
 
-.rowDataAlbum p {
+.rowDataTrack p {
   margin: 0;
   padding: 0;
 }
-.rowDataAlbum p:first-child {
+
+.rowDataTrack p:first-child {
   font-weight: 800;
 }
-
-.rowDataAvailability {
-  content: '';
-  width: 100%;
-  aspect-ratio: 1/1;
-  border-radius: 50%;
-  /* background-color: rgb(38, 208, 81); */
-}
-.unavailable {
-  background-color: rgb(208, 44, 38);
-}
-
-.albumItemSoldOut {
-  content: '';
-  position: absolute;
-  width: 40px;
-  aspect-ratio: 1/1;
-  border-radius: 50%;
-  background-color: red;
-  top: 0;
-  right: 0;
+.rowDataTrack p:nth-child(2) {
+  font-size: 0.9rem;
 }
