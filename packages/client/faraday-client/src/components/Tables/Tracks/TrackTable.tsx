@@ -15,27 +15,45 @@ import {
 } from '@tanstack/react-table'
 import styles from './TrackTable.module.css'
 import {
+  image,
   title,
-  artists,
+  songAndArtist,
+  // artists,
   duration,
-  trackNumber
+  trackNumber,
+  player,
 } from './columns/columns'
 
 export type TrackListData = SpotifySearchResult["trackList"][number]
-export default function TrackTable({ data }: { data: TrackListData[] }) {
+export type TrackListColumnData = TrackListData & { imageUrl: string }
+export type TrackTableProps = { data: TrackListData[] } & { 
+  imageUrl: string,
+  setAudioUrl: React.Dispatch<React.SetStateAction<string | null>>
+}
+export default function TrackTable({ data, imageUrl, setAudioUrl }: TrackTableProps) {
   const tableTracksRef = useRef<HTMLTableElement>(null)
   const [sorting, setSorting] = useState<SortingState>([])
+  const dataWithImageMapped = React.useMemo(() => data.map(d => ({ ...d, imageUrl })),[data,imageUrl])
   const columns = React.useMemo(
     () => [
+      image,
       trackNumber,
-      title,
+      songAndArtist,
+      // title,
       // artists,
       duration,
+      // player
     ], []
   )
+
+  const handleOnClick = (audioUrl: string) => {
+    console.log('!clikc', audioUrl)
+    setAudioUrl(audioUrl)
+  }
+
   const table = useReactTable({
     columns,
-    data,
+    data: dataWithImageMapped,
     debugTable: true,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(), //client-side sorting
@@ -116,7 +134,7 @@ export default function TrackTable({ data }: { data: TrackListData[] }) {
             .map(row => {
               return (
                 <>
-                  <tr key={row.id} className={styles.albumRows}>
+                  <tr key={row.id} className={styles.trackRows} onClick={() => handleOnClick(row.original.preview_url)}>
                     {row.getVisibleCells().map(cell => {
                       return (
                         <td key={cell.id}>

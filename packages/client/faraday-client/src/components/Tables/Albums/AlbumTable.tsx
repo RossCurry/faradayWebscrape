@@ -23,6 +23,7 @@ import {
   releaseDate,
 } from './sections/columns/columns'
 import TrackTable, { TrackListData } from '../Tracks/TrackTable'
+import Player from '../../Player/Player'
 
 export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
   const [tracklistVisible, setTrackListVisible] = useState<{ albumId: string | null }>({ albumId: null })
@@ -30,6 +31,7 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
   const [tracklistNumTracks, setTracklistNumTracks] = useState<number>(0)
   const [tracklist, setTracklist] = useState<TrackListData[] | null>(null)
   const [sorting, setSorting] = useState<SortingState>([])
+  const [audioUrl, setAudioUrl] = useState<string | null>(null)
   const columns = React.useMemo(
     () => [
       image,
@@ -82,8 +84,8 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
   }, [tracklistNumTracks]);
 
   return (
-    <div className="p-2">
-      <div className="h-2" />
+    <>
+      <Player audioUrl={audioUrl}/>
       <table
         id='table_albums'
         className={styles.table_albums}
@@ -189,7 +191,14 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
                             <div style={{ height: 'var(--trackListRowHeight)'}}>work</div>
                           )
                         })} */}
-                        {tracklist && <TrackTable data={tracklist} key={row.original.id} />}
+                        {tracklist && 
+                          <TrackTable 
+                            data={tracklist} 
+                            key={row.original.id} 
+                            imageUrl={row.original.image.url} 
+                            setAudioUrl={setAudioUrl}
+                          />
+                        }
                         {/* {tracklist && tracklist.map((trackData) => {
                           console.log('!track', trackData)
                           return (
@@ -206,6 +215,6 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
             })}
         </tbody>
       </table>
-    </div>
+    </>
   )
 }

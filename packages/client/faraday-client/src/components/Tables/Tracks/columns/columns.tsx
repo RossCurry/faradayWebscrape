@@ -1,64 +1,66 @@
 import { AccessorColumnDef } from "@tanstack/react-table"
 import styles from './columns.module.css'
-import { TrackListData } from "../TrackTable"
+import { TrackListColumnData } from "../TrackTable"
 
 
-// export const image: AccessorColumnDef<SpotifySearchResult, { url: SpotifySearchResult["image"]["url"], isSoldOut: SpotifySearchResult["isSoldOut"] }> = {
-//   accessorFn: ({ isSoldOut, image }) => {
-//     return {
-//       url: image.url,
-//       isSoldOut
-//     }
-//   },
-//   id: 'image',
-//   cell: info => {
-//     const { isSoldOut, url } = info.getValue()
-//     return (
-//       <>
-//         <div
-//           className={styles.rowDataImg}
-//           style={{
-//             backgroundImage: `url(${url})`
-//           }}
-//         >
-//           {isSoldOut && <div className={styles.albumItemSoldOut}></div>}
-//         </div>
-//       </>
-//     )
-//   },
-//   header: () => null,
-//   enableSorting: false
-// }
+export const image: AccessorColumnDef<TrackListColumnData, { url: TrackListColumnData["imageUrl"] }> = {
+  accessorFn: ({ imageUrl }) => {
+    return {
+      url: imageUrl,
+    }
+  },
+  id: 'image',
+  cell: info => {
+    const { url } = info.getValue()
+    return (
+      <>
+        <div
+          className={styles.trackRowDataImg}
+          style={{
+            backgroundImage: `url(${url})`
+          }}
+        />
+      </>
+    )
+  },
+  header: () => null,
+  enableSorting: false,
+  size: 50,
+  maxSize: 50,
+}
 
-// export const albumAndArtist: AccessorColumnDef<SpotifySearchResult, SpotifySearchResult> = {
-//   accessorFn: row => row,
-//   id: 'albumInfo',
-//   cell: info => {
-//     const { name, artists } = info.getValue() as SpotifySearchResult
-//     const artist = artists.join(', ')
-//     const album = name
-//     return (
-//       <div className={styles.rowDataAlbum}>
-//         <p>{album}</p>
-//         <p>{artist}</p>
-//       </div>
-//     )
-//   },
-//   header: () => <span>Title</span>,
-//   sortUndefined: 'last', //force undefined values to the end
-//   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
-// }
+export const songAndArtist: AccessorColumnDef<TrackListColumnData, TrackListColumnData> = {
+  accessorFn: row => row,
+  id: 'songInfo',
+  cell: info => {
+    const { name, artists } = info.getValue()
+    const artist = artists.map(artist => artist.name).join(', ')
+    const song = name
+    return (
+      <div className={styles.rowDataTrack}>
+        <p>{song}</p>
+        <p>{artist}</p>
+      </div>
+    )
+  },
+  header: () => <span>Title</span>,
+  sortingFn: (a, b) => {
+    return a.original.name.localeCompare(b.original.name)
+  },
+  sortUndefined: 'last', //force undefined values to the end
+  sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
+}
 
-export const title: AccessorColumnDef<TrackListData, TrackListData["name"]> = {
+export const title: AccessorColumnDef<TrackListColumnData, TrackListColumnData["name"]> = {
   accessorFn: row => row.name,
   id: 'title',
-  cell: info => <span className={styles.rowDataAlbum}>{info.getValue()}</span>,
+  cell: info => <span className={styles.rowDataTrack}>{info.getValue()}</span>,
   header: () => <span>title</span>,
   sortUndefined: 'last', //force undefined values to the end
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
 }
 
-export const duration: AccessorColumnDef<TrackListData, string> = {
+export const duration: AccessorColumnDef<TrackListColumnData, string> = {
   accessorFn: row => {
     const minutes = Math.floor(row.duration_ms / 60000); // 1 minute = 60000 row.duration_ms
     const seconds = Math.floor((row.duration_ms % 60000) / 1000); // Remaining seconds
@@ -70,116 +72,46 @@ export const duration: AccessorColumnDef<TrackListData, string> = {
     // return row.duration_ms
   },
   id: 'duration',
-  cell: info => <span className={styles.rowDataAlbum}>{info.getValue()}</span>,
+  cell: info => <span className={styles.rowDataTrack}>{info.getValue()}</span>,
   header: () => <span>duration</span>,
   sortUndefined: 'last', //force undefined values to the end
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
 }
 
-export const artists: AccessorColumnDef<TrackListData, TrackListData["artists"][number]["name"][]> = {
+export const artists: AccessorColumnDef<TrackListColumnData, TrackListColumnData["artists"][number]["name"][]> = {
   accessorFn: row => {
     const artistNames = row.artists.map(artist =>  artist.name)
     return artistNames
   },
   id: 'artists',
-  cell: info => <span className={styles.rowDataAlbum}>{info.getValue().join(', ')}</span>,
+  cell: info => <span className={styles.rowDataTrack}>{info.getValue().join(', ')}</span>,
   header: () => <span>artists</span>,
   sortUndefined: 'last', //force undefined values to the end
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
 }
 
-export const trackNumber: AccessorColumnDef<TrackListData, TrackListData["track_number"]> = {
+export const trackNumber: AccessorColumnDef<TrackListColumnData, TrackListColumnData["track_number"]> = {
   accessorFn: row => row.track_number,
   id: 'trackNumber',
-  cell: info => <span className={styles.rowDataAlbum}>{info.getValue()}</span>,
-  header: () => <span>trackNumber</span>,
+  cell: info => <span className={styles.rowDataTrackNumber}>{info.getValue()}</span>,
+  header: () => <span className={styles.headerTrackNumber}>#</span>,
+  sortUndefined: 'last', //force undefined values to the end
+  sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
+  size: 50
+}
+
+export const player: AccessorColumnDef<TrackListColumnData, TrackListColumnData["preview_url"]> = {
+  accessorFn: row => row.preview_url,
+  id: 'player',
+  cell: info => {
+    const playUrl = info.getValue()
+    return (
+      <audio controls >
+        <source src={playUrl} type="audio/mpeg"/>
+      </audio>
+    )
+  },
+  header: () => null,
   sortUndefined: 'last', //force undefined values to the end
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
 }
-
-// export const artists: AccessorColumnDef<SpotifySearchResult, SpotifySearchResult["artists"]> = {
-//   accessorFn: row => row.artists,
-//   id: 'artists',
-//   cell: info => <span className={styles.rowDataArtist}>{info.getValue().join(', ')}</span>,
-//   header: () => <span>Artist</span>,
-//   sortUndefined: 'last', //force undefined values to the end
-//   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
-// }
-
-// export const availablity: AccessorColumnDef<SpotifySearchResult, SpotifySearchResult["isSoldOut"]> = {
-//   accessorFn: row => row.isSoldOut,
-//   id: 'availablity',
-//   cell: info => {
-//     const isSoldOut = !!info.getValue()
-//     return (
-//       <span className={`${styles.rowDataAvailability} ${isSoldOut ? styles.unavailable : ''}`}>
-
-//       </span>
-//     )
-//   },
-//   header: () => <span>Available</span>,
-//   sortUndefined: 'last', //force undefined values to the end
-//   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
-// }
-
-// export const category: AccessorColumnDef<SpotifySearchResult, SpotifySearchResult["category"]> = {
-//   accessorFn: row => row.category,
-//   id: 'category',
-//   cell: info => info.getValue() || '',
-//   header: () => <span>Category</span>,
-//   sortUndefined: 'last', //force undefined values to the end
-//   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
-// }
-
-// export const price: AccessorColumnDef<SpotifySearchResult, SpotifySearchResult["price"]> = {
-//   accessorFn: row => row.price,
-//   id: 'price',
-//   cell: info => {
-//     const value = info.getValue() || ''
-//     const onSale = value.toLowerCase().includes('sale')
-//     const i = value.indexOf(':')
-//     const price = onSale ? value.substring(i + 1, i + 6) : value
-//     return (
-//       <div>{price}</div>
-//     )
-//   },
-//   header: () => <span>Price</span>,
-//   sortUndefined: 'last', //force undefined values to the end
-//   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
-// }
-
-// export const popularity: AccessorColumnDef<SpotifySearchResult, SpotifySearchResult["popularity"]> = {
-//   accessorFn: row => row.popularity,
-//   id: 'popularity',
-//   cell: info => info.getValue(),
-//   header: () => <span>Popularity</span>,
-//   sortUndefined: 'last', //force undefined values to the end
-//   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
-// }
-
-// export const releaseDate: AccessorColumnDef<SpotifySearchResult, SpotifySearchResult["releaseDate"]> = {
-//   accessorFn: row => row.releaseDate,
-//   id: 'release',
-//   cell: info => {
-//     const date = info.getValue()
-//     const asYear = date ? new Date(date).getFullYear().toString() : ''
-//     return (
-//       <div>{asYear}</div>
-//     )
-//   },
-//   header: () => <span>Release Date</span>,
-//   sortUndefined: 'last', //force undefined values to the end
-//   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
-// }
-
-// export const genre: AccessorColumnDef<SpotifySearchResult, SpotifySearchResult["genres"]> = {
-//   accessorFn: row => row.genres,
-//   id: 'genre',
-//   cell: info => info.getValue(),
-//   header: () => <span>Genre</span>,
-//   sortUndefined: 'last', //force undefined values to the end
-//   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
-// }
-
-
-
