@@ -2,6 +2,7 @@ import Router from "koa-router"
 import mw from '#middlewares/index.js'
 import Application from 'koa';
 import type { AppContext, AppState } from "../../router.js";
+import { user } from "../../constants.js";
 const faradayRouter = new Router<AppState, AppContext>()
 
 faradayRouter.post("/api/faraday/albums/update",
@@ -47,7 +48,7 @@ faradayRouter.get("/api/faraday/playlists",
     try {
       // TODO use dynamic data once FE is developed
       // const userId = ctx.services.token.currentUser?.id
-      const userId = '66b9317f5ffd03bdb76b9647'
+      const userId = user.freezeId
       if (!userId) throw Error('Cannot get playlist info. No userId given')
       const playlistsData = await mongo.getFaradayPlaylistData(userId)
       console.log('!spotifyData length-> ', playlistsData?.length);
