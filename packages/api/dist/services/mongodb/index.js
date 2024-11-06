@@ -42,7 +42,7 @@ class MongoDb {
             if (matched) {
                 await albumCollection.updateOne({ 'faraday.id': album.id }, { $set: {
                         spotify: matched.spotify,
-                        updatedDate: new Date(Date.now()).toISOString()
+                        updatedDate: new Date().toISOString()
                     } });
                 matchedCount++;
             }
@@ -69,7 +69,7 @@ class MongoDb {
             await albumCollection.updateOne({ 'spotify.id': spotifyTrackInfo.album.id }, { $set: {
                     'spotify.trackIds': trackIds,
                     'spotify.trackInfo': spotifyTrackInfo.tracks,
-                    updatedDate: new Date(Date.now()).toISOString()
+                    updatedDate: new Date().toISOString()
                 } });
         }));
         console.log('!insertedDocs -> ', insertedDocs.length);
@@ -89,7 +89,7 @@ class MongoDb {
         }, {});
         const insertedDoc = await albumCollection.updateOne(match, { $set: {
                 ...update,
-                updatedDate: new Date(Date.now()).toISOString()
+                updatedDate: new Date().toISOString()
             } });
         console.log('!insertedDoc -> ', insertedDoc);
         return insertedDoc;
@@ -233,7 +233,8 @@ class MongoDb {
         console.log('!getFaradayPlaylistData -> ');
         const userCollection = this.db?.collection('users');
         const projection = { playlists: 1, _id: 0 };
-        const userPlaylists = await userCollection?.findOne({ _id: new ObjectId(userId) }, { projection });
+        const sort = { createdTime: 'desc' };
+        const userPlaylists = await userCollection?.findOne({ _id: new ObjectId(userId) }, { projection, sort });
         console.log('!userPlaylists -> ', userPlaylists);
         if (!userPlaylists?.playlists || !Array.isArray(userPlaylists.playlists))
             throw Error('Playlists returned is not an array');
@@ -282,7 +283,7 @@ class MongoDb {
             const insertedDocs = await usersCollection.insertOne({
                 ...userInfo,
                 endpoint: tokenInfo,
-                createdDate: new Date(Date.now()).toISOString(),
+                createdDate: new Date().toISOString(),
                 playlists: []
             });
             console.log('!insertedDocs -> ', insertedDocs);
@@ -290,7 +291,7 @@ class MongoDb {
         }
         const insertedDocs = await usersCollection.updateOne({ _id: user._id }, { $set: {
                 endpoint: tokenInfo,
-                updatedDate: new Date(Date.now()).toISOString()
+                updatedDate: new Date().toISOString()
             } });
         console.log('!insertedDocs -> ', insertedDocs);
         return insertedDocs;
@@ -300,7 +301,12 @@ class MongoDb {
         const usersCollection = this.db?.collection('users');
         if (!usersCollection)
             throw new Error('No users collecion found');
-        const updated = await usersCollection.findOneAndUpdate({ uri: userUri }, { $push: { playlists: spotifyPlaylist } });
+        const updated = await usersCollection.findOneAndUpdate({ uri: userUri }, { $push: {
+                playlists: {
+                    ...spotifyPlaylist,
+                    createdTime: new Date().toISOString()
+                }
+            } });
     }
     async setFaradayIdAsNotFound(faradayId) {
         console.log('!setFaradayIdAsNotFound -> ', faradayId);

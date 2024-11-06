@@ -1,4 +1,4 @@
-import { SpotifySearchResult } from "./types/spotify.types"
+import { SpotifyPlaylist, SpotifySearchResult } from "./types/spotify.types"
 
 const localConnectEndpoint = 'http://localhost:3000/api/spotify/connect'
 // TODO change endpoint to suit purpose
@@ -80,5 +80,15 @@ export async function getTrackList(albumId: string) {
     console.log('!jsonRes -> ', jsonRes);
     const { tracklist } = jsonRes;
     return tracklist.items
+  }
+}
+
+// TODO send user id
+export async function getAvailablePlaylists(){
+  const getAlbumsPath = '/api/faraday/playlists'
+  const response = await fetch(baseUrlDev + getAlbumsPath)
+  if (response.ok){
+    const jsonRes: SpotifyPlaylist[] = await response.json()
+    return jsonRes
   }
 }
