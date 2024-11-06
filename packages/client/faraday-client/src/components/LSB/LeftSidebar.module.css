@@ -22,11 +22,25 @@
   gap: 1rem;
 }
 
+
 .playlistItem,
+.playlistItemBgImg,
 .playlistItem img.playlistItemImg {
   border-radius: 8px;
 }
 
+/* spotify img */
+.playlistItemBgImg {
+  content: '';
+  min-width: 50px;
+  min-height: 50px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  margin-right: 1rem;
+}
+
+/* fallback img */
 .playlistItem img.playlistItemImg {
   width: 50px;  /* Set the width */
   height: auto;  /* Adjusts the height proportionally */
@@ -38,12 +52,13 @@
   list-style: none;
   display: flex;
 }
-.playlistItem:hover{
-  background: rgba(201, 201, 200, 0.411);
-}
 
 .playlistItemInfo {
   display: flex;
   flex-direction: column;
   text-align: left;
+  width: 100%;
+}
+.playlistItemInfo:hover{
+  background: rgba(201, 201, 200, 0.411);
 }
