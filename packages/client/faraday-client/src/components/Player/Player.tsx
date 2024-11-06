@@ -18,7 +18,7 @@ export default function Player({ audioUrl }: PlayerProps) {
     <div style={{ position: 'absolute', left: 600, top: 0 }}>
       {
         <audio controls ref={audioRef}>
-          <source src={audioUrl} media='audio/mpeg'/>
+          <source src={audioUrl || '#'} media='audio/mpeg'/>
         </audio>
       }
     </div>
