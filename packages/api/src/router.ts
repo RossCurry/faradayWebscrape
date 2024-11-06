@@ -65,10 +65,10 @@ router.use(
 router.use(faradayRouter.routes(), faradayRouter.allowedMethods())
 router.use(spotifyRouter.routes(), spotifyRouter.allowedMethods())
 
-// router.get('/api/faraday/albums', test)
+// router.get('/api/faraday/playlists', test)
 
-async function test(ctx: AppParamContext, _next: Application.Next) {
-  ctx.body = { foo: 'bar' }
-}
+// async function test(ctx: AppParamContext, _next: Application.Next) {
+//   ctx.body = { foo: 'bar' }
+// }
 
 export default router;

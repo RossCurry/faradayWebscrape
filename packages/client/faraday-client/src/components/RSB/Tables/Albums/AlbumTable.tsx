@@ -1,10 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Columnas
  * Artista, album title, disponible, genero, precio
  */
 
 import React, { useEffect, useRef, useState } from 'react'
-import { SpotifySearchResult } from '../../../types/spotify.types'
 import {
   ColumnDef,
   flexRender,
@@ -24,6 +24,7 @@ import {
 } from './sections/columns/columns'
 import TrackTable, { TrackListData } from '../Tracks/TrackTable'
 import Player from '../../Player/Player'
+import { SpotifySearchResult } from '../../../../types/spotify.types'
 
 export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
   const [tracklistVisible, setTrackListVisible] = useState<{ albumId: string | null }>({ albumId: null })
@@ -143,7 +144,7 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
               // 2. the track info for the album
 
               const albumId = row.original.id
-              const handleOnClick = async (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
+              const handleOnClick = async (_e: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
                 console.log('!click', row.original.id)
                 // TODO otra solucion
                 // TODO give it margin        
