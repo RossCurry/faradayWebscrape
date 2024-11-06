@@ -23,8 +23,8 @@ router.use((async (ctx, next) => {
 // TODO investigate more if this is best way to extend routes.
 router.use(faradayRouter.routes(), faradayRouter.allowedMethods());
 router.use(spotifyRouter.routes(), spotifyRouter.allowedMethods());
-// router.get('/api/faraday/albums', test)
-async function test(ctx, _next) {
-    ctx.body = { foo: 'bar' };
-}
+// router.get('/api/faraday/playlists', test)
+// async function test(ctx: AppParamContext, _next: Application.Next) {
+//   ctx.body = { foo: 'bar' }
+// }
 export default router;

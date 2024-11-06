@@ -255,6 +255,16 @@ class MongoDb {
     const faradayData: Array<FaradayItemData & { _id: string }> | undefined =  albums?.map(album => ( { _id: album._id.toString(),  ...album.faraday }))
     return faradayData ? faradayData : []
   }
+ 
+  async getFaradayPlaylistData(userId: string): Promise<SpotifyPlaylist[] | null | undefined> {
+    console.log('!getFaradayPlaylistData -> ');
+    const userCollection = this.db?.collection('users')
+    const projection = { playlists: 1 , _id: 0 }
+    const userPlaylists = await userCollection?.findOne({ _id: new ObjectId(userId) }, { projection })
+    console.log('!userPlaylists -> ', userPlaylists);
+    if (!userPlaylists?.playlists || !Array.isArray(userPlaylists.playlists)) throw Error('Playlists returned is not an array')
+    return userPlaylists.playlists
+  }
 
   async getFaradayDataMissingSpotifyInfo(){
     console.log('!getFaradayDataMissingSpotifyInfo -> ');

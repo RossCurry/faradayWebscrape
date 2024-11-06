@@ -30,4 +30,25 @@ faradayRouter.get("/api/faraday/albums", async (ctx, _next) => {
 //   mw.faraday.setFaradayStock,
 //   // TODO add spotify scrape
 // )
+faradayRouter.get("/api/faraday/playlists", async (ctx, _next) => {
+    const { mongo } = ctx.services;
+    if (!mongo)
+        throw new Error('No mongo object found');
+    try {
+        // TODO use dynamic data once FE is developed
+        // const userId = ctx.services.token.currentUser?.id
+        const userId = '66b9317f5ffd03bdb76b9647';
+        if (!userId)
+            throw Error('Cannot get playlist info. No userId given');
+        const playlistsData = await mongo.getFaradayPlaylistData(userId);
+        console.log('!spotifyData length-> ', playlistsData?.length);
+        ctx.status = 200;
+        ctx.body = playlistsData;
+    }
+    catch (error) {
+        console.error('Error in middleware:', error);
+        ctx.status = 500;
+        ctx.body = 'Internal Server Error';
+    }
+});
 export default faradayRouter;
