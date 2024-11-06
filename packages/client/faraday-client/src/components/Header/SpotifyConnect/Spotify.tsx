@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useSearchParams } from 'react-router-dom';
-import { connectToSpoti, createPlaylist } from '../../services';
+import { connectToSpoti, createPlaylist } from '../../../services';
 
 
 export default function SpotifyConnect() {
