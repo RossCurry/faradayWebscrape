@@ -21,6 +21,7 @@ import {
   category,
   price,
   releaseDate,
+  checkBox
 } from './sections/columns/columns'
 import TrackTable, { TrackListData } from '../Tracks/TrackTable'
 import Player from '../../Player/Player'
@@ -35,6 +36,7 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
   const [audioUrl, setAudioUrl] = useState<string | null>(null)
   const columns = React.useMemo(
     () => [
+      checkBox,
       image,
       albumAndArtist,
       category,
@@ -144,8 +146,12 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
               // 2. the track info for the album
 
               const albumId = row.original.id
-              const handleOnClick = async (_e: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
-                console.log('!click', row.original.id)
+              const handleOnClick = async (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
+                const { tagName } = (e.target as HTMLElement)
+                if (tagName === 'INPUT'){
+                  // TODO selection stuff
+                  return
+                } 
                 // TODO otra solucion
                 // TODO give it margin        
                 // e.currentTarget.scrollIntoView({ behavior: 'smooth' , 

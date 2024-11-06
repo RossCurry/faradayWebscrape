@@ -1,6 +1,7 @@
 import { AccessorColumnDef } from "@tanstack/react-table"
-import { SpotifySearchResult } from "../../../../../types/spotify.types"
 import styles from './columns.module.css'
+import { SpotifySearchResult } from "../../../../../../types/spotify.types"
+import { useState } from "react"
 
 
 export const image: AccessorColumnDef<SpotifySearchResult, { url: SpotifySearchResult["image"]["url"], isSoldOut: SpotifySearchResult["isSoldOut"] }> = {
@@ -138,6 +139,20 @@ export const genre: AccessorColumnDef<SpotifySearchResult, SpotifySearchResult["
   id: 'genre',
   cell: info => info.getValue(),
   header: () => <span>Genre</span>,
+  sortUndefined: 'last', //force undefined values to the end
+  sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
+}
+
+export const checkBox: AccessorColumnDef<SpotifySearchResult, SpotifySearchResult['id']> = {
+  accessorFn: row => row.id,
+  id: 'checkBox',
+  cell: info => {
+    const albumId = info.getValue()
+    return (
+      <input type="checkbox" value={albumId} />
+    )
+  },
+  header: () => <span>Select</span>,
   sortUndefined: 'last', //force undefined values to the end
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
 }
