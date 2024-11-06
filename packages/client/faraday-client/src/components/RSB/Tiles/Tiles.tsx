@@ -1,6 +1,6 @@
 import React from 'react'
 import styles from './tiles.module.css'
-import { SpotifySearchResult } from '../../types/spotify.types'
+import { SpotifySearchResult } from '../../../types/spotify.types'
 
 export type TilesProps = {
   albumCollection: SpotifySearchResult[]

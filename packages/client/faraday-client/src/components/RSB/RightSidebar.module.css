@@ -1,0 +1,14 @@
+.rightSidebar {
+  grid-area: right-sidebar;
+  overflow-y: scroll;
+  position: relative;
+}
+
+#albumCollection {
+  background: rgba(230, 230, 230, 0.25);
+}
+.albumCollection {
+  background: rgba(230, 230, 230, 0.25);
+  /* max-height: 500px;
+  overflow: scroll */
+}

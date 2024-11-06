@@ -1,39 +1,19 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
+import styles from './App.module.css'
 
-import { SpotifySearchResult } from './types/spotify.types'
-import styles from './app.module.css'
-import { getAvailableAlbums } from './services'
-import AlbumTable from './components/Tables/Albums/AlbumTable'
 import Header from './components/Header/Header'
+import LeftSidebar from './components/LSB/LeftSidebar'
+import RightSidebar from './components/RSB/RightSidebar'
 
 
 
 function App() {
-  const [albumCollection, setAlbumCollection] = useState<SpotifySearchResult[] | null>(null)
-
-
-  
-  useEffect(() => {
-    async function updateAlbums(){
-      const availableAlbums = await getAvailableAlbums()
-      if (availableAlbums) setAlbumCollection(availableAlbums)
-    }
-    updateAlbums()
-  }, [])
-
   return (
-    <>
+    <div id={'appLayout'} className={styles.appLayout} >
       <Header />
-      <main>
-        <section id='albumCollection' className={styles.albumCollection}>
-          {/* <h2>grid section</h2> */}
-          {albumCollection &&
-            <AlbumTable data={albumCollection} />
-          }
-        </section>
-      </main>
-      
-    </>
+      <LeftSidebar />
+      <RightSidebar />
+    </div>
   )
 }
 

@@ -1,0 +1,4 @@
+.leftSidebar {
+  grid-area: left-sidebar;
+  overflow-y: scroll;
+}
