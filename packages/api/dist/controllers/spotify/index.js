@@ -1,6 +1,8 @@
 import Router from 'koa-router';
 import mw from '#middlewares/index.js';
 import { redirectToSpotifyAuthorize } from './auth/PKCE/1.codeChallenge.js';
+import { user } from '../../constants.js';
+import { getPlaylistImage } from '#middlewares/spotify/playlists/updateCoverImage.js';
 const spotifyRouter = new Router();
 // // Temporary Route to update missing genre field for existing
 // spotifyRouter.post("/api/spotify/albums/update/properties",
@@ -14,16 +16,7 @@ mw.spotify.setSpotifyAlbumInfo);
 spotifyRouter.post("/api/spotify/tracks/update", mw.spotify.getSpotifyAlbumInfo, // from db
 mw.auth.getClientCredentialToken, mw.spotify.getSpotifyTracksInfo, // from spoti api
 mw.spotify.setSpotifyTrackInfo);
-spotifyRouter.post('/api/spotify/playlist/create', 
-// TODO add accessToken to ctx.state
-// async (ctx: AppContext, next: Application.Next) => {
-//   const accessToken = ctx.body && typeof ctx.body === 'object' && 'accessToken' in ctx.body && ctx.body.accessToken || undefined;
-//   console.log('!body -> ', ctx.body);
-//   console.log('!accessToken -> ', accessToken);
-//   ctx.state.accessToken = accessToken
-//   next()
-// },
-mw.spotify.CreatePlaylist, mw.spotify.PopulatePlaylist);
+spotifyRouter.post('/api/spotify/playlist/create', mw.auth.getClientCredentialToken, mw.spotify.playlists.CreatePlaylist, mw.spotify.playlists.PopulatePlaylist);
 // Helper route to update playlist images for user X
 spotifyRouter.post('/api/spotify/playlist/updateCoverImage/:playlistId', mw.auth.getClientCredentialToken, mw.spotify.playlists.updateCoverImage);
 /**
@@ -45,8 +38,8 @@ spotifyRouter.get('/api/spotify/connect', async (ctx, _next) => {
  */
 spotifyRouter.post("/api/spotify/redirect", mw.auth.getPCKECredentialsToken, // use code from url
 mw.spotify.getCurrentUser, // get user info
-mw.spotify.CreatePlaylist, // user info needed for playlist creation
-mw.spotify.PopulatePlaylist);
+mw.spotify.playlists.CreatePlaylist, // user info needed for playlist creation
+mw.spotify.playlists.PopulatePlaylist);
 /**
  * Testing spotfiy search single album
  */
@@ -69,6 +62,59 @@ spotifyRouter.get("/api/spotify/album/:id/tracks", async (ctx, _next) => {
         console.error('Error in middleware:', error);
         ctx.status = 500;
         ctx.body = 'Internal Server Error';
+    }
+});
+spotifyRouter.get("/api/spotify/playlists", mw.auth.getClientCredentialToken, 
+// Get playlists
+// Find playlists missing images
+// fetch those images 
+// update those images in db
+// return everything updated to the FE
+async (ctx, next) => {
+    const { mongo } = ctx.services;
+    if (!mongo)
+        throw new Error('No mongo object found');
+    try {
+        const userId = ctx.services.token.getUserInfo()?.id || user.freezeId;
+        if (!userId)
+            throw Error('Cannot get playlist info. No userId given');
+        const playlistsData = await mongo.getFaradayPlaylistData(userId);
+        console.log('!spotifyData length-> ', playlistsData?.length);
+        ctx.state.data.userPlaylists = playlistsData;
+        await next();
+    }
+    catch (error) {
+        console.error('Error in middleware:', error);
+        ctx.status = 500;
+        ctx.body = `Internal Server Error: ${error}`;
+    }
+}, async (ctx, _next) => {
+    // Find playlists missing images
+    const userId = ctx.services.token.currentUser?.id || user.freezeId;
+    const accessToken = ctx.services.token.accessToken;
+    if (!userId)
+        throw Error('Cannot get playlist images. No userId found');
+    if (!accessToken)
+        throw Error('Cannot get playlist images. No accessToken found');
+    if (!ctx.state.data.userPlaylists)
+        throw Error('Cannot get playlist images. No userPlaylists found');
+    try {
+        const playlistsToUpdate = await Promise.all(ctx.state.data.userPlaylists.map(async (playlist) => {
+            const imageInfo = await getPlaylistImage(playlist.id, accessToken);
+            // Set in DB for next time
+            const updated = await ctx.services.mongo.setCoverImage(userId, playlist.id, imageInfo);
+            // Update in Memory for response
+            playlist.images = imageInfo;
+            return playlist;
+        }));
+        console.log('!playlistsToUpdate -> ', playlistsToUpdate);
+        ctx.body = playlistsToUpdate;
+        ctx.status = 200;
+    }
+    catch (error) {
+        console.error('Error in middleware:', error);
+        ctx.status = 500;
+        ctx.body = `Internal Server Error: ${error}`;
     }
 });
 export default spotifyRouter;

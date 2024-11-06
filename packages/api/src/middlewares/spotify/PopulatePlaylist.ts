@@ -7,7 +7,7 @@ type SnapshotResponse = {
   snapshot_id: string
 }
 
-export default async function PopulatePlaylist(ctx: AppContext, _next: Application.Next) {
+export default async function PopulatePlaylist(ctx: AppContext, next: Application.Next) {
   const playlistData =  await ctx.services.mongo.getPlaylistData()
   if (!playlistData.length) throw new Error('No spotify track ids found')
   const playlist = ctx.state.playlist
@@ -55,6 +55,7 @@ export default async function PopulatePlaylist(ctx: AppContext, _next: Applicati
         throw error
       }
     }
-    ctx.body = JSON.stringify(snapshots)
-    ctx.status = 200
+  ctx.body = JSON.stringify(snapshots)
+  ctx.status = 200
+  next()
 }

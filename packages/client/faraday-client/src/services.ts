@@ -85,7 +85,7 @@ export async function getTrackList(albumId: string) {
 
 // TODO send user id
 export async function getAvailablePlaylists(){
-  const getAlbumsPath = '/api/faraday/playlists'
+  const getAlbumsPath = '/api/spotify/playlists'
   const response = await fetch(baseUrlDev + getAlbumsPath)
   if (response.ok){
     const jsonRes: SpotifyPlaylist[] = await response.json()

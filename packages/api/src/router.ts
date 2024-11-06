@@ -18,17 +18,18 @@ import { SpotifySearchProjection } from '#middlewares/spotify/getAlbumInfo.js'
 
 export interface AppState extends Application.DefaultState {
   accessToken?: string | null,
-  playlist: SpotifyPlaylist | undefined,
+  playlist?: SpotifyPlaylist,
   playlistInfo?: Record<string, any>,
   data: {
     spotifyTrackInfo?: Array<{tracks: SpotifyAlbumTracksResponse, album: SpotifySearchResult}>,
     spotifyAlbumInfo?: SpotifySearchResult[],
     searchResults?: Array<{
       faraday: FaradayItemData,
-      spotify: SpotifySearchProjection | undefined
+      spotify?: SpotifySearchProjection
     }>,
     faraday?: ScrapedData,
-    playlistCoverImage?: SpotifyCoverImageResponse
+    playlistCoverImage?: SpotifyCoverImageResponse,
+    userPlaylists?: SpotifyPlaylist[] | null
   },
 }
 export interface AppContext extends Application.BaseContext {

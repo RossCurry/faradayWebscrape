@@ -10,17 +10,19 @@ import searchSingleTitle from "./searchSingleTitle.js";
 import getAlbumsAndSetProperties from "./getAlbumsAndSetProperties.js";
 import updateCoverImage from "./playlists/updateCoverImage.js";
 export default {
-    CreatePlaylist,
+    // CreatePlaylist,
     getAlbumInfoSpotify,
     getCurrentUser,
     getAlbumsAndSetProperties,
     getSpotifyAlbumInfo,
     getSpotifyTracksInfo,
-    PopulatePlaylist,
+    // PopulatePlaylist,
     setSpotifyAlbumInfo,
     setSpotifyTrackInfo,
     searchSingleTitle,
     playlists: {
-        updateCoverImage
+        CreatePlaylist,
+        PopulatePlaylist,
+        updateCoverImage,
     }
 };

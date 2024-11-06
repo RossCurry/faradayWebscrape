@@ -1,5 +1,5 @@
 import { getBatches } from '#utils/utils.js';
-export default async function PopulatePlaylist(ctx, _next) {
+export default async function PopulatePlaylist(ctx, next) {
     const playlistData = await ctx.services.mongo.getPlaylistData();
     if (!playlistData.length)
         throw new Error('No spotify track ids found');
@@ -50,4 +50,5 @@ export default async function PopulatePlaylist(ctx, _next) {
     }
     ctx.body = JSON.stringify(snapshots);
     ctx.status = 200;
+    next();
 }
