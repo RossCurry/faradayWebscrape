@@ -4,12 +4,13 @@ dotenv.config();
 
 import { FaradayItemData } from '#controllers/faraday/getItemData.js'
 import { AppState } from '../../router.js'
-import { SpotifyAlbum, SpotifyPlaylist, SpotifySearchResult, SpotifyUserProfile } from '#controllers/spotify/spotify.types.js'
+import { SpotifyAlbum, SpotifyCoverImageResponse, SpotifyPlaylist, SpotifySearchResult, SpotifyUserProfile } from '#controllers/spotify/spotify.types.js'
 import { AuthToken } from '#services/token/Token.js';
-import spotify from '#middlewares/spotify/index.js';
 
 class MongoDb {
   db: mongoDB.Db | null = null
+  // TODO redo this class to have an OOP spotify & faraday classes
+  // spotify: SpotifyMongo | null = null
   constructor(){
     console.log('!MongoDb  constructor-> ')
     this.init()
@@ -355,6 +356,28 @@ class MongoDb {
     return tracks
   }
 
+  /**
+   * Sets cover image info for a playlist
+   * @param userId ObjectId
+   * @param playlistId string
+   * @param coverImageInfo Array<{url}>
+   * @returns 
+   */
+  async setCoverImage(userId: string, playlistId: string, coverImageInfo: SpotifyCoverImageResponse){
+    console.log('!setCoverImage -> ', userId, playlistId, coverImageInfo.length);
+    const usersCollection = this.db?.collection('users')
+    if (!usersCollection) throw new Error('No users collecion found')
+    // An alternative approach would be to use arrayFilters. lets see.
+    /**
+     *  { _id: userId },
+        { $set: { "playlists.$[elem].images": coverImageInfo } },
+        { arrayFilters: [{ "elem.id": playlistId }] }
+     */
+    const match = { _id: new ObjectId(userId), 'playlists.id': playlistId }
+    const update = { $set: { "playlists.$.images": coverImageInfo } }
+    const updated = await usersCollection.updateOne(match, update)
+    return updated
+  }
 
 }
 

@@ -7,7 +7,7 @@ import CodeVerifier from '#services/codeVerifier/CodeVerifier.js'
 import Token from '#services/token/Token.js'
 
 // types
-import type { SpotifyAlbumTracksResponse, SpotifyPlaylist, SpotifySearchResult } from '#controllers/spotify/spotify.types.js'
+import type { SpotifyAlbumTracksResponse, SpotifyCoverImageResponse, SpotifyPlaylist, SpotifySearchResult } from '#controllers/spotify/spotify.types.js'
 import type { FaradayItemData, ScrapedData } from '#controllers/faraday/getItemData.js'
 
 // routers
@@ -27,10 +27,12 @@ export interface AppState extends Application.DefaultState {
       faraday: FaradayItemData,
       spotify: SpotifySearchProjection | undefined
     }>,
-    faraday?: ScrapedData
+    faraday?: ScrapedData,
+    playlistCoverImage?: SpotifyCoverImageResponse
   },
 }
 export interface AppContext extends Application.BaseContext {
+  params: Record<string, string>
   state: AppState,
   services: {
     codeVerifier: CodeVerifier;

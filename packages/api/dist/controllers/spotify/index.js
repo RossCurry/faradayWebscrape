@@ -24,6 +24,8 @@ spotifyRouter.post('/api/spotify/playlist/create',
 //   next()
 // },
 mw.spotify.CreatePlaylist, mw.spotify.PopulatePlaylist);
+// Helper route to update playlist images for user X
+spotifyRouter.post('/api/spotify/playlist/updateCoverImage/:playlistId', mw.auth.getClientCredentialToken, mw.spotify.playlists.updateCoverImage);
 /**
  * main request from UI to send code verification to spoti auth
  * & redirect FE to the spoti auth

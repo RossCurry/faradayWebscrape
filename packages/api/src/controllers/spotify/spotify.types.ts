@@ -750,3 +750,9 @@ export type SearchResponse =
     popularity: number;
   };
   
+
+export type SpotifyCoverImageResponse = Array<{
+  height: number,
+  width: number,
+  url: string
+}>

@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 dotenv.config();
 class MongoDb {
     db = null;
+    // TODO redo this class to have an OOP spotify & faraday classes
+    // spotify: SpotifyMongo | null = null
     constructor() {
         console.log('!MongoDb  constructor-> ');
         this.init();
@@ -322,6 +324,29 @@ class MongoDb {
         const albumInfo = await albumCollection?.findOne(match, { projection });
         const tracks = albumInfo?.spotify.trackInfo;
         return tracks;
+    }
+    /**
+     * Sets cover image info for a playlist
+     * @param userId ObjectId
+     * @param playlistId string
+     * @param coverImageInfo Array<{url}>
+     * @returns
+     */
+    async setCoverImage(userId, playlistId, coverImageInfo) {
+        console.log('!setCoverImage -> ', userId, playlistId, coverImageInfo.length);
+        const usersCollection = this.db?.collection('users');
+        if (!usersCollection)
+            throw new Error('No users collecion found');
+        // An alternative approach would be to use arrayFilters. lets see.
+        /**
+         *  { _id: userId },
+            { $set: { "playlists.$[elem].images": coverImageInfo } },
+            { arrayFilters: [{ "elem.id": playlistId }] }
+         */
+        const match = { _id: new ObjectId(userId), 'playlists.id': playlistId };
+        const update = { $set: { "playlists.$.images": coverImageInfo } };
+        const updated = await usersCollection.updateOne(match, update);
+        return updated;
     }
 }
 export default MongoDb;
