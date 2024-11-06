@@ -274,7 +274,11 @@ class MongoDb {
     if (!this.db) throw new Error('No DB found')
       const albumCollection = this.db?.collection('albums')
     if (!albumCollection) throw new Error('No albumCollection found')
-      const albums = await albumCollection?.find({'spotify.trackIds': { '$exists': true } }, {}).toArray()
+    const match = {
+      'faraday.isSoldOut': false ,
+      'spotify.trackIds': { '$exists': true }
+    }
+    const albums = await albumCollection?.find(match, {}).toArray()
     if (!albums) return []
     const playlistData: { trackIds: string}[] =  albums
     .filter(album => !!album )
