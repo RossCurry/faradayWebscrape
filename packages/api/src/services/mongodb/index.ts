@@ -263,7 +263,7 @@ class MongoDb {
     const projection = { playlists: 1 , _id: 0 }
     const sort = { createdTime: 'desc' as 'desc' }
     const userPlaylists = await userCollection?.findOne({ _id: new ObjectId(userId) }, { projection, sort })
-    console.log('!userPlaylists -> ', userPlaylists);
+    console.log('!userPlaylists -> ', userPlaylists?.length);
     if (!userPlaylists?.playlists || !Array.isArray(userPlaylists.playlists)) throw Error('Playlists returned is not an array')
     return userPlaylists.playlists
   }
