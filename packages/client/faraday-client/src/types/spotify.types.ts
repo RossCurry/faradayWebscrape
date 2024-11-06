@@ -445,21 +445,20 @@ export type SearchResponse =
         width: number
        }[],
     name: string,
-    owner: Record<string, any>,
-    // owner: {
-    //   "external_urls": {
-    //     "spotify": "string"
-    //   },
-    //   "followers": {
-    //     "href": "string",
-    //     "total": 0
-    //   },
-    //   "href": "string",
-    //   "id": "string",
-    //   "type": "user",
-    //   "uri": "string",
-    //   "display_name": "string"
-    // },
+    owner: {
+      "external_urls": {
+        "spotify": "string"
+      },
+      "followers": {
+        "href": "string",
+        "total": 0
+      },
+      "href": "string",
+      "id": "string",
+      "type": "user",
+      "uri": "string",
+      "display_name": "string"
+    },
     public: boolean,
     snapshot_id: string,
     tracks: Record<string, any>

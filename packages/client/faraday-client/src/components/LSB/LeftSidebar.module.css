@@ -2,3 +2,48 @@
   grid-area: left-sidebar;
   overflow-y: scroll;
 }
+
+/* reset */
+.playlistCollection,
+.playlistItem,
+.playlistItem img,
+.playlistItem p {
+ padding: 0;
+ margin: 0;
+}
+
+.playlistContainer {
+  padding: 1em;
+}
+
+.playlistCollection{
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.playlistItem,
+.playlistItem img.playlistItemImg {
+  border-radius: 8px;
+}
+
+.playlistItem img.playlistItemImg {
+  width: 50px;  /* Set the width */
+  height: auto;  /* Adjusts the height proportionally */
+  object-fit: contain; /* Maintains aspect ratio without cropping */
+  margin-right: 1rem;
+}
+
+.playlistItem{
+  list-style: none;
+  display: flex;
+}
+.playlistItem:hover{
+  background: rgba(201, 201, 200, 0.411);
+}
+
+.playlistItemInfo {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
