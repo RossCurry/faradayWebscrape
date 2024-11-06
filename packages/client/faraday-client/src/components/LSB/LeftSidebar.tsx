@@ -35,9 +35,13 @@ export default function LeftSidebar() {
 
 
 export function PlaylistItem({playlist}: { playlist: SpotifyPlaylist}) {
+  const smallestImage = playlist.images.at(-1)
   return (
     <li className={styles.playlistItem}>
-      <img src={faradayLogo} className={styles.playlistItemImg} alt="Vite logo" />
+      {smallestImage
+       ? <span className={styles.playlistItemBgImg} style={{ backgroundImage: `url(${smallestImage.url})` }}></span>
+       : <img src={faradayLogo} className={styles.playlistItemImg} alt="Vite logo" />
+      }
       <div className={styles.playlistItemInfo}>
         <p>{playlist.name}</p>
         <p>{playlist.owner.id}</p>
