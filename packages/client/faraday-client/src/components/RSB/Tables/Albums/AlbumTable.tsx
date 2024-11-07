@@ -4,7 +4,7 @@
  * Artista, album title, disponible, genero, precio
  */
 
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import {
   ColumnDef,
   flexRender,
@@ -27,13 +27,41 @@ import TrackTable, { TrackListData } from '../Tracks/TrackTable'
 import Player from '../../Player/Player'
 import { SpotifySearchResult } from '../../../../types/spotify.types'
 
+type CheckedAlbumDict = {
+  [K in SpotifySearchResult['id']]: boolean
+}
+export type CheckedTrackDict = {
+  [K in SpotifySearchResult['trackList'][number]['id']]: boolean
+}
+export type AlbumItemTableData = SpotifySearchResult & { isChecked: boolean }
+
 export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
+  const checkedAlbumDictionary = useMemo(() => data.reduce((dict: CheckedAlbumDict, album: SpotifySearchResult) => {
+    dict[album.id] = false
+    return dict;
+  }, {} as CheckedAlbumDict), [data])
+  const checkedTrackDictionary = useMemo(() => data.reduce((dict: CheckedAlbumDict, album: SpotifySearchResult) => {
+    album.trackList.forEach(track =>{
+      dict[track.id] = false
+    })
+    return dict;
+  }, {} as CheckedAlbumDict),[data])
+  const [customPlaylistAlbumSelection, setCustomPlaylistAlbumSelection] = useState<CheckedAlbumDict>(checkedAlbumDictionary)
+  const [customPlaylist, setCustomPlaylist] = useState<CheckedTrackDict>(checkedTrackDictionary)
+  const [customPlaylistArray, setCustomPlaylistArray] = useState<string[]>([])
   const [tracklistVisible, setTrackListVisible] = useState<{ albumId: string | null }>({ albumId: null })
   const tableAlbumsRef = useRef<HTMLTableElement>(null)
   const [tracklistNumTracks, setTracklistNumTracks] = useState<number>(0)
   const [tracklist, setTracklist] = useState<TrackListData[] | null>(null)
   const [sorting, setSorting] = useState<SortingState>([])
   const [audioUrl, setAudioUrl] = useState<string | null>(null)
+  console.log('!customPlaylistSelection -> ', customPlaylistAlbumSelection);
+  const dataWithCheckbox = useMemo(() => data.map(album => {
+    return {
+      ...album,
+      isChecked: customPlaylistAlbumSelection[album.id]
+    }
+  }),[customPlaylistAlbumSelection, data])
   const columns = React.useMemo(
     () => [
       checkBox,
@@ -46,7 +74,7 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
   )
   const table = useReactTable({
     columns,
-    data,
+    data: dataWithCheckbox,
     debugTable: true,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(), //client-side sorting
@@ -149,19 +177,27 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
               const handleOnClick = async (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
                 const { tagName } = (e.target as HTMLElement)
                 if (tagName === 'INPUT'){
-                  // TODO selection stuff
+                  const { target } = e;
+                  const { value: albumId, checked } = (target as HTMLInputElement)
+                  setCustomPlaylistAlbumSelection(selection => ({
+                    ...selection,
+                    [albumId]: checked
+                  }))
                   return
                 } 
                 // TODO otra solucion
-                // TODO give it margin        
-                // e.currentTarget.scrollIntoView({ behavior: 'smooth' , 
-                //   block: 'start', inline: 'start'
-                // })
+                // TODO give it margin
+                // e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest'})
                 // Toggle
                 setTrackListVisible({ albumId: tracklistVisible.albumId === albumId ? null : albumId })
                 // Sets the height for the dropdown
                 setTracklistNumTracks(row.original.totalTracks)
-                setTracklist(row.original.trackList)
+                setTracklist(row.original.trackList.map(track => ({ 
+                  ...track, 
+                  isChecked: customPlaylistArray.includes(track.id),
+                  // isChecked: customPlaylist[track.id],
+                  imageUrl: row.original.image.url,
+                })))
               }
               return (
                 <>
@@ -192,28 +228,16 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
                           ${tracklistVisible.albumId === albumId ? styles.albumTrackListOpen : ''}
                         `}
                       >
-
-                        {/* {Array.from({ length: row.original.totalTracks}).map(() => {
-                          return (
-                            <div style={{ height: 'var(--trackListRowHeight)'}}>work</div>
-                          )
-                        })} */}
                         {tracklist && 
                           <TrackTable 
                             data={tracklist} 
                             key={row.original.id} 
-                            imageUrl={row.original.image.url} 
                             setAudioUrl={setAudioUrl}
+                            // setCustomPlaylist={setCustomPlaylist}
+                            setCustomPlaylistArray={setCustomPlaylistArray}
+                            customPlaylistArray={customPlaylistArray}
                           />
                         }
-                        {/* {tracklist && tracklist.map((trackData) => {
-                          console.log('!track', trackData)
-                          return (
-                            <div style={{ height: 'var(--trackListRowHeight)' }}>
-                              {trackData.name}
-                            </div>
-                          )
-                        })} */}
                       </div>
                     </td>
                   </tr>
