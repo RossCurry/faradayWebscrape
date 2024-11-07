@@ -30,3 +30,7 @@
 .rowDataTrack p:nth-child(2) {
   font-size: 0.9rem;
 }
+
+input.rowDataTrack {
+  width: 3rem;
+}

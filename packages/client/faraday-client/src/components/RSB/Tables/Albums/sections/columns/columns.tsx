@@ -149,10 +149,15 @@ export const checkBox: AccessorColumnDef<AlbumItemTableData, { albumId: SpotifyS
   cell: info => {
     const {albumId, isChecked} = info.getValue()
     return (
-      <input type="checkbox" value={albumId} checked={isChecked}/>
+      <input
+        className={styles.rowDataCheckbox}
+        type="checkbox" 
+        value={albumId} 
+        checked={isChecked}
+      />
     )
   },
-  header: () => <span>Select</span>,
+  header: () => null,
 }
 
 

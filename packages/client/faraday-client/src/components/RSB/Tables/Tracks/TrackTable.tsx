@@ -3,18 +3,16 @@ import {
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
+  Row,
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
 import styles from './TrackTable.module.css'
 import {
   image,
-  // title,
   songAndArtist,
-  // artists,
   duration,
   trackNumber,
-  // player,
   checkBox
 } from './columns/columns'
 import { CheckedTrackDict } from '../Albums/AlbumTable'
@@ -25,8 +23,6 @@ export type TrackListColumnData = TrackListData & { isChecked: boolean }
 export type TrackTableProps = { data: TrackListData[] } & { 
   setAudioUrl: React.Dispatch<React.SetStateAction<string | null>>,
   setCustomPlaylist: React.Dispatch<React.SetStateAction<CheckedTrackDict>>,
-  setCustomPlaylistArray: React.Dispatch<React.SetStateAction<string[]>>,
-  customPlaylistArray: string[],
   customPlaylist: CheckedTrackDict
 }
 export default function TrackTable({
@@ -34,11 +30,10 @@ export default function TrackTable({
   setAudioUrl,
   customPlaylist,
   setCustomPlaylist,
-  setCustomPlaylistArray,
-  customPlaylistArray,
 }: TrackTableProps) {
   const tableTracksRef = useRef<HTMLTableElement>(null)
   const [sorting, setSorting] = useState<SortingState>([])
+  
   const dataWithCheckbox = useMemo(() => data.map(track => {
     return {
       ...track,
@@ -72,7 +67,6 @@ export default function TrackTable({
         delete copy[trackId]
         return copy
       })
-      // setCustomPlaylistArray(checked ? customPlaylistArray.concat(trackId) : customPlaylistArray.filter(id => id !== trackId))
       return
     }
     setAudioUrl(audioUrl)
@@ -85,22 +79,8 @@ export default function TrackTable({
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(), //client-side sorting
     onSortingChange: setSorting, //optionally control sorting state in your own scope for easy access
-    state: {
-      sorting,
-    },
-    // autoResetPageIndex: false, // turn off page index reset when sorting or filtering - default on/true
-    // enableMultiSort: false, //Don't allow shift key to sort multiple columns - default on/true
-    // enableSorting: false, // - default on/true
-    // enableSortingRemoval: false, //Don't allow - default on/true
-    // isMultiSortEvent: (e) => true, //Make all clicks multi-sort - default requires `shift` key
-    // maxMultiSortColCount: 3, // only allow 3 columns to be sorted at once - default is Infinity
+    state: { sorting },
   })
-
-  /**
-   * Css variable useEffect. 
-   * Sets num of tracks which sets height of tracklist
-   * calc(var(--trackListNumTracks) * var(--trackListRowHeight))
-   */
 
   return (
     <div className="p-2">
@@ -156,20 +136,11 @@ export default function TrackTable({
             .rows
             .map(row => {
               return (
-                <>
-                  <tr key={row.id} className={styles.trackRows} onClick={(e) => handleOnClick(e, row.original.preview_url)}>
-                    {row.getVisibleCells().map(cell => {
-                      return (
-                        <td key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </td>
-                      )
-                    })}
-                  </tr>
-                </>
+                <TrackRowMemoized 
+                  key={row.id + row.original.id}
+                  row={row}
+                  handleOnClick={handleOnClick}
+                />
               )
             })}
         </tbody>
@@ -177,3 +148,31 @@ export default function TrackTable({
     </div>
   )
 }
+
+type TrackRowMemoizedProps = {
+  row: Row<TrackListColumnData>
+  handleOnClick: (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, audioUrl: string) => void
+}
+const TrackRowMemoized = React.memo(({
+  row,
+  handleOnClick
+}: TrackRowMemoizedProps) => {
+  return (
+    <tr 
+      key={row.id} 
+      className={styles.trackRows} 
+      onClick={(e) => handleOnClick(e, row.original.preview_url)}
+    >
+      {row.getVisibleCells().map(cell => {
+        return (
+          <td key={cell.id}>
+            {flexRender(
+              cell.column.columnDef.cell,
+              cell.getContext()
+            )}
+          </td>
+        )
+      })}
+    </tr>
+  )
+})

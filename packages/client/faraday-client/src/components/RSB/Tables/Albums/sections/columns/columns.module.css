@@ -33,6 +33,10 @@
   background-color: rgb(208, 44, 38);
 }
 
+.rowDataCheckbox{
+  width: 3rem;
+}
+
 .albumItemSoldOut {
   content: '';
   position: absolute;

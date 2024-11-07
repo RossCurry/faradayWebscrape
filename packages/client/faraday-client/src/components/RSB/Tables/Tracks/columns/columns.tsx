@@ -122,8 +122,13 @@ export const checkBox: AccessorColumnDef<TrackListColumnData, { trackId: TrackLi
   cell: info => {
     const {trackId, isChecked} = info.getValue()
     return (
-      <input type="checkbox" value={trackId} checked={isChecked}/>
+      <input
+        className={styles.rowDataTrack}
+        type="checkbox" 
+        value={trackId} 
+        checked={isChecked}
+      />
     )
   },
-  header: () => <span>Select</span>,
+  header: () => null,
 }
