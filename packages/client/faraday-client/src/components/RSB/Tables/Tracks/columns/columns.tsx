@@ -115,3 +115,15 @@ export const player: AccessorColumnDef<TrackListColumnData, TrackListColumnData[
   sortUndefined: 'last', //force undefined values to the end
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
 }
+
+export const checkBox: AccessorColumnDef<TrackListColumnData, { trackId: TrackListColumnData['id'], isChecked: boolean }> = {
+  accessorFn: row => ({ trackId: row.id, isChecked: row.isChecked }),
+  id: 'checkBox',
+  cell: info => {
+    const {trackId, isChecked} = info.getValue()
+    return (
+      <input type="checkbox" value={trackId} checked={isChecked}/>
+    )
+  },
+  header: () => <span>Select</span>,
+}

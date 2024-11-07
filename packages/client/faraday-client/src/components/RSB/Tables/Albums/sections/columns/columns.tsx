@@ -1,10 +1,10 @@
 import { AccessorColumnDef } from "@tanstack/react-table"
 import styles from './columns.module.css'
 import { SpotifySearchResult } from "../../../../../../types/spotify.types"
-import { useState } from "react"
+import { AlbumItemTableData } from "../../AlbumTable"
 
 
-export const image: AccessorColumnDef<SpotifySearchResult, { url: SpotifySearchResult["image"]["url"], isSoldOut: SpotifySearchResult["isSoldOut"] }> = {
+export const image: AccessorColumnDef<AlbumItemTableData, { url: SpotifySearchResult["image"]["url"], isSoldOut: SpotifySearchResult["isSoldOut"] }> = {
   accessorFn: ({ isSoldOut, image }) => {
     return {
       url: image.url,
@@ -31,7 +31,7 @@ export const image: AccessorColumnDef<SpotifySearchResult, { url: SpotifySearchR
   enableSorting: false
 }
 
-export const albumAndArtist: AccessorColumnDef<SpotifySearchResult, SpotifySearchResult> = {
+export const albumAndArtist: AccessorColumnDef<AlbumItemTableData, SpotifySearchResult> = {
   accessorFn: row => row,
   id: 'albumInfo',
   cell: info => {
@@ -50,7 +50,7 @@ export const albumAndArtist: AccessorColumnDef<SpotifySearchResult, SpotifySearc
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
 }
 
-export const album: AccessorColumnDef<SpotifySearchResult, SpotifySearchResult["name"]> = {
+export const album: AccessorColumnDef<AlbumItemTableData, SpotifySearchResult["name"]> = {
   accessorFn: row => row.name,
   id: 'album',
   cell: info => <span className={styles.rowDataAlbum}>{info.getValue() as string}</span>,
@@ -59,7 +59,7 @@ export const album: AccessorColumnDef<SpotifySearchResult, SpotifySearchResult["
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
 }
 
-export const artists: AccessorColumnDef<SpotifySearchResult, SpotifySearchResult["artists"]> = {
+export const artists: AccessorColumnDef<AlbumItemTableData, SpotifySearchResult["artists"]> = {
   accessorFn: row => row.artists,
   id: 'artists',
   cell: info => <span className={styles.rowDataArtist}>{info.getValue().join(', ')}</span>,
@@ -68,7 +68,7 @@ export const artists: AccessorColumnDef<SpotifySearchResult, SpotifySearchResult
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
 }
 
-export const availablity: AccessorColumnDef<SpotifySearchResult, SpotifySearchResult["isSoldOut"]> = {
+export const availablity: AccessorColumnDef<AlbumItemTableData, SpotifySearchResult["isSoldOut"]> = {
   accessorFn: row => row.isSoldOut,
   id: 'availablity',
   cell: info => {
@@ -84,7 +84,7 @@ export const availablity: AccessorColumnDef<SpotifySearchResult, SpotifySearchRe
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
 }
 
-export const category: AccessorColumnDef<SpotifySearchResult, SpotifySearchResult["category"]> = {
+export const category: AccessorColumnDef<AlbumItemTableData, SpotifySearchResult["category"]> = {
   accessorFn: row => row.category,
   id: 'category',
   cell: info => info.getValue() || '',
@@ -93,7 +93,7 @@ export const category: AccessorColumnDef<SpotifySearchResult, SpotifySearchResul
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
 }
 
-export const price: AccessorColumnDef<SpotifySearchResult, SpotifySearchResult["price"]> = {
+export const price: AccessorColumnDef<AlbumItemTableData, SpotifySearchResult["price"]> = {
   accessorFn: row => row.price,
   id: 'price',
   cell: info => {
@@ -110,7 +110,7 @@ export const price: AccessorColumnDef<SpotifySearchResult, SpotifySearchResult["
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
 }
 
-export const popularity: AccessorColumnDef<SpotifySearchResult, SpotifySearchResult["popularity"]> = {
+export const popularity: AccessorColumnDef<AlbumItemTableData, SpotifySearchResult["popularity"]> = {
   accessorFn: row => row.popularity,
   id: 'popularity',
   cell: info => info.getValue(),
@@ -119,7 +119,7 @@ export const popularity: AccessorColumnDef<SpotifySearchResult, SpotifySearchRes
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
 }
 
-export const releaseDate: AccessorColumnDef<SpotifySearchResult, SpotifySearchResult["releaseDate"]> = {
+export const releaseDate: AccessorColumnDef<AlbumItemTableData, SpotifySearchResult["releaseDate"]> = {
   accessorFn: row => row.releaseDate,
   id: 'release',
   cell: info => {
@@ -134,7 +134,7 @@ export const releaseDate: AccessorColumnDef<SpotifySearchResult, SpotifySearchRe
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
 }
 
-export const genre: AccessorColumnDef<SpotifySearchResult, SpotifySearchResult["genres"]> = {
+export const genre: AccessorColumnDef<AlbumItemTableData, SpotifySearchResult["genres"]> = {
   accessorFn: row => row.genres,
   id: 'genre',
   cell: info => info.getValue(),
@@ -143,18 +143,16 @@ export const genre: AccessorColumnDef<SpotifySearchResult, SpotifySearchResult["
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
 }
 
-export const checkBox: AccessorColumnDef<SpotifySearchResult, SpotifySearchResult['id']> = {
-  accessorFn: row => row.id,
+export const checkBox: AccessorColumnDef<AlbumItemTableData, { albumId: SpotifySearchResult['id'], isChecked: boolean }> = {
+  accessorFn: row => ({ albumId: row.id, isChecked: row.isChecked }),
   id: 'checkBox',
   cell: info => {
-    const albumId = info.getValue()
+    const {albumId, isChecked} = info.getValue()
     return (
-      <input type="checkbox" value={albumId} />
+      <input type="checkbox" value={albumId} checked={isChecked}/>
     )
   },
   header: () => <span>Select</span>,
-  sortUndefined: 'last', //force undefined values to the end
-  sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
 }
 
 

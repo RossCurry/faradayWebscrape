@@ -1,67 +1,74 @@
-/**
- * Columnas: TBC
- */
-
-import React, { useEffect, useRef, useState } from 'react'
-import { SpotifySearchResult } from '../../../types/spotify.types'
+import React, { useRef, useState } from 'react'
 import {
-  ColumnDef,
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
-  SortingFn,
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
 import styles from './TrackTable.module.css'
 import {
   image,
-  title,
+  // title,
   songAndArtist,
   // artists,
   duration,
   trackNumber,
-  player,
+  // player,
+  checkBox
 } from './columns/columns'
+import { CheckedTrackDict } from '../Albums/AlbumTable'
+import { SpotifySearchResult } from '../../../../types/spotify.types'
 
-export type TrackListData = SpotifySearchResult["trackList"][number]
-export type TrackListColumnData = TrackListData & { imageUrl: string }
+export type TrackListData = SpotifySearchResult["trackList"][number] & { isChecked: boolean, imageUrl: string }
+export type TrackListColumnData = TrackListData
 export type TrackTableProps = { data: TrackListData[] } & { 
-  imageUrl: string,
-  setAudioUrl: React.Dispatch<React.SetStateAction<string | null>>
+  setAudioUrl: React.Dispatch<React.SetStateAction<string | null>>,
+  // setCustomPlaylist: React.Dispatch<React.SetStateAction<CheckedTrackDict>>,
+  setCustomPlaylistArray: React.Dispatch<React.SetStateAction<string[]>>,
+  customPlaylistArray: string[],
 }
-export default function TrackTable({ data, imageUrl, setAudioUrl }: TrackTableProps) {
+export default function TrackTable({
+  data,
+  setAudioUrl,
+  // setCustomPlaylist,
+  setCustomPlaylistArray,
+  customPlaylistArray,
+}: TrackTableProps) {
   const tableTracksRef = useRef<HTMLTableElement>(null)
   const [sorting, setSorting] = useState<SortingState>([])
-  const dataWithImageMapped = React.useMemo(() => data.map(d => ({ ...d, imageUrl })),[data,imageUrl])
+
   const columns = React.useMemo(
     () => [
+      checkBox,
       image,
       trackNumber,
       songAndArtist,
-      // title,
-      // artists,
       duration,
-      // player
     ], []
   )
 
-  const handleOnClick = (audioUrl: string) => {
-    console.log('!clikc', audioUrl)
+  const handleOnClick = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, audioUrl: string) => {
+    const { target } = e
+    const { tagName, checked, value: trackId } = target as HTMLInputElement;
+    if (tagName  === 'INPUT'){
+      // setCustomPlaylist(selection => ({
+      //   ...selection,
+      //   [trackId]: checked
+      // }))
+      setCustomPlaylistArray(checked ? customPlaylistArray.concat(trackId) : customPlaylistArray.filter(id => id !== trackId))
+      return
+    }
     setAudioUrl(audioUrl)
   }
 
   const table = useReactTable({
     columns,
-    data: dataWithImageMapped,
+    data,
     debugTable: true,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(), //client-side sorting
     onSortingChange: setSorting, //optionally control sorting state in your own scope for easy access
-    // sortingFns: {
-    //   sortStatusFn, //or provide our custom sorting function globally for all columns to be able to use
-    // },
-    //no need to pass pageCount or rowCount with client-side pagination as it is calculated automatically
     state: {
       sorting,
     },
@@ -134,7 +141,7 @@ export default function TrackTable({ data, imageUrl, setAudioUrl }: TrackTablePr
             .map(row => {
               return (
                 <>
-                  <tr key={row.id} className={styles.trackRows} onClick={() => handleOnClick(row.original.preview_url)}>
+                  <tr key={row.id} className={styles.trackRows} onClick={(e) => handleOnClick(e, row.original.preview_url)}>
                     {row.getVisibleCells().map(cell => {
                       return (
                         <td key={cell.id}>
