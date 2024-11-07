@@ -26,7 +26,7 @@ import TrackTable, { TrackListData } from '../Tracks/TrackTable'
 import Player from '../../Player/Player'
 import { SpotifySearchResult } from '../../../../types/spotify.types'
 
-type CheckedAlbumDict = {
+export type CheckedAlbumDict = {
   [K in SpotifySearchResult['id']]: boolean
 }
 export type CheckedTrackDict = {
@@ -36,7 +36,9 @@ export type AlbumItemTableData = SpotifySearchResult & { isChecked: boolean }
 
 // TODO possible improvement use virtualizer from tanStack https://tanstack.com/virtual/latest
 export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
+  // Handles album row input selection
   const [customPlaylistAlbumSelection, setCustomPlaylistAlbumSelection] = useState<CheckedAlbumDict>({})
+  // Handles custom playlist selection - tracks here will be added to the custom playlist
   const [customPlaylist, setCustomPlaylist] = useState<CheckedTrackDict>({})
   const [tracklistVisible, setTrackListVisible] = useState<{ albumId: string | null }>({ albumId: null })
   const tableAlbumsRef = useRef<HTMLTableElement>(null)
@@ -205,6 +207,7 @@ const AlbumRowMemoized = React.memo(({
     if (tagName === 'INPUT'){
       const { target } = e;
       const { value: albumId, checked } = (target as HTMLInputElement)
+      // controls input components for rows
       setCustomPlaylistAlbumSelection(selection => {
         if (checked){
           return {
@@ -216,18 +219,34 @@ const AlbumRowMemoized = React.memo(({
         delete copy[albumId]
         return copy
       })
+      // handle selecting all tracks of the album
+      setCustomPlaylist(selection => {
+        const copy = { ...selection }
+        if (checked){
+          row.original.trackList.forEach(track => {
+            copy[track.id] = true
+          })
+          return copy
+        } else {
+          row.original.trackList.forEach(track => {
+            delete copy[track.id]
+          })
+          return copy
+        }
+      })
       return
-    } 
-    // e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest'})
-    // Toggle
-    setTrackListVisible({ albumId: tracklistVisible.albumId === albumId ? null : albumId })
-    // Sets the height for the dropdown
-    setTracklistNumTracks(row.original.totalTracks)
+    }
+    const isSelected = tracklistVisible.albumId === albumId;
+    if (!isSelected) e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest'})
     // Mapping imageUrl here but not isSelected so to re-render on selection
     setTracklist(row.original.trackList.map(track => ({ 
       ...track, 
       imageUrl: row.original.image.url,
     })))
+    // Sets the height for the dropdown
+    setTracklistNumTracks(row.original.totalTracks)
+    // Toggle
+    setTrackListVisible({ albumId: isSelected ? null : albumId })
   }
   return (
     <>
@@ -243,6 +262,7 @@ const AlbumRowMemoized = React.memo(({
         setAudioUrl={setAudioUrl}
         customPlaylist={customPlaylist}
         setCustomPlaylist={setCustomPlaylist}
+        setCustomPlaylistAlbumSelection={setCustomPlaylistAlbumSelection}
       />
     </>
   )
@@ -279,6 +299,7 @@ type AlbumTrackListCellProps = {
   row: Row<AlbumItemTableData>,
   setAudioUrl: React.Dispatch<React.SetStateAction<string | null>>,
   setCustomPlaylist: React.Dispatch<React.SetStateAction<CheckedTrackDict>>,
+  setCustomPlaylistAlbumSelection: React.Dispatch<React.SetStateAction<CheckedAlbumDict>>,
   tracklist: TrackListData[] | null,
   tracklistVisible: { albumId: string | null },
 }
@@ -288,6 +309,7 @@ const AlbumTrackListCell = React.memo(({
   row,
   setAudioUrl,
   setCustomPlaylist,
+  setCustomPlaylistAlbumSelection,
   tracklist,
   tracklistVisible,
 }: AlbumTrackListCellProps) => {
@@ -313,6 +335,9 @@ const AlbumTrackListCell = React.memo(({
                 setAudioUrl={setAudioUrl}
                 customPlaylist={customPlaylist}
                 setCustomPlaylist={setCustomPlaylist}
+                // deselect the album selection if selected
+                albumId={albumId}
+                setCustomPlaylistAlbumSelection={setCustomPlaylistAlbumSelection}
               />
             }
           </div>
