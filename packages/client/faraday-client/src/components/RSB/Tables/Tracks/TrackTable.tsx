@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import {
   flexRender,
   getCoreRowModel,
@@ -20,23 +20,31 @@ import {
 import { CheckedTrackDict } from '../Albums/AlbumTable'
 import { SpotifySearchResult } from '../../../../types/spotify.types'
 
-export type TrackListData = SpotifySearchResult["trackList"][number] & { isChecked: boolean, imageUrl: string }
-export type TrackListColumnData = TrackListData
+export type TrackListData = SpotifySearchResult["trackList"][number] & { imageUrl: string }
+export type TrackListColumnData = TrackListData & { isChecked: boolean }
 export type TrackTableProps = { data: TrackListData[] } & { 
   setAudioUrl: React.Dispatch<React.SetStateAction<string | null>>,
-  // setCustomPlaylist: React.Dispatch<React.SetStateAction<CheckedTrackDict>>,
+  setCustomPlaylist: React.Dispatch<React.SetStateAction<CheckedTrackDict>>,
   setCustomPlaylistArray: React.Dispatch<React.SetStateAction<string[]>>,
   customPlaylistArray: string[],
+  customPlaylist: CheckedTrackDict
 }
 export default function TrackTable({
   data,
   setAudioUrl,
-  // setCustomPlaylist,
+  customPlaylist,
+  setCustomPlaylist,
   setCustomPlaylistArray,
   customPlaylistArray,
 }: TrackTableProps) {
   const tableTracksRef = useRef<HTMLTableElement>(null)
   const [sorting, setSorting] = useState<SortingState>([])
+  const dataWithCheckbox = useMemo(() => data.map(track => {
+    return {
+      ...track,
+      isChecked: !!customPlaylist[track.id]
+    }
+  }),[data, customPlaylist])
 
   const columns = React.useMemo(
     () => [
@@ -49,14 +57,22 @@ export default function TrackTable({
   )
 
   const handleOnClick = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, audioUrl: string) => {
+    e.stopPropagation()
     const { target } = e
     const { tagName, checked, value: trackId } = target as HTMLInputElement;
     if (tagName  === 'INPUT'){
-      // setCustomPlaylist(selection => ({
-      //   ...selection,
-      //   [trackId]: checked
-      // }))
-      setCustomPlaylistArray(checked ? customPlaylistArray.concat(trackId) : customPlaylistArray.filter(id => id !== trackId))
+      setCustomPlaylist(selection => {
+        if (checked){
+          return {
+            ...selection,
+            [trackId]: checked
+          }
+        } 
+        const copy = { ...selection }
+        delete copy[trackId]
+        return copy
+      })
+      // setCustomPlaylistArray(checked ? customPlaylistArray.concat(trackId) : customPlaylistArray.filter(id => id !== trackId))
       return
     }
     setAudioUrl(audioUrl)
@@ -64,7 +80,7 @@ export default function TrackTable({
 
   const table = useReactTable({
     columns,
-    data,
+    data: dataWithCheckbox,
     debugTable: true,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(), //client-side sorting

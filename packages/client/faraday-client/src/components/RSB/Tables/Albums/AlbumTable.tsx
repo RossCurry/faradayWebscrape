@@ -40,14 +40,15 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
     dict[album.id] = false
     return dict;
   }, {} as CheckedAlbumDict), [data])
+  // This might just be too big to manage in memory
   const checkedTrackDictionary = useMemo(() => data.reduce((dict: CheckedAlbumDict, album: SpotifySearchResult) => {
     album.trackList.forEach(track =>{
       dict[track.id] = false
     })
     return dict;
   }, {} as CheckedAlbumDict),[data])
-  const [customPlaylistAlbumSelection, setCustomPlaylistAlbumSelection] = useState<CheckedAlbumDict>(checkedAlbumDictionary)
-  const [customPlaylist, setCustomPlaylist] = useState<CheckedTrackDict>(checkedTrackDictionary)
+  const [customPlaylistAlbumSelection, setCustomPlaylistAlbumSelection] = useState<CheckedAlbumDict>({})
+  const [customPlaylist, setCustomPlaylist] = useState<CheckedTrackDict>({})
   const [customPlaylistArray, setCustomPlaylistArray] = useState<string[]>([])
   const [tracklistVisible, setTrackListVisible] = useState<{ albumId: string | null }>({ albumId: null })
   const tableAlbumsRef = useRef<HTMLTableElement>(null)
@@ -179,10 +180,17 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
                 if (tagName === 'INPUT'){
                   const { target } = e;
                   const { value: albumId, checked } = (target as HTMLInputElement)
-                  setCustomPlaylistAlbumSelection(selection => ({
-                    ...selection,
-                    [albumId]: checked
-                  }))
+                  setCustomPlaylistAlbumSelection(selection => {
+                    if (checked){
+                      return {
+                        ...selection,
+                       [albumId]: checked
+                      }
+                    }
+                    const copy = { ...selection }
+                    delete copy[albumId]
+                    return copy
+                  })
                   return
                 } 
                 // TODO otra solucion
@@ -194,7 +202,7 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
                 setTracklistNumTracks(row.original.totalTracks)
                 setTracklist(row.original.trackList.map(track => ({ 
                   ...track, 
-                  isChecked: customPlaylistArray.includes(track.id),
+                  // isChecked: customPlaylistArray.includes(track.id),
                   // isChecked: customPlaylist[track.id],
                   imageUrl: row.original.image.url,
                 })))
@@ -233,7 +241,8 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
                             data={tracklist} 
                             key={row.original.id} 
                             setAudioUrl={setAudioUrl}
-                            // setCustomPlaylist={setCustomPlaylist}
+                            customPlaylist={customPlaylist}
+                            setCustomPlaylist={setCustomPlaylist}
                             setCustomPlaylistArray={setCustomPlaylistArray}
                             customPlaylistArray={customPlaylistArray}
                           />
