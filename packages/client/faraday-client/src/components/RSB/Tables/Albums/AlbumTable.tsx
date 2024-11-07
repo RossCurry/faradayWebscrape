@@ -6,11 +6,10 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  ColumnDef,
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
-  SortingFn,
+  Row,
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
@@ -35,34 +34,24 @@ export type CheckedTrackDict = {
 }
 export type AlbumItemTableData = SpotifySearchResult & { isChecked: boolean }
 
+// TODO possible improvement use virtualizer from tanStack https://tanstack.com/virtual/latest
 export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
-  const checkedAlbumDictionary = useMemo(() => data.reduce((dict: CheckedAlbumDict, album: SpotifySearchResult) => {
-    dict[album.id] = false
-    return dict;
-  }, {} as CheckedAlbumDict), [data])
-  // This might just be too big to manage in memory
-  const checkedTrackDictionary = useMemo(() => data.reduce((dict: CheckedAlbumDict, album: SpotifySearchResult) => {
-    album.trackList.forEach(track =>{
-      dict[track.id] = false
-    })
-    return dict;
-  }, {} as CheckedAlbumDict),[data])
   const [customPlaylistAlbumSelection, setCustomPlaylistAlbumSelection] = useState<CheckedAlbumDict>({})
   const [customPlaylist, setCustomPlaylist] = useState<CheckedTrackDict>({})
-  const [customPlaylistArray, setCustomPlaylistArray] = useState<string[]>([])
   const [tracklistVisible, setTrackListVisible] = useState<{ albumId: string | null }>({ albumId: null })
   const tableAlbumsRef = useRef<HTMLTableElement>(null)
   const [tracklistNumTracks, setTracklistNumTracks] = useState<number>(0)
   const [tracklist, setTracklist] = useState<TrackListData[] | null>(null)
   const [sorting, setSorting] = useState<SortingState>([])
   const [audioUrl, setAudioUrl] = useState<string | null>(null)
-  console.log('!customPlaylistSelection -> ', customPlaylistAlbumSelection);
+
   const dataWithCheckbox = useMemo(() => data.map(album => {
     return {
       ...album,
       isChecked: customPlaylistAlbumSelection[album.id]
     }
   }),[customPlaylistAlbumSelection, data])
+
   const columns = React.useMemo(
     () => [
       checkBox,
@@ -80,19 +69,7 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(), //client-side sorting
     onSortingChange: setSorting, //optionally control sorting state in your own scope for easy access
-    // sortingFns: {
-    //   sortStatusFn, //or provide our custom sorting function globally for all columns to be able to use
-    // },
-    //no need to pass pageCount or rowCount with client-side pagination as it is calculated automatically
-    state: {
-      sorting,
-    },
-    // autoResetPageIndex: false, // turn off page index reset when sorting or filtering - default on/true
-    // enableMultiSort: false, //Don't allow shift key to sort multiple columns - default on/true
-    // enableSorting: false, // - default on/true
-    // enableSortingRemoval: false, //Don't allow - default on/true
-    // isMultiSortEvent: (e) => true, //Make all clicks multi-sort - default requires `shift` key
-    // maxMultiSortColCount: 3, // only allow 3 columns to be sorted at once - default is Infinity
+    state: { sorting },
   })
 
   /**
@@ -166,91 +143,26 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
         <tbody>
           {table
             .getRowModel()
-            // TODO Pagination if you want
-            // .rows.slice(0, 10)
-            .rows
+            // TODO virtualize or use pagination
+            .rows.slice(0,30)
             .map(row => {
               // Each row is actually going to be 2 rows
               // 1. the tanStack data row (album)
               // 2. the track info for the album
-
-              const albumId = row.original.id
-              const handleOnClick = async (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
-                const { tagName } = (e.target as HTMLElement)
-                if (tagName === 'INPUT'){
-                  const { target } = e;
-                  const { value: albumId, checked } = (target as HTMLInputElement)
-                  setCustomPlaylistAlbumSelection(selection => {
-                    if (checked){
-                      return {
-                        ...selection,
-                       [albumId]: checked
-                      }
-                    }
-                    const copy = { ...selection }
-                    delete copy[albumId]
-                    return copy
-                  })
-                  return
-                } 
-                // TODO otra solucion
-                // TODO give it margin
-                // e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest'})
-                // Toggle
-                setTrackListVisible({ albumId: tracklistVisible.albumId === albumId ? null : albumId })
-                // Sets the height for the dropdown
-                setTracklistNumTracks(row.original.totalTracks)
-                setTracklist(row.original.trackList.map(track => ({ 
-                  ...track, 
-                  // isChecked: customPlaylistArray.includes(track.id),
-                  // isChecked: customPlaylist[track.id],
-                  imageUrl: row.original.image.url,
-                })))
-              }
               return (
-                <>
-                  <tr key={row.id} className={styles.albumRows} onClick={handleOnClick}>
-                    {row.getVisibleCells().map(cell => {
-                      return (
-
-                        <td key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </td>
-                      )
-                    })}
-                  </tr>
-                  <tr
-                    className={`
-                      ${styles.tableRowWidth}
-                    `}
-                  >
-                    <td
-                      colSpan={row.getVisibleCells().length}
-                    >
-                      <div
-                        className={`
-                          ${styles.albumTrackList}
-                          ${tracklistVisible.albumId === albumId ? styles.albumTrackListOpen : ''}
-                        `}
-                      >
-                        {tracklist && 
-                          <TrackTable 
-                            data={tracklist} 
-                            key={row.original.id} 
-                            setAudioUrl={setAudioUrl}
-                            customPlaylist={customPlaylist}
-                            setCustomPlaylist={setCustomPlaylist}
-                            setCustomPlaylistArray={setCustomPlaylistArray}
-                            customPlaylistArray={customPlaylistArray}
-                          />
-                        }
-                      </div>
-                    </td>
-                  </tr>
-                </>
+                <AlbumRowMemoized
+                  key={row.id + row.original.id}
+                  row={row}
+                  setCustomPlaylistAlbumSelection={setCustomPlaylistAlbumSelection}
+                  setTrackListVisible={setTrackListVisible}
+                  setTracklistNumTracks={setTracklistNumTracks}
+                  setTracklist={setTracklist}
+                  tracklistVisible={tracklistVisible}
+                  tracklist={tracklist}
+                  setAudioUrl={setAudioUrl}
+                  customPlaylist={customPlaylist}
+                  setCustomPlaylist={setCustomPlaylist}
+                />
               )
             })}
         </tbody>
@@ -258,3 +170,153 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
     </>
   )
 }
+
+type AlbumRowMemoizedProps = {
+  customPlaylist: CheckedTrackDict,
+  row: Row<AlbumItemTableData>,
+  setAudioUrl: React.Dispatch<React.SetStateAction<string | null>>,
+  setCustomPlaylist: React.Dispatch<React.SetStateAction<CheckedTrackDict>>,
+  setCustomPlaylistAlbumSelection: React.Dispatch<React.SetStateAction<CheckedAlbumDict>>,
+  setTracklist: React.Dispatch<React.SetStateAction<TrackListData[] | null>>,
+  setTracklistNumTracks: React.Dispatch<React.SetStateAction<number>>,
+  setTrackListVisible: React.Dispatch<React.SetStateAction<{albumId: string | null}>>,
+  tracklist: TrackListData[] | null,
+  tracklistVisible: { albumId: string | null },
+}
+const AlbumRowMemoized = React.memo(({
+  customPlaylist,
+  row,
+  setAudioUrl,
+  setCustomPlaylist,
+  setCustomPlaylistAlbumSelection,
+  setTracklist,
+  setTracklistNumTracks,
+  setTrackListVisible,
+  tracklist,
+  tracklistVisible,
+}: AlbumRowMemoizedProps) => {
+   // Each row is actually going to be 2 rows
+  // 1. the tanStack data row (album)
+  // 2. the track info for the album
+
+  const albumId = row.original.id
+  const handleOnClick = async (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
+    const { tagName } = (e.target as HTMLElement)
+    if (tagName === 'INPUT'){
+      const { target } = e;
+      const { value: albumId, checked } = (target as HTMLInputElement)
+      setCustomPlaylistAlbumSelection(selection => {
+        if (checked){
+          return {
+            ...selection,
+            [albumId]: checked
+          }
+        }
+        const copy = { ...selection }
+        delete copy[albumId]
+        return copy
+      })
+      return
+    } 
+    // e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest'})
+    // Toggle
+    setTrackListVisible({ albumId: tracklistVisible.albumId === albumId ? null : albumId })
+    // Sets the height for the dropdown
+    setTracklistNumTracks(row.original.totalTracks)
+    // Mapping imageUrl here but not isSelected so to re-render on selection
+    setTracklist(row.original.trackList.map(track => ({ 
+      ...track, 
+      imageUrl: row.original.image.url,
+    })))
+  }
+  return (
+    <>
+      <AlbumCell  
+        row={row}
+        handleOnClick={handleOnClick}
+      />
+      <AlbumTrackListCell 
+        row={row}
+        tracklistVisible={tracklistVisible}
+        albumId={albumId}
+        tracklist={tracklist}
+        setAudioUrl={setAudioUrl}
+        customPlaylist={customPlaylist}
+        setCustomPlaylist={setCustomPlaylist}
+      />
+    </>
+  )
+})
+
+type AlbumCellProps = {
+  row: Row<AlbumItemTableData>,
+  handleOnClick: (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => Promise<void>
+}
+const AlbumCell = ({ 
+  row,
+  handleOnClick,
+}: AlbumCellProps) => {
+  return (
+    <tr key={row.id} className={styles.albumRows} onClick={handleOnClick}>
+      {row.getVisibleCells().map(cell => {
+        return (
+
+          <td key={cell.id}>
+            {flexRender(
+              cell.column.columnDef.cell,
+              cell.getContext()
+            )}
+          </td>
+        )
+      })}
+    </tr>
+  )
+}
+
+type AlbumTrackListCellProps = {
+  albumId: string,
+  customPlaylist: CheckedTrackDict,
+  row: Row<AlbumItemTableData>,
+  setAudioUrl: React.Dispatch<React.SetStateAction<string | null>>,
+  setCustomPlaylist: React.Dispatch<React.SetStateAction<CheckedTrackDict>>,
+  tracklist: TrackListData[] | null,
+  tracklistVisible: { albumId: string | null },
+}
+const AlbumTrackListCell = React.memo(({
+  albumId,
+  customPlaylist,
+  row,
+  setAudioUrl,
+  setCustomPlaylist,
+  tracklist,
+  tracklistVisible,
+}: AlbumTrackListCellProps) => {
+  return (
+    <tr
+        className={`
+          ${styles.tableRowWidth}
+        `}
+      >
+        <td
+          colSpan={row.getVisibleCells().length}
+        >
+          <div
+            className={`
+              ${styles.albumTrackList}
+              ${tracklistVisible.albumId === albumId ? styles.albumTrackListOpen : ''}
+            `}
+          >
+            {tracklist && 
+              <TrackTable 
+                data={tracklist} 
+                key={row.original.id} 
+                setAudioUrl={setAudioUrl}
+                customPlaylist={customPlaylist}
+                setCustomPlaylist={setCustomPlaylist}
+              />
+            }
+          </div>
+        </td>
+      </tr>
+  )
+})
