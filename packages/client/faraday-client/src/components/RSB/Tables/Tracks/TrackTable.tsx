@@ -15,7 +15,7 @@ import {
   trackNumber,
   checkBox
 } from './columns/columns'
-import { CheckedTrackDict } from '../Albums/AlbumTable'
+import { CheckedAlbumDict, CheckedTrackDict } from '../Albums/AlbumTable'
 import { SpotifySearchResult } from '../../../../types/spotify.types'
 
 export type TrackListData = SpotifySearchResult["trackList"][number] & { imageUrl: string }
@@ -23,17 +23,21 @@ export type TrackListColumnData = TrackListData & { isChecked: boolean }
 export type TrackTableProps = { data: TrackListData[] } & { 
   setAudioUrl: React.Dispatch<React.SetStateAction<string | null>>,
   setCustomPlaylist: React.Dispatch<React.SetStateAction<CheckedTrackDict>>,
-  customPlaylist: CheckedTrackDict
+  customPlaylist: CheckedTrackDict,
+  albumId: string,
+  setCustomPlaylistAlbumSelection: React.Dispatch<React.SetStateAction<CheckedAlbumDict>>,
 }
 export default function TrackTable({
   data,
   setAudioUrl,
   customPlaylist,
   setCustomPlaylist,
+  albumId,
+  setCustomPlaylistAlbumSelection,
 }: TrackTableProps) {
   const tableTracksRef = useRef<HTMLTableElement>(null)
   const [sorting, setSorting] = useState<SortingState>([])
-  
+
   const dataWithCheckbox = useMemo(() => data.map(track => {
     return {
       ...track,
@@ -67,6 +71,14 @@ export default function TrackTable({
         delete copy[trackId]
         return copy
       })
+      // Handle unClicking a selected album if you unselect an option
+      if (!checked){
+        setCustomPlaylistAlbumSelection(selection => {
+          const copy = { ...selection }
+          delete copy[albumId]
+          return copy
+        })
+      }
       return
     }
     setAudioUrl(audioUrl)
