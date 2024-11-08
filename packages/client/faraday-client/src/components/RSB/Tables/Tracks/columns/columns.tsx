@@ -118,7 +118,7 @@ export const player: AccessorColumnDef<TrackListColumnData, TrackListColumnData[
 
 export const checkBox: AccessorColumnDef<TrackListColumnData, { trackId: TrackListColumnData['id'], isChecked: boolean }> = {
   accessorFn: row => ({ trackId: row.id, isChecked: row.isChecked }),
-  id: 'checkBox',
+  id: 'checkbox',
   cell: info => {
     const {trackId, isChecked} = info.getValue()
     return (
