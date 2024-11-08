@@ -2,6 +2,22 @@
   grid-area: right-sidebar;
   overflow-y: scroll;
   position: relative;
+  height: 100%;
+  /* sub grid */
+  display: grid;
+  grid-template-areas:
+    "view"
+    "footer"
+  ;
+  grid-template-columns: 1fr;
+  grid-template-rows: 2fr auto;
+  height: 100%;
+  overflow: hidden; /* Prevent overall scrolling */
+}
+
+.viewContainer {
+  grid-area: "view";
+  overflow-y: auto; /* Make only the main content scrollable */
 }
 
 #albumCollection {
