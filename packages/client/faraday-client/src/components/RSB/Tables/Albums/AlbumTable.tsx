@@ -42,8 +42,6 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
   const [customPlaylistAlbumSelection, setCustomPlaylistAlbumSelection] = useState<CheckedAlbumDict>({})
   // TODO update use of useState to useReducer Helpers
   // Handles custom playlist selection - tracks here will be added to the custom playlist
-  // const [customPlaylist, setCustomPlaylist] = useState<CheckedTrackDict>({})
-  const appState = useAppState()
   const appDispatch = useAppDispatch()
 
   // Handles bulk selection input checkbox
@@ -54,7 +52,7 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
   const [tracklist, setTracklist] = useState<TrackListData[] | null>(null)
   const [sorting, setSorting] = useState<SortingState>([])
   const [audioUrl, setAudioUrl] = useState<string | null>(null)
-  console.log('!appState.customPlaylists -> ', appState.playlist.custom);
+
   const dataWithCheckbox = useMemo(() => data.map(album => {
     return {
       ...album,
@@ -72,15 +70,6 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
   const handleSelectAll = useCallback(() => {
     if (!isAllSelected){
       // add all tracks that actually count
-      // setCustomPlaylist(_selection => {
-      //   const allTracks: Record<string,boolean> = {}
-      //   data.forEach(album => {
-      //     album.trackList.forEach(track => {
-      //       allTracks[track.id] = true;
-      //     })
-      //   })
-      //   return allTracks;
-      // })
       appDispatch({
         type: 'addTracksToCustomPlaylist',
         trackIds: allTrackIds
@@ -94,7 +83,6 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
         return allAlbums;
       })
     } else {
-      // setCustomPlaylist({})
       appDispatch({ type: 'resetCustomPlaylist' })
       setCustomPlaylistAlbumSelection({})
     }
@@ -165,7 +153,6 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
                             : ''
                         }
                         onClick={header.column.getToggleSortingHandler()}
-                        // onClick={isCheckbox ? handleSelectAll : header.column.getToggleSortingHandler()}
                         title={
                           header.column.getCanSort()
                             ? header.column.getNextSortingOrder() === 'asc'
@@ -212,8 +199,6 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
                   tracklistVisible={tracklistVisible}
                   tracklist={tracklist}
                   setAudioUrl={setAudioUrl}
-                  // customPlaylist={customPlaylist}
-                  // setCustomPlaylist={setCustomPlaylist}
                   setIsAllSelected={setIsAllSelected}
                 />
               )
@@ -225,10 +210,8 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
 }
 
 type AlbumRowMemoizedProps = {
-  // customPlaylist: CheckedTrackDict,
   row: Row<AlbumItemTableData>,
   setAudioUrl: React.Dispatch<React.SetStateAction<string | null>>,
-  // setCustomPlaylist: React.Dispatch<React.SetStateAction<CheckedTrackDict>>,
   setCustomPlaylistAlbumSelection: React.Dispatch<React.SetStateAction<CheckedAlbumDict>>,
   setTracklist: React.Dispatch<React.SetStateAction<TrackListData[] | null>>,
   setTracklistNumTracks: React.Dispatch<React.SetStateAction<number>>,
@@ -238,10 +221,8 @@ type AlbumRowMemoizedProps = {
   setIsAllSelected: React.Dispatch<React.SetStateAction<boolean>>
 }
 const AlbumRowMemoized = React.memo(({
-  // customPlaylist,
   row,
   setAudioUrl,
-  // setCustomPlaylist,
   setCustomPlaylistAlbumSelection,
   setTracklist,
   setTracklistNumTracks,
@@ -274,21 +255,6 @@ const AlbumRowMemoized = React.memo(({
         delete copy[albumId]
         return copy
       })
-      // handle selecting all tracks of the album
-      // setCustomPlaylist(selection => {
-      //   const copy = { ...selection }
-      //   if (checked){
-      //     row.original.trackList.forEach(track => {
-      //       copy[track.id] = true
-      //     })
-      //     return copy
-      //   } else {
-      //     row.original.trackList.forEach(track => {
-      //       delete copy[track.id]
-      //     })
-      //     return copy
-      //   }
-      // })
       if (checked){
         appDispatch({ type: 'addTracksToCustomPlaylist', trackIds: row.original.trackList.map(t => t.id)})
       } else {
@@ -322,8 +288,6 @@ const AlbumRowMemoized = React.memo(({
         albumId={albumId}
         tracklist={tracklist}
         setAudioUrl={setAudioUrl}
-        // customPlaylist={customPlaylist}
-        // setCustomPlaylist={setCustomPlaylist}
         setCustomPlaylistAlbumSelection={setCustomPlaylistAlbumSelection}
       />
     </>
@@ -357,20 +321,16 @@ const AlbumCell = ({
 
 type AlbumTrackListCellProps = {
   albumId: string,
-  // customPlaylist: CheckedTrackDict,
   row: Row<AlbumItemTableData>,
   setAudioUrl: React.Dispatch<React.SetStateAction<string | null>>,
-  // setCustomPlaylist: React.Dispatch<React.SetStateAction<CheckedTrackDict>>,
   setCustomPlaylistAlbumSelection: React.Dispatch<React.SetStateAction<CheckedAlbumDict>>,
   tracklist: TrackListData[] | null,
   tracklistVisible: { albumId: string | null },
 }
 const AlbumTrackListCell = React.memo(({
   albumId,
-  // customPlaylist,
   row,
   setAudioUrl,
-  // setCustomPlaylist,
   setCustomPlaylistAlbumSelection,
   tracklist,
   tracklistVisible,
@@ -395,8 +355,6 @@ const AlbumTrackListCell = React.memo(({
                 data={tracklist} 
                 key={row.original.id} 
                 setAudioUrl={setAudioUrl}
-                // customPlaylist={customPlaylist}
-                // setCustomPlaylist={setCustomPlaylist}
                 // deselect the album selection if selected
                 albumId={albumId}
                 setCustomPlaylistAlbumSelection={setCustomPlaylistAlbumSelection}
