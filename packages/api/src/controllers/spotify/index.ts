@@ -22,6 +22,10 @@ spotifyRouter.post("/api/spotify/albums/update",
   mw.spotify.setSpotifyAlbumInfo,
 )
 
+spotifyRouter.post("/api/spotify/tracks",
+  mw.spotify.getTracksById,
+)
+
 spotifyRouter.post("/api/spotify/tracks/update",
   mw.spotify.getSpotifyAlbumInfo, // from db
   mw.auth.getClientCredentialToken, 

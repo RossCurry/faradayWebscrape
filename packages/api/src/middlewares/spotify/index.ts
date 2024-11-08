@@ -8,6 +8,7 @@ import setSpotifyAlbumInfo from "./setSpotifyAlbumInfo.js";
 import setSpotifyTrackInfo from "./setSpotifyTrackInfo.js";
 import searchSingleTitle from "./searchSingleTitle.js"
 import getAlbumsAndSetProperties from "./getAlbumsAndSetProperties.js"
+import getTracksById from "./getTracksById.js"
 import updateCoverImage from "./playlists/updateCoverImage.js"
 
 export default {
@@ -21,6 +22,7 @@ export default {
   setSpotifyAlbumInfo,
   setSpotifyTrackInfo,
   searchSingleTitle,
+  getTracksById,
   playlists: {
     CreatePlaylist,
     PopulatePlaylist,

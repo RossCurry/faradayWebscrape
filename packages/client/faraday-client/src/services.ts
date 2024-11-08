@@ -1,4 +1,4 @@
-import { SpotifyPlaylist, SpotifySearchResult } from "./types/spotify.types"
+import {  SpotifyPlaylist, SpotifySearchResult } from "./types/spotify.types"
 
 const localConnectEndpoint = 'http://localhost:3000/api/spotify/connect'
 // TODO change endpoint to suit purpose
@@ -89,6 +89,23 @@ export async function getAvailablePlaylists(){
   const response = await fetch(baseUrlDev + getAlbumsPath)
   if (response.ok){
     const jsonRes: SpotifyPlaylist[] = await response.json()
+    return jsonRes
+  }
+}
+
+// TODO send user id
+export async function getTracksByIds(trackIds: string[]){
+  const getTracksPath = '/api/spotify/tracks'
+  const response = await fetch(baseUrlDev + getTracksPath, {
+    method: 'POST',
+    headers: {
+      'Content-type': 'application/json',
+      'Accept': 'application/json',
+    },
+    body: JSON.stringify({ trackIds })
+  })
+  if (response.ok){
+    const jsonRes: SpotifySearchResult["trackList"] = await response.json()
     return jsonRes
   }
 }

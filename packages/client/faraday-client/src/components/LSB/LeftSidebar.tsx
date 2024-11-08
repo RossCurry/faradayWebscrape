@@ -3,6 +3,7 @@ import styles from './LeftSidebar.module.css'
 import { SpotifyPlaylist } from '../../types/spotify.types'
 import { getAvailablePlaylists } from '../../services'
 import { faradayLogo } from '../Header/Header'
+import { useAppDispatch, useAppState } from '../../state/AppStateHooks'
 
 export default function LeftSidebar() {
   const [playlistCollection, setPalylistCollection] = useState<SpotifyPlaylist[] | null>(null)
@@ -36,11 +37,18 @@ export default function LeftSidebar() {
 
 
 export function PlaceholderItem() {
+  const { newTitle } = useAppState().playlist
+  const dispatch = useAppDispatch();
+  const handleOnClick = () => {
+    dispatch({
+      type: 'updateView', view: 'playlist', playlistId: 'custom'
+    })
+  }
   return (
-    <li className={styles.playlistItem}>
+    <li className={styles.playlistItem} onClick={handleOnClick}>
       <img src={faradayLogo} className={styles.playlistItemImg} alt="Vite logo" />
       <div className={styles.playlistItemInfo}>
-        <p>{'Placeholder playlist'}</p>
+        <p>{newTitle}</p>
         <p style={{ fontSize: '.85rem' }}>{'Not logged in'}</p>
       </div>
     </li>

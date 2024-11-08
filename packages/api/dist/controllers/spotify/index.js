@@ -13,6 +13,7 @@ const spotifyRouter = new Router();
 // )
 spotifyRouter.post("/api/spotify/albums/update", mw.faraday.getFaradayStockMissingSpotifyInfo, mw.auth.getClientCredentialToken, mw.spotify.getAlbumInfoSpotify, // expensive on requests 200+
 mw.spotify.setSpotifyAlbumInfo);
+spotifyRouter.post("/api/spotify/tracks", mw.spotify.getTracksById);
 spotifyRouter.post("/api/spotify/tracks/update", mw.spotify.getSpotifyAlbumInfo, // from db
 mw.auth.getClientCredentialToken, mw.spotify.getSpotifyTracksInfo, // from spoti api
 mw.spotify.setSpotifyTrackInfo);

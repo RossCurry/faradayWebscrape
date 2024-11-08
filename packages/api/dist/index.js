@@ -39,11 +39,11 @@ app.use(cors({
     expose: ['location'] // headers we expose in the response
 }));
 // app.use(cors())
-app.use(router.routes());
-app.use(router.allowedMethods());
 app.use(bodyParser());
 app.use(json());
 app.use(logger());
+app.use(router.routes());
+app.use(router.allowedMethods());
 try {
     app.listen(port, () => {
         console.log("__dirname", __dirname);
