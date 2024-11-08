@@ -6,6 +6,7 @@ import {
 } from "react-router-dom";
 import App from './App.tsx'
 import './index.css'
+import StateProvider from './state/AppStateProvider.tsx';
 
 const router = createBrowserRouter([
   {
@@ -20,6 +21,8 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <StateProvider>
+      <RouterProvider router={router} />
+    </StateProvider>
   </StrictMode>,
 )

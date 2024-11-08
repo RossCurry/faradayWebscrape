@@ -17,26 +17,30 @@ import {
 } from './columns/columns'
 import { CheckedAlbumDict, CheckedTrackDict } from '../Albums/AlbumTable'
 import { SpotifySearchResult } from '../../../../types/spotify.types'
+import { useAppDispatch, useAppState } from '../../../../state/AppStateHooks'
 
 export type TrackListData = SpotifySearchResult["trackList"][number] & { imageUrl: string }
 export type TrackListColumnData = TrackListData & { isChecked: boolean }
 export type TrackTableProps = { data: TrackListData[] } & { 
   setAudioUrl: React.Dispatch<React.SetStateAction<string | null>>,
-  setCustomPlaylist: React.Dispatch<React.SetStateAction<CheckedTrackDict>>,
-  customPlaylist: CheckedTrackDict,
+  // setCustomPlaylist: React.Dispatch<React.SetStateAction<CheckedTrackDict>>,
+  // customPlaylist: CheckedTrackDict,
   albumId: string,
   setCustomPlaylistAlbumSelection: React.Dispatch<React.SetStateAction<CheckedAlbumDict>>,
 }
 export default function TrackTable({
   data,
   setAudioUrl,
-  customPlaylist,
-  setCustomPlaylist,
+  // customPlaylist,
+  // setCustomPlaylist,
   albumId,
   setCustomPlaylistAlbumSelection,
 }: TrackTableProps) {
   const tableTracksRef = useRef<HTMLTableElement>(null)
   const [sorting, setSorting] = useState<SortingState>([])
+  const appState = useAppState();
+  const appDispatch = useAppDispatch()
+  const customPlaylist = appState.playlist.custom
 
   const dataWithCheckbox = useMemo(() => data.map(track => {
     return {
@@ -60,17 +64,22 @@ export default function TrackTable({
     const { target } = e
     const { tagName, checked, value: trackId } = target as HTMLInputElement;
     if (tagName  === 'INPUT'){
-      setCustomPlaylist(selection => {
-        if (checked){
-          return {
-            ...selection,
-            [trackId]: checked
-          }
-        } 
-        const copy = { ...selection }
-        delete copy[trackId]
-        return copy
-      })
+      // setCustomPlaylist(selection => {
+      //   if (checked){
+      //     return {
+      //       ...selection,
+      //       [trackId]: checked
+      //     }
+      //   } 
+      //   const copy = { ...selection }
+      //   delete copy[trackId]
+      //   return copy
+      // })
+      if (checked){
+        appDispatch({ type: 'addTrackToCustomPlaylist', trackId: trackId })
+      } else {
+        appDispatch({ type: 'deleteTrackFromCustomPlaylist', trackId: trackId })
+      }
       // Handle unClicking a selected album if you unselect an option
       if (!checked){
         setCustomPlaylistAlbumSelection(selection => {

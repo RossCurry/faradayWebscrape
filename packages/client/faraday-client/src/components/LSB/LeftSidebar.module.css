@@ -58,6 +58,8 @@
   flex-direction: column;
   text-align: left;
   width: 100%;
+  padding: .25em .5em;
+  gap: .15rem;
 }
 .playlistItemInfo:hover{
   background: rgba(201, 201, 200, 0.411);
