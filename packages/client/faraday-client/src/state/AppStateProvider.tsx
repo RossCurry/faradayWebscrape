@@ -5,25 +5,56 @@ import {
   Dispatch,
 } from 'react';
 import { CheckedTrackDict } from '../components/RSB/Tables/Albums/AlbumTable';
-
+import { CONSTANTS, Views } from './constants';
+import { SpotifySearchResult } from '../types/spotify.types';
 
 type AppState = {
+  albumCollection: SpotifySearchResult[] | null,
   playlist: {
-    custom: CheckedTrackDict
+    custom: CheckedTrackDict,
+    selectedPlaylistId: string | null,
+    tracksCollection: SpotifySearchResult["trackList"] | null,
+    newTitle: string,
+  },
+  rsb: {
+    view: Views
+  },
+  player: {
+    audioUrl: string | null
   }
+
 };
 const initialAppState = {
+  albumCollection: null,
   playlist: {
-    custom: {}
+    custom: {},
+    selectedPlaylistId: null,
+    tracksCollection: null,
+    newTitle: 'Your new playlist'
+  },
+  rsb: {
+    view: CONSTANTS.views.albums
+  },
+  player: {
+    audioUrl: null
   }
 }
 
 type ActionTypes = 
+// Playlist
 | { type: 'addTrackToCustomPlaylist', trackId: string }
 | { type: 'deleteTrackFromCustomPlaylist', trackId: string }
 | { type: 'addTracksToCustomPlaylist', trackIds: string[] }
 | { type: 'deleteTracksFromCustomPlaylist', trackIds: string[] }
 | { type: 'resetCustomPlaylist' }
+| { type: 'setCustomTracksCollection', tracks: SpotifySearchResult["trackList"] | null }
+| { type: 'setNewPlaylistTitle', title: string }
+// RSB Views
+| { type: 'updateView', view: Views, playlistId: string | null }
+// Main album collection
+| { type: 'setAlbumCollection', albums: SpotifySearchResult[] | null }
+// Player
+| { type: 'setAudioUrl', audioUrl: string | null }
 
 export type AppStateDispatch = Dispatch<ActionTypes>;
 
@@ -74,6 +105,40 @@ function stateReducer(state: AppState, action: ActionTypes) {
       return { 
         ...state, 
         playlist: { ...state.playlist, custom: {} } 
+      };
+    }
+    case 'setCustomTracksCollection': {
+      return { 
+        ...state,
+        playlist: { ...state.playlist, tracksCollection: action.tracks }
+      }
+    }
+    case 'setNewPlaylistTitle': {
+      return {
+        ...state,
+        playlist: { ...state.playlist, newTitle: action.title }
+      }
+    }
+    // View Reducers
+    case 'updateView': {
+      return { 
+        ...state,
+        playlist: { ...state.playlist, selectedPlaylist: action.playlistId },
+        rsb: { ...state.rsb, view: action.view } 
+      };
+    }
+    // Album Reducers
+    case 'setAlbumCollection': {
+      return { 
+        ...state,
+        albumCollection: action.albums
+      };
+    }
+    // Player Reducers
+    case 'setAudioUrl': {
+      return { 
+        ...state,
+        player: { ...state.player, audioUrl: action.audioUrl }
       };
     }
     default: {

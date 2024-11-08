@@ -379,6 +379,35 @@ class MongoDb {
     return updated
   }
 
+  /**
+   * Returns track info for ids given
+   */
+  async getSpotifyTracksById(trackIds: string[]){
+    if (!this.db) throw new Error('No DB found')
+    const albumCollection = this.db.collection('albums')
+    if (!albumCollection) throw new Error('No albumCollection found')
+    const match = {
+      'spotify.trackInfo.items.id': { $in: trackIds }
+    }
+    const tracks = await albumCollection.aggregate([
+      { $match: match }, // returns the matching document
+      { $unwind: '$spotify.trackInfo.items' },
+      { $match: { 'spotify.trackInfo.items.id': { $in: trackIds } } }, // Match only the tracks
+      { $project: {
+        artists: '$spotify.trackInfo.items.artists',
+        duration_ms: '$spotify.trackInfo.items.duration_ms',
+        id: '$spotify.trackInfo.items.id',
+        name: '$spotify.trackInfo.items.name',
+        preview_url: '$spotify.trackInfo.items.preview_url',
+        track_number: '$spotify.trackInfo.items.track_number',
+        type: '$spotify.trackInfo.items.type',
+        uri: '$spotify.trackInfo.items.uri',
+        imageUrl: '$spotify.image.url',
+      }}
+    ]).toArray()
+    return tracks;
+  }
+
 }
 
 export default MongoDb;

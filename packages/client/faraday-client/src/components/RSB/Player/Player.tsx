@@ -1,9 +1,9 @@
 import React, { useEffect, useRef } from 'react'
+import { useAppState } from '../../../state/AppStateHooks';
 
-type PlayerProps = {
-  audioUrl: string | null
-}
-export default function Player({ audioUrl }: PlayerProps) {
+type PlayerProps = {}
+export default function Player(props: PlayerProps) {
+  const { audioUrl } = useAppState().player
   const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {

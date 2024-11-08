@@ -1,6 +1,7 @@
 .leftSidebar {
   grid-area: left-sidebar;
   overflow-y: scroll;
+  height: 100%;
 }
 
 /* reset */
@@ -51,6 +52,7 @@
 .playlistItem{
   list-style: none;
   display: flex;
+  cursor: pointer;
 }
 
 .playlistItemInfo {

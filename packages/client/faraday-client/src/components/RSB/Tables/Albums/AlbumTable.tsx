@@ -51,7 +51,6 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
   const [tracklistNumTracks, setTracklistNumTracks] = useState<number>(0)
   const [tracklist, setTracklist] = useState<TrackListData[] | null>(null)
   const [sorting, setSorting] = useState<SortingState>([])
-  const [audioUrl, setAudioUrl] = useState<string | null>(null)
 
   const dataWithCheckbox = useMemo(() => data.map(album => {
     return {
@@ -133,7 +132,7 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
 
   return (
     <>
-      <Player audioUrl={audioUrl}/>
+      <Player />
       <table
         id='table_albums'
         className={styles.table_albums}
@@ -198,7 +197,6 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
                   setTracklist={setTracklist}
                   tracklistVisible={tracklistVisible}
                   tracklist={tracklist}
-                  setAudioUrl={setAudioUrl}
                   setIsAllSelected={setIsAllSelected}
                 />
               )
@@ -211,7 +209,6 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
 
 type AlbumRowMemoizedProps = {
   row: Row<AlbumItemTableData>,
-  setAudioUrl: React.Dispatch<React.SetStateAction<string | null>>,
   setCustomPlaylistAlbumSelection: React.Dispatch<React.SetStateAction<CheckedAlbumDict>>,
   setTracklist: React.Dispatch<React.SetStateAction<TrackListData[] | null>>,
   setTracklistNumTracks: React.Dispatch<React.SetStateAction<number>>,
@@ -222,7 +219,6 @@ type AlbumRowMemoizedProps = {
 }
 const AlbumRowMemoized = React.memo(({
   row,
-  setAudioUrl,
   setCustomPlaylistAlbumSelection,
   setTracklist,
   setTracklistNumTracks,
@@ -287,7 +283,6 @@ const AlbumRowMemoized = React.memo(({
         tracklistVisible={tracklistVisible}
         albumId={albumId}
         tracklist={tracklist}
-        setAudioUrl={setAudioUrl}
         setCustomPlaylistAlbumSelection={setCustomPlaylistAlbumSelection}
       />
     </>
@@ -322,7 +317,6 @@ const AlbumCell = ({
 type AlbumTrackListCellProps = {
   albumId: string,
   row: Row<AlbumItemTableData>,
-  setAudioUrl: React.Dispatch<React.SetStateAction<string | null>>,
   setCustomPlaylistAlbumSelection: React.Dispatch<React.SetStateAction<CheckedAlbumDict>>,
   tracklist: TrackListData[] | null,
   tracklistVisible: { albumId: string | null },
@@ -330,7 +324,6 @@ type AlbumTrackListCellProps = {
 const AlbumTrackListCell = React.memo(({
   albumId,
   row,
-  setAudioUrl,
   setCustomPlaylistAlbumSelection,
   tracklist,
   tracklistVisible,
@@ -354,7 +347,6 @@ const AlbumTrackListCell = React.memo(({
               <TrackTable 
                 data={tracklist} 
                 key={row.original.id} 
-                setAudioUrl={setAudioUrl}
                 // deselect the album selection if selected
                 albumId={albumId}
                 setCustomPlaylistAlbumSelection={setCustomPlaylistAlbumSelection}

@@ -19,19 +19,18 @@ import { CheckedAlbumDict } from '../Albums/AlbumTable'
 import { SpotifySearchResult } from '../../../../types/spotify.types'
 import { useAppDispatch, useAppState } from '../../../../state/AppStateHooks'
 
-export type TrackListData = SpotifySearchResult["trackList"][number] & { imageUrl: string }
+export type TrackListData = SpotifySearchResult["trackList"][number] & { imageUrl?: string }
 export type TrackListColumnData = TrackListData & { isChecked: boolean }
 export type TrackTableProps = { data: TrackListData[] } & { 
-  setAudioUrl: React.Dispatch<React.SetStateAction<string | null>>,
-  albumId: string,
-  setCustomPlaylistAlbumSelection: React.Dispatch<React.SetStateAction<CheckedAlbumDict>>,
+  albumId?: string,
+  setCustomPlaylistAlbumSelection?: React.Dispatch<React.SetStateAction<CheckedAlbumDict>>,
 }
 export default function TrackTable({
   data,
-  setAudioUrl,
   albumId,
   setCustomPlaylistAlbumSelection,
 }: TrackTableProps) {
+  const dispatch = useAppDispatch()
   const tableTracksRef = useRef<HTMLTableElement>(null)
   const [sorting, setSorting] = useState<SortingState>([])
   const appState = useAppState();
@@ -66,7 +65,9 @@ export default function TrackTable({
         appDispatch({ type: 'deleteTrackFromCustomPlaylist', trackId: trackId })
       }
       // Handle unClicking a selected album if you unselect an option
-      if (!checked){
+      // Only do this if we pass the album id.
+      // in playlist view we dont have that, currently
+      if (!checked && albumId && setCustomPlaylistAlbumSelection){
         setCustomPlaylistAlbumSelection(selection => {
           const copy = { ...selection }
           delete copy[albumId]
@@ -75,7 +76,7 @@ export default function TrackTable({
       }
       return
     }
-    setAudioUrl(audioUrl)
+    dispatch({ type: 'setAudioUrl' , audioUrl })
   }
 
   const table = useReactTable({
