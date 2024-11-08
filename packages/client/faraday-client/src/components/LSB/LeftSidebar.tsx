@@ -22,6 +22,7 @@ export default function LeftSidebar() {
         >
           {/* <h2>grid section</h2> */}
           <ol className={styles.playlistCollection}>
+            <PlaceholderItem />
             {playlistCollection?.map(playlist => {
               return (
                 <PlaylistItem playlist={playlist} key={playlist.id}/>
@@ -33,6 +34,18 @@ export default function LeftSidebar() {
   )
 }
 
+
+export function PlaceholderItem() {
+  return (
+    <li className={styles.playlistItem}>
+      <img src={faradayLogo} className={styles.playlistItemImg} alt="Vite logo" />
+      <div className={styles.playlistItemInfo}>
+        <p>{'Placeholder playlist'}</p>
+        <p style={{ fontSize: '.85rem' }}>{'Not logged in'}</p>
+      </div>
+    </li>
+  )
+}
 
 export function PlaylistItem({playlist}: { playlist: SpotifyPlaylist}) {
   const smallestImage = playlist.images.at(-1)
