@@ -23,7 +23,7 @@ import {
   getCheckbox
 } from './sections/columns/columns'
 import TrackTable, { TrackListData } from '../Tracks/TrackTable'
-import Player from '../../Player/Player'
+import Player from '../../Footer/Player/Player'
 import { SpotifySearchResult } from '../../../../types/spotify.types'
 import { useAppDispatch, useAppState } from '../../../../state/AppStateHooks'
 
@@ -132,7 +132,6 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
 
   return (
     <>
-      <Player />
       <table
         id='table_albums'
         className={styles.table_albums}

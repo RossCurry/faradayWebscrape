@@ -45,7 +45,17 @@ export function PlaceholderItem() {
     })
   }
   return (
-    <li className={styles.playlistItem} onClick={handleOnClick}>
+    <li 
+      className={styles.playlistItem} 
+      onClick={handleOnClick} 
+      style={{
+        borderWidth: '2px',
+        borderStyle: 'solid',
+        borderColor: 'yellow',
+        borderRadius: '8px',
+        padding: '1em'
+      }}
+    >
       <img src={faradayLogo} className={styles.playlistItemImg} alt="Vite logo" />
       <div className={styles.playlistItemInfo}>
         <p>{newTitle}</p>

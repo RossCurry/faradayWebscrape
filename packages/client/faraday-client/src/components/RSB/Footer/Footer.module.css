@@ -1,0 +1,9 @@
+.footer {
+  grid-area: "footer";
+  background-color: rgb(149, 231, 133);
+  height: 3rem;
+}
+
+.player {
+  
+}
