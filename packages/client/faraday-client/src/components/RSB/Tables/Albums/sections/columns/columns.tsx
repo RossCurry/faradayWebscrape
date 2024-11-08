@@ -143,21 +143,47 @@ export const genre: AccessorColumnDef<AlbumItemTableData, SpotifySearchResult["g
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
 }
 
-export const checkBox: AccessorColumnDef<AlbumItemTableData, { albumId: SpotifySearchResult['id'], isChecked: boolean }> = {
-  accessorFn: row => ({ albumId: row.id, isChecked: row.isChecked }),
-  id: 'checkBox',
-  cell: info => {
-    const {albumId, isChecked} = info.getValue()
-    return (
-      <input
-        className={styles.rowDataCheckbox}
-        type="checkbox" 
-        value={albumId} 
-        checked={isChecked}
-      />
-    )
-  },
-  header: () => null,
+export const getCheckbox = ({
+  isAllSelected,
+  handleSelectAll,
+}: {
+  isAllSelected: boolean,
+  handleSelectAll: () => void,
+}) => {
+  const checkbox: AccessorColumnDef<AlbumItemTableData, { albumId: SpotifySearchResult['id'], isChecked: boolean }> = {
+    accessorFn: row => ({ albumId: row.id, isChecked: row.isChecked }),
+    id: 'checkbox',
+    cell: info => {
+      const {albumId, isChecked} = info.getValue()
+      return (
+        <input
+          className={styles.rowDataCheckbox}
+          type="checkbox" 
+          value={albumId} 
+          checked={isChecked}
+        />
+      )
+    },
+    header: () => {
+      return (
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+        }}>
+          <p style={{ textAlign: 'left' }}>Select All</p>
+          <input
+            className={styles.rowDataCheckbox}
+            type="checkbox" 
+            value={'all'} 
+            checked={isAllSelected}
+            onChange={handleSelectAll}
+          />
+        </div>
+      )
+    },
+    enableSorting: false
+  }
+  return checkbox
 }
 
 

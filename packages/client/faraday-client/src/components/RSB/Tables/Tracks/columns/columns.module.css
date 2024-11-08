@@ -31,6 +31,7 @@
   font-size: 0.9rem;
 }
 
-input.rowDataTrack {
+td:has(input.rowDataTrack) {
   width: 3rem;
 }
+ 
