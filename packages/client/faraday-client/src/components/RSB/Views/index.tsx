@@ -40,15 +40,25 @@ export function PlaylistView() {
   const ids = useMemo(() => Object.keys(custom), [custom])
   const showPlaylist = tracks && tracks.length > 0;
 
+  // Load data on mount
+  // Dont call if nothing is selected
   useEffect(()=>{
     async function updateAlbums(){
       const tracksCollection = await getTracksByIds(ids)
       if (tracksCollection) dispatch({ type: 'setCustomTracksCollection', tracks: tracksCollection })
-    }
-    updateAlbums()
+      }
+    if (ids.length) updateAlbums()
+    dispatch({ type: 'setIsLoading', isLoading: true })
   // Only run on component mount
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[])
+
+  // set isLoading to false when we get the data
+  useEffect(()=>{
+    if (showPlaylist) dispatch({ type: 'setIsLoading', isLoading: false })
+    // dispatch should not be in the dependency array
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showPlaylist])
 
   return (
     <section id='playlistView' className={styles.albumCollection}>
@@ -84,16 +94,18 @@ const PlaylistTitle = () => {
 
 const PlaylistEmptyContainer = () => {
   const dispatch = useAppDispatch();
+  const { isLoading } = useAppState().playlist;
   return (
   <div className={styles.playlistEmptyContainer}>
-    <div className={styles.playlistEmptyPlaceholder}>
+    {isLoading && <div>isLoading</div>}
+    {!isLoading && <div className={styles.playlistEmptyPlaceholder}>
       <p>No tracks selected for your playlist yet</p>
       <button
         onClick={() => dispatch({ type: 'updateView', view: 'albums', playlistId: null })}
       >
         Go to Collection
       </button>
-    </div>
+    </div>}
   </div>
   )
 }

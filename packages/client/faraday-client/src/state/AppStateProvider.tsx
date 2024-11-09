@@ -15,6 +15,7 @@ type AppState = {
     selectedPlaylistId: string | null,
     tracksCollection: SpotifySearchResult["trackList"] | null,
     newTitle: string,
+    isLoading: boolean
   },
   rsb: {
     view: Views
@@ -30,7 +31,8 @@ const initialAppState = {
     custom: {},
     selectedPlaylistId: null,
     tracksCollection: null,
-    newTitle: 'Your new playlist'
+    newTitle: 'Your new playlist',
+    isLoading: false,
   },
   rsb: {
     view: CONSTANTS.views.albums
@@ -49,6 +51,7 @@ type ActionTypes =
 | { type: 'resetCustomPlaylist' }
 | { type: 'setCustomTracksCollection', tracks: SpotifySearchResult["trackList"] | null }
 | { type: 'setNewPlaylistTitle', title: string }
+| { type: 'setIsLoading', isLoading: boolean }
 // RSB Views
 | { type: 'updateView', view: Views, playlistId: string | null }
 // Main album collection
@@ -117,6 +120,12 @@ function stateReducer(state: AppState, action: ActionTypes) {
       return {
         ...state,
         playlist: { ...state.playlist, newTitle: action.title }
+      }
+    }
+    case 'setIsLoading': {
+      return {
+        ...state,
+        playlist: { ...state.playlist, isLoading: action.isLoading }
       }
     }
     // View Reducers
