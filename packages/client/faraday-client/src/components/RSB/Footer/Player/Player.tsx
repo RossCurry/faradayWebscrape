@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import styles from '../Footer.module.css'
 import { useAppState } from '../../../../state/AppStateHooks';
+import { faradayLogo } from '../../../Header/Header';
 
 export default function Player() {
-  const { audioUrl } = useAppState().player
+  const { audioUrl, track } = useAppState().player
+  console.log('!track -> ', track);
   const audioRef = useRef<HTMLAudioElement>(null);
   const [controls, setControls] = useState({
     isPlaying: false,
@@ -11,6 +13,8 @@ export default function Player() {
     isMuted: false,
     volume: 1,
     playbackRate: 1,
+    track: track,
+    clipDuration: 0
   })
 
     // Plays the audio
@@ -37,9 +41,11 @@ export default function Player() {
       return
     }
   }
+
   // Gets the current playback position in seconds
-  function handleGetCurrentTime() {
-    return audioRef.current?.currentTime;
+  function getCurrentTime() {
+    if (!audioRef.current) return 0
+    return audioRef.current.currentTime;
   }
 
   // Sets the current playback position in seconds
@@ -105,6 +111,13 @@ export default function Player() {
     if (audioRef.current && audioUrl) {
       audioRef.current.src = audioUrl
       audioRef.current.load(); // Reloads the audio source
+      audioRef.current.addEventListener('loadedmetadata', () => {
+        setControls({ 
+          ...controls, 
+          clipDuration: audioRef.current?.duration || 0
+        })
+      });
+      console.log('!audioRef.current.duration -> ', audioRef.current.duration);
       handlePlay()
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -116,19 +129,54 @@ export default function Player() {
         <audio ref={audioRef}>
           <source src={audioUrl || '#'} media='audio/mpeg' />
         </audio>
-      {/* REPRODUCIR CONTROLS */}
-      {/* PlayPause */}
-      <button onClick={handleStop}>{'<-|'}</button>
-      <button onClick={handlePlayPause}>{controls.isPlaying ? '||' : '>'}</button>
-      <button onClick={() => alert(handleGetCurrentTime())}>Get Current Time</button>
+      
+      {/* <button onClick={() => alert(handleGetCurrentTime())}>Get Current Time</button> */}
       {/* TODO */}
       {/* IMG */}
+      <div
+          className={styles.playerImg}
+          style={{
+            backgroundImage: `url(${track?.imageUrl || faradayLogo})`
+          }}
+        />
       {/* ARTIST & SONG NAME */}
-      {/* PROGESS BAR */}
-      {/* VOLUME CONTROLS - at least MUTE */}
-      <button onClick={handleSetMuted}>(Mute)</button>
+      <div className={styles.playerTrackInfo}>
+        <p className={styles.playerTrackName}>{track?.name}</p>
+        <p>{track?.artists.map(a=>a.name).join(', ')}</p>
+      </div>
+      {/* REPRODUCIR CONTROLS */}
+      {/* PlayPause */}
+      <fieldset>
+        <button onClick={handleStop}>{'<-'}</button>
+        <button onClick={handlePlayPause}>{controls.isPlaying ? '||' : '>'}</button>
+        {/* PROGESS BAR */}
+        <ProgressBar getCurrentTime={getCurrentTime} totalTime={controls.clipDuration}/>
+        {/* VOLUME CONTROLS - at least MUTE */}
+        <button onClick={handleSetMuted}>M</button>
+      </fieldset>
       {/* <button onClick={() => handleSetVolume(0.5)}>Set Volume (e.g., 0.5)</button> */}
       {/* <button onClick={() => handleSetPlaybackRate(1.5)}>Set Playback Rate (e.g., 1.5x)</button> */}
+    </div>
+  )
+}
+
+const ProgressBar = ({ getCurrentTime, totalTime }: { getCurrentTime: () => number, totalTime: number }) => {
+  const [currentTime, setCurrentTime] = useState<number>(0)
+  console.log('!currentTime, totalTime -> ', currentTime, totalTime);
+  const progress = currentTime/totalTime * 100;
+  console.log('!progress -> ', progress);
+  useEffect(() => {
+    const internvalId = setInterval(() => {
+      setCurrentTime(getCurrentTime())
+    }, 150)
+    return () => clearInterval(internvalId)
+  })
+  return (
+    <div className={styles.progressBarContainer}>
+      <div 
+        className={styles.progressBar} id="progress-bar" 
+        style={{ width: `${progress}%`}}
+      />
     </div>
   )
 }

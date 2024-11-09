@@ -54,7 +54,7 @@ export default function TrackTable({
     ], []
   )
 
-  const handleOnClick = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, audioUrl: string) => {
+  const handleOnClick = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, track: TrackListData) => {
     e.stopPropagation()
     const { target } = e
     const { tagName, checked, value: trackId } = target as HTMLInputElement;
@@ -76,7 +76,7 @@ export default function TrackTable({
       }
       return
     }
-    dispatch({ type: 'setAudioUrl' , audioUrl })
+    dispatch({ type: 'setAudioUrl', track })
   }
 
   const table = useReactTable({
@@ -158,7 +158,7 @@ export default function TrackTable({
 
 type TrackRowMemoizedProps = {
   row: Row<TrackListColumnData>
-  handleOnClick: (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, audioUrl: string) => void
+  handleOnClick: (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, track: TrackListData) => void
 }
 const TrackRowMemoized = React.memo(({
   row,
@@ -168,7 +168,7 @@ const TrackRowMemoized = React.memo(({
     <tr 
       key={row.id} 
       className={styles.trackRows} 
-      onClick={(e) => handleOnClick(e, row.original.preview_url)}
+      onClick={(e) => handleOnClick(e, row.original)}
     >
       {row.getVisibleCells().map(cell => {
         return (
