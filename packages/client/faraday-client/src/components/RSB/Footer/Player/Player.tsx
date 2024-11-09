@@ -1,27 +1,162 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import styles from '../Footer.module.css'
 import { useAppState } from '../../../../state/AppStateHooks';
 
-type PlayerProps = {}
-export default function Player(props: PlayerProps) {
+export default function Player() {
   const { audioUrl } = useAppState().player
   const audioRef = useRef<HTMLAudioElement>(null);
+  const [controls, setControls] = useState({
+    isPlaying: false,
+    isPaused: false,
+    isMuted: false,
+    volume: 1,
+    playbackRate: 1,
+  })
+
+    // Plays the audio
+  function handlePlay () {
+    if (!audioRef.current) return
+    audioRef.current?.play();
+    setControls({ ...controls, isPlaying: true, isPaused: false })
+  }
+
+  // Pauses the audio
+  function handlePause() {
+    if (!audioRef.current) return
+    audioRef.current?.pause();
+    setControls({ ...controls, isPaused: true, isPlaying: false })
+  }
+
+  function handlePlayPause(){
+    if (controls.isPlaying){
+      handlePause()
+      return
+    }
+    if (controls.isPaused){
+      handlePlay()
+      return
+    }
+  }
+  // Gets the current playback position in seconds
+  function handleGetCurrentTime() {
+    return audioRef.current?.currentTime;
+  }
+
+  // Sets the current playback position in seconds
+  function handleSetCurrentTime(seconds: number) {
+    if (!audioRef.current) return
+    audioRef.current.currentTime = seconds;
+  }
+  
+  // Sets the current playback position in seconds
+  function handleStop() {
+    if (!audioRef.current) return
+    handlePause()
+    audioRef.current.currentTime = 0;
+  }
+
+  // Returns the length of the audio in seconds
+  function handleGetDuration() {
+    return audioRef.current?.duration;
+  }
+
+  // Gets the current audio volume (0.0 to 1.0)
+  function handleGetVolume() {
+    return audioRef.current?.volume;
+  }
+
+  // Sets the audio volume (0.0 to 1.0)
+  function handleSetVolume(volume: number) {
+    if (!audioRef.current) return
+    audioRef.current.volume = volume;
+  }
+
+  // Returns true if the audio is paused
+  function handleIsPaused() {
+    return audioRef.current?.paused;
+  }
+
+  // Gets whether the audio is muted
+  function handleGetMuted() {
+    return audioRef.current?.muted;
+  }
+
+  // Sets whether the audio is muted
+  function handleSetMuted() {
+    if (!audioRef.current) return
+    const toogleValue = !controls.isMuted
+    audioRef.current.muted = toogleValue;
+    setControls({ ...controls, isMuted: toogleValue })
+  }
+
+  // Gets the current playback rate
+  function handleGetPlaybackRate() {
+    return audioRef.current?.playbackRate;
+  }
+
+  // Sets the speed of playback
+  function handleSetPlaybackRate(rate: number) {
+    if (!audioRef.current) return
+    audioRef.current.playbackRate = rate;
+  }
+
 
   useEffect(() => {
     if (audioRef.current && audioUrl) {
       audioRef.current.src = audioUrl
       audioRef.current.load(); // Reloads the audio source
-      audioRef.current.play(); // Reloads the audio source
+      handlePlay()
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [audioUrl]); // Trigger the effect whenever the audioUrl changes
 
   return (
     <div className={styles.player}>
-      {
-        <audio controls ref={audioRef}>
+    
+        <audio ref={audioRef}>
           <source src={audioUrl || '#'} media='audio/mpeg' />
         </audio>
-      }
+      {/* REPRODUCIR CONTROLS */}
+      {/* PlayPause */}
+      <button onClick={handleStop}>{'<-|'}</button>
+      <button onClick={handlePlayPause}>{controls.isPlaying ? '||' : '>'}</button>
+      <button onClick={() => alert(handleGetCurrentTime())}>Get Current Time</button>
+      {/* TODO */}
+      {/* IMG */}
+      {/* ARTIST & SONG NAME */}
+      {/* PROGESS BAR */}
+      {/* VOLUME CONTROLS - at least MUTE */}
+      <button onClick={handleSetMuted}>(Mute)</button>
+      {/* <button onClick={() => handleSetVolume(0.5)}>Set Volume (e.g., 0.5)</button> */}
+      {/* <button onClick={() => handleSetPlaybackRate(1.5)}>Set Playback Rate (e.g., 1.5x)</button> */}
     </div>
   )
 }
+
+const BasicPlayerWithControls = () => {
+  const { audioUrl } = useAppState().player
+  return (
+    <audio 
+      controls 
+      // ref={audioRef}
+    >
+      <source src={audioUrl || '#'} media='audio/mpeg' />
+    </audio>
+  )
+}
+
+
+/**
+ * <button onClick={handlePlay}>Play</button>
+    <button onClick={handlePause}>Pause</button>
+    <button onClick={() => alert(handleGetCurrentTime())}>Get Current Time</button>
+    <button onClick={() => handleSetCurrentTime(30)}>Set Current Time (e.g., 30s)</button>
+    <button onClick={() => alert(handleGetDuration())}>Get Duration</button>
+    <button onClick={() => alert(handleGetVolume())}>Get Volume</button>
+    <button onClick={() => handleSetVolume(0.5)}>Set Volume (e.g., 0.5)</button>
+    <button onClick={() => alert(handleIsPaused())}>Is Paused?</button>
+    <button onClick={() => alert(handleGetMuted())}>Get Muted</button>
+    <button onClick={() => handleSetMuted(true)}>Set Muted (Mute)</button>
+    <button onClick={() => alert(handleGetPlaybackRate())}>Get Playback Rate</button>
+    <button onClick={() => handleSetPlaybackRate(1.5)}>Set Playback Rate (e.g., 1.5x)</button>
+ */
