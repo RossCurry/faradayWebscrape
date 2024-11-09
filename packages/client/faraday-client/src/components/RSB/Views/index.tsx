@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import styles from '../RightSidebar.module.css'
+import styles from './Views.module.css'
 import { useAppDispatch, useAppState } from '../../../state/AppStateHooks';
 import AlbumTable from '../Tables/Albums/AlbumTable';
 import { getTracksByIds } from '../../../services';
@@ -21,7 +21,6 @@ export default function Views() {
   }
 }
 
-
 export function AlbumView() {
   const { albumCollection } = useAppState()
   return (
@@ -35,10 +34,11 @@ export function AlbumView() {
 }
 
 export function PlaylistView() {
-  const { tracksCollection: tracks, newTitle } = useAppState().playlist
+  const { tracksCollection: tracks } = useAppState().playlist
   const dispatch = useAppDispatch();
   const { custom } = useAppState().playlist
   const ids = useMemo(() => Object.keys(custom), [custom])
+  const showPlaylist = tracks && tracks.length > 0;
 
   useEffect(()=>{
     async function updateAlbums(){
@@ -50,14 +50,18 @@ export function PlaylistView() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[])
 
-  if (!tracks) return null;
   return (
     <section id='playlistView' className={styles.albumCollection}>
-      <PlaylistTitle />
-      <TrackTable 
-        data={tracks}
-        key={'playlist-table'}
-      />
+      {!showPlaylist && <PlaylistEmptyContainer />}
+      {showPlaylist &&
+        <>
+        <PlaylistTitle />
+        <TrackTable
+          data={tracks}
+          key={'playlist-table'}
+        />
+        </>
+      }
     </section>
   )
 }
@@ -75,5 +79,21 @@ const PlaylistTitle = () => {
       }
       <button onClick={() => setEditMode(!editMode)}>{editMode ? 'done' : 'edit'}</button>
     </div>
+  )
+}
+
+const PlaylistEmptyContainer = () => {
+  const dispatch = useAppDispatch();
+  return (
+  <div className={styles.playlistEmptyContainer}>
+    <div className={styles.playlistEmptyPlaceholder}>
+      <p>No tracks selected for your playlist yet</p>
+      <button
+        onClick={() => dispatch({ type: 'updateView', view: 'albums', playlistId: null })}
+      >
+        Go to Collection
+      </button>
+    </div>
+  </div>
   )
 }
