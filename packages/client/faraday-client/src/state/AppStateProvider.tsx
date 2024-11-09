@@ -7,6 +7,7 @@ import {
 import { CheckedTrackDict } from '../components/RSB/Tables/Albums/AlbumTable';
 import { CONSTANTS, Views } from './constants';
 import { SpotifySearchResult } from '../types/spotify.types';
+import { TrackListData } from '../components/RSB/Tables/Tracks/TrackTable';
 
 type AppState = {
   albumCollection: SpotifySearchResult[] | null,
@@ -21,7 +22,8 @@ type AppState = {
     view: Views
   },
   player: {
-    audioUrl: string | null
+    audioUrl: string | null,
+    track: TrackListData | null
   }
 
 };
@@ -38,7 +40,8 @@ const initialAppState = {
     view: CONSTANTS.views.albums
   },
   player: {
-    audioUrl: null
+    audioUrl: null,
+    track: null,
   }
 }
 
@@ -57,7 +60,7 @@ type ActionTypes =
 // Main album collection
 | { type: 'setAlbumCollection', albums: SpotifySearchResult[] | null }
 // Player
-| { type: 'setAudioUrl', audioUrl: string | null }
+| { type: 'setAudioUrl', track: TrackListData | null }
 
 export type AppStateDispatch = Dispatch<ActionTypes>;
 
@@ -147,7 +150,7 @@ function stateReducer(state: AppState, action: ActionTypes) {
     case 'setAudioUrl': {
       return { 
         ...state,
-        player: { ...state.player, audioUrl: action.audioUrl }
+        player: { ...state.player, audioUrl: action.track?.preview_url || null, track: action.track }
       };
     }
     default: {
