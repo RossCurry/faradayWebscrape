@@ -67,9 +67,8 @@ button:focus-visible {
 }
 
 #root {
-  width: calc(100% - 4rem);
-  margin: 0 auto;
-  padding: 2rem;
+  width: calc(100% - 0rem);
+  /* margin: 0 auto; */
   text-align: center;
 }
 

@@ -16,15 +16,7 @@
 }
 
 .viewContainer {
-  grid-area: "view";
+  grid-area: view;
+  min-height: 100%;
   overflow-y: auto; /* Make only the main content scrollable */
-}
-
-#albumCollection {
-  background: rgba(230, 230, 230, 0.25);
-}
-.albumCollection {
-  background: rgba(230, 230, 230, 0.25);
-  /* max-height: 500px;
-  overflow: scroll */
 }
