@@ -23,7 +23,6 @@ import {
   getCheckbox
 } from './sections/columns/columns'
 import TrackTable, { TrackListData } from '../Tracks/TrackTable'
-import Player from '../../Footer/Player/Player'
 import { SpotifySearchResult } from '../../../../types/spotify.types'
 import { useAppDispatch, useAppState } from '../../../../state/AppStateHooks'
 
@@ -38,26 +37,22 @@ export type AlbumItemTableData = SpotifySearchResult & { isChecked: boolean }
 // TODO possible improvement use virtualizer from tanStack https://tanstack.com/virtual/latest
 
 export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
-  // Handles album row input selection
-  const [customPlaylistAlbumSelection, setCustomPlaylistAlbumSelection] = useState<CheckedAlbumDict>({})
-  // TODO update use of useState to useReducer Helpers
-  // Handles custom playlist selection - tracks here will be added to the custom playlist
   const appDispatch = useAppDispatch()
+  const { selectedAlbums, areAllAlbumsSelected } = useAppState().rsb
 
-  // Handles bulk selection input checkbox
-  const [isAllSelected, setIsAllSelected] = useState<boolean>(false)
+  // TrackTable Logic
   const [tracklistVisible, setTrackListVisible] = useState<{ albumId: string | null }>({ albumId: null })
   const tableAlbumsRef = useRef<HTMLTableElement>(null)
   const [tracklistNumTracks, setTracklistNumTracks] = useState<number>(0)
   const [tracklist, setTracklist] = useState<TrackListData[] | null>(null)
   const [sorting, setSorting] = useState<SortingState>([])
-
+  
   const dataWithCheckbox = useMemo(() => data.map(album => {
     return {
       ...album,
-      isChecked: customPlaylistAlbumSelection[album.id]
+      isChecked: selectedAlbums[album.id]
     }
-  }),[customPlaylistAlbumSelection, data])
+  }),[selectedAlbums, data])
 
   const allTrackIds = useMemo(() => {
     return data.reduce((tracks, album) => {
@@ -66,39 +61,32 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
     },[] as string[])
   },[data])
 
-  const handleSelectAll = useCallback(() => {
-    if (!isAllSelected){
-      // add all tracks that actually count
-      appDispatch({
-        type: 'addTracksToCustomPlaylist',
-        trackIds: allTrackIds
-      })
-      // add all albums that are visibly selected
-      setCustomPlaylistAlbumSelection(_selection => {
-        const allAlbums: Record<string,boolean> = {}
-        data.forEach(album => {
-          allAlbums[album.id] = true;
-        })
-        return allAlbums;
-      })
+  const handleSelectAll = useCallback((checkboxValue?: boolean) => {
+    const addAll = !!checkboxValue
+    // Modify playlist and checkbox selection
+    if (addAll){
+      // add all tracks to the custom playlist
+      appDispatch({type: 'addTracksToCustomPlaylist', trackIds: allTrackIds })
+      appDispatch({ type: 'selectAllAlbums' })
     } else {
       appDispatch({ type: 'resetCustomPlaylist' })
-      setCustomPlaylistAlbumSelection({})
+      appDispatch({ type: 'deselectAllAlbums' })
     }
     // Toggle
-    setIsAllSelected(!isAllSelected)
-  },[data, isAllSelected, allTrackIds, appDispatch])
+    appDispatch({ type: 'setAllAlbumsSelected', areSelected: !areAllAlbumsSelected })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[allTrackIds, areAllAlbumsSelected])
 
 
   const columns = React.useMemo(
     () => [
-      getCheckbox({isAllSelected, handleSelectAll}),
+      getCheckbox({ areAllAlbumsSelected, handleSelectAll}),
       image,
       albumAndArtist,
       category,
       releaseDate,
       price,
-    ], [isAllSelected, handleSelectAll]
+    ], [areAllAlbumsSelected, handleSelectAll]
   )
   const table = useReactTable({
     columns,
@@ -190,13 +178,12 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
                 <AlbumRowMemoized
                   key={row.id + row.original.id}
                   row={row}
-                  setCustomPlaylistAlbumSelection={setCustomPlaylistAlbumSelection}
                   setTrackListVisible={setTrackListVisible}
                   setTracklistNumTracks={setTracklistNumTracks}
                   setTracklist={setTracklist}
                   tracklistVisible={tracklistVisible}
                   tracklist={tracklist}
-                  setIsAllSelected={setIsAllSelected}
+                  // setIsAllSelected={setIsAllSelected}
                 />
               )
             })}
@@ -208,23 +195,21 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
 
 type AlbumRowMemoizedProps = {
   row: Row<AlbumItemTableData>,
-  setCustomPlaylistAlbumSelection: React.Dispatch<React.SetStateAction<CheckedAlbumDict>>,
   setTracklist: React.Dispatch<React.SetStateAction<TrackListData[] | null>>,
   setTracklistNumTracks: React.Dispatch<React.SetStateAction<number>>,
   setTrackListVisible: React.Dispatch<React.SetStateAction<{albumId: string | null}>>,
   tracklist: TrackListData[] | null,
   tracklistVisible: { albumId: string | null },
-  setIsAllSelected: React.Dispatch<React.SetStateAction<boolean>>
+  // setIsAllSelected: React.Dispatch<React.SetStateAction<boolean>>
 }
 const AlbumRowMemoized = React.memo(({
   row,
-  setCustomPlaylistAlbumSelection,
   setTracklist,
   setTracklistNumTracks,
   setTrackListVisible,
   tracklist,
   tracklistVisible,
-  setIsAllSelected
+  // setIsAllSelected
 }: AlbumRowMemoizedProps) => {
   const appDispatch = useAppDispatch();
    // Each row is actually going to be 2 rows
@@ -239,24 +224,16 @@ const AlbumRowMemoized = React.memo(({
       const { target } = e;
       const { value: albumId, checked } = (target as HTMLInputElement)
       // controls input components for rows
-      setCustomPlaylistAlbumSelection(selection => {
-        if (checked){
-          return {
-            ...selection,
-            [albumId]: checked
-          }
-        }
-        const copy = { ...selection }
-        delete copy[albumId]
-        return copy
-      })
       if (checked){
+        appDispatch({ type: 'addSelectedAlbum', albumId })
         appDispatch({ type: 'addTracksToCustomPlaylist', trackIds: row.original.trackList.map(t => t.id)})
       } else {
+        appDispatch({ type: 'deleteSelectedAlbum', albumId })
         appDispatch({ type: 'deleteTracksFromCustomPlaylist', trackIds: row.original.trackList.map(t => t.id)})
       }
       // handle deselect bulk selection
-      if (!checked) setIsAllSelected(false)
+      if (!checked) appDispatch({ type: 'setAllAlbumsSelected', areSelected: false })
+      // if (!checked) setIsAllSelected(false)
       return
     }
     const isSelected = tracklistVisible.albumId === albumId;
@@ -282,7 +259,6 @@ const AlbumRowMemoized = React.memo(({
         tracklistVisible={tracklistVisible}
         albumId={albumId}
         tracklist={tracklist}
-        setCustomPlaylistAlbumSelection={setCustomPlaylistAlbumSelection}
       />
     </>
   )
@@ -316,14 +292,12 @@ const AlbumCell = ({
 type AlbumTrackListCellProps = {
   albumId: string,
   row: Row<AlbumItemTableData>,
-  setCustomPlaylistAlbumSelection: React.Dispatch<React.SetStateAction<CheckedAlbumDict>>,
   tracklist: TrackListData[] | null,
   tracklistVisible: { albumId: string | null },
 }
 const AlbumTrackListCell = React.memo(({
   albumId,
   row,
-  setCustomPlaylistAlbumSelection,
   tracklist,
   tracklistVisible,
 }: AlbumTrackListCellProps) => {
@@ -348,7 +322,6 @@ const AlbumTrackListCell = React.memo(({
                 key={row.original.id} 
                 // deselect the album selection if selected
                 albumId={albumId}
-                setCustomPlaylistAlbumSelection={setCustomPlaylistAlbumSelection}
               />
             }
           </div>

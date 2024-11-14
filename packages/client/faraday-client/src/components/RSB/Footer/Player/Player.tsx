@@ -5,7 +5,6 @@ import { faradayLogo } from '../../../Header/Header';
 
 export default function Player() {
   const { audioUrl, track } = useAppState().player
-  console.log('!track -> ', track);
   const audioRef = useRef<HTMLAudioElement>(null);
   const [controls, setControls] = useState({
     isPlaying: false,
@@ -117,7 +116,6 @@ export default function Player() {
           clipDuration: audioRef.current?.duration || 0
         })
       });
-      console.log('!audioRef.current.duration -> ', audioRef.current.duration);
       handlePlay()
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -147,12 +145,12 @@ export default function Player() {
       {/* REPRODUCIR CONTROLS */}
       {/* PlayPause */}
       <fieldset>
-        <button onClick={handleStop}>{'<-'}</button>
-        <button onClick={handlePlayPause}>{controls.isPlaying ? '||' : '>'}</button>
+        <button onClick={handleStop}>{'I<'}</button>
+        <button onClick={handlePlayPause}>{controls.isPlaying && !controls.isPaused ? '||' : '>'}</button>
         {/* PROGESS BAR */}
         <ProgressBar getCurrentTime={getCurrentTime} totalTime={controls.clipDuration}/>
         {/* VOLUME CONTROLS - at least MUTE */}
-        <button onClick={handleSetMuted}>M</button>
+        <button onClick={handleSetMuted} className={`${styles.playerButtonMute} ${controls.isMuted ? styles.isMuted : ''}`}>M</button>
       </fieldset>
       {/* <button onClick={() => handleSetVolume(0.5)}>Set Volume (e.g., 0.5)</button> */}
       {/* <button onClick={() => handleSetPlaybackRate(1.5)}>Set Playback Rate (e.g., 1.5x)</button> */}
@@ -162,9 +160,7 @@ export default function Player() {
 
 const ProgressBar = ({ getCurrentTime, totalTime }: { getCurrentTime: () => number, totalTime: number }) => {
   const [currentTime, setCurrentTime] = useState<number>(0)
-  console.log('!currentTime, totalTime -> ', currentTime, totalTime);
   const progress = currentTime/totalTime * 100;
-  console.log('!progress -> ', progress);
   useEffect(() => {
     const internvalId = setInterval(() => {
       setCurrentTime(getCurrentTime())

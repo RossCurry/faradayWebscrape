@@ -74,13 +74,19 @@
   max-height: var(--button-size);
   overflow: hidden;
 }
+.player fieldset button:active{
+  background-color: #73737378;
+}
+.player fieldset button.playerButtonMute.isMuted {
+  background-color: #73737378;
+}
 
 .progressBarContainer {
   width: 200px;
   background-color: #e0e0e0; /* Light gray background */
   border-radius: 10px; /* Rounded corners */
   overflow: hidden; /* Ensure the progress bar stays inside the container */
-  height: 10px; /* Height of the progress bar */
+  height: 5px; /* Height of the progress bar */
 }
 
 .progressBar {
