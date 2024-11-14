@@ -4,7 +4,7 @@ import {
   useReducer, 
   Dispatch,
 } from 'react';
-import { CheckedTrackDict } from '../components/RSB/Tables/Albums/AlbumTable';
+import { CheckedAlbumDict, CheckedTrackDict } from '../components/RSB/Tables/Albums/AlbumTable';
 import { CONSTANTS, Views } from './constants';
 import { SpotifySearchResult } from '../types/spotify.types';
 import { TrackListData } from '../components/RSB/Tables/Tracks/TrackTable';
@@ -19,7 +19,9 @@ type AppState = {
     isLoading: boolean
   },
   rsb: {
-    view: Views
+    view: Views,
+    selectedAlbums: CheckedAlbumDict
+    areAllAlbumsSelected: boolean
   },
   player: {
     audioUrl: string | null,
@@ -37,7 +39,9 @@ const initialAppState = {
     isLoading: false,
   },
   rsb: {
-    view: CONSTANTS.views.albums
+    view: CONSTANTS.views.albums,
+    selectedAlbums: {},
+    areAllAlbumsSelected: false,
   },
   player: {
     audioUrl: null,
@@ -57,6 +61,11 @@ type ActionTypes =
 | { type: 'setIsLoading', isLoading: boolean }
 // RSB Views
 | { type: 'updateView', view: Views, playlistId: string | null }
+| { type: 'addSelectedAlbum', albumId: string }
+| { type: 'deleteSelectedAlbum', albumId: string }
+| { type: 'selectAllAlbums' }
+| { type: 'deselectAllAlbums' }
+| { type: 'setAllAlbumsSelected', areSelected: boolean }
 // Main album collection
 | { type: 'setAlbumCollection', albums: SpotifySearchResult[] | null }
 // Player
@@ -68,6 +77,7 @@ export const AppStateContext = createContext<AppState>(initialAppState);
 export const AppStateDispatchContext = createContext<AppStateDispatch>(() => {});
 
 function stateReducer(state: AppState, action: ActionTypes) {
+  console.log('!stateReducer CALLED-> ', action.type);
   switch (action.type) {
     case 'addTrackToCustomPlaylist': {
       const updatedList = {
@@ -131,13 +141,50 @@ function stateReducer(state: AppState, action: ActionTypes) {
         playlist: { ...state.playlist, isLoading: action.isLoading }
       }
     }
-    // View Reducers
+    // RSB Reducers
     case 'updateView': {
       return { 
         ...state,
         playlist: { ...state.playlist, selectedPlaylist: action.playlistId },
         rsb: { ...state.rsb, view: action.view } 
       };
+    }
+    case 'addSelectedAlbum': {
+      return { 
+        ...state,
+        rsb: { ...state.rsb, selectedAlbums: { ...state.rsb.selectedAlbums, [action.albumId]: true } } 
+      };
+    }
+    case 'deleteSelectedAlbum': {
+      const copy = { ...state.rsb.selectedAlbums }
+      delete copy[action.albumId]
+      return { 
+        ...state,
+        rsb: { ...state.rsb, selectedAlbums: copy }
+      };
+    }
+    case 'selectAllAlbums': {
+      const allSelected = (state.albumCollection || []).reduce((selection, album) => {
+        selection[album.id] = true;
+        return selection
+      }, {} as Record<SpotifySearchResult['id'], boolean>)
+      return { 
+        ...state,
+        rsb: { ...state.rsb, selectedAlbums: allSelected } 
+      };
+    }
+    case 'deselectAllAlbums': {
+      return { 
+        ...state,
+        rsb: { ...state.rsb, selectedAlbums: {} } 
+      };
+    }
+    case 'setAllAlbumsSelected': {
+      const { areSelected } = action;
+      return { 
+        ...state,
+        rsb: { ...state.rsb, areAllAlbumsSelected: areSelected } 
+      }; 
     }
     // Album Reducers
     case 'setAlbumCollection': {
