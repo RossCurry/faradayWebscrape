@@ -59,7 +59,7 @@ spotifyRouter.get('/api/spotify/connect', async (ctx: AppContext, _next: Applica
 })
 
 /**
- * Spoti Auth redirects user to here
+ * This is used by the FE to create the playlist.
  * We only get the code from the url redirect from Spotify
  * We need the codeChallenge from the previous connect step
  */
@@ -110,7 +110,7 @@ spotifyRouter.get("/api/spotify/playlists",
     const { mongo } = ctx.services
     if (!mongo) throw new Error('No mongo object found')
     try {
-      const userId = ctx.services.token.getUserInfo()?.id || user.freezeId
+      const userId = ctx.services.token.getUserInfo()?.id
       if (!userId) throw Error('Cannot get playlist info. No userId given')
       const playlistsData = await mongo.getFaradayPlaylistData(userId)
       console.log('!spotifyData length-> ', playlistsData?.length);
@@ -124,7 +124,7 @@ spotifyRouter.get("/api/spotify/playlists",
   },
   async (ctx: AppContext, _next: Application.Next) => {
     // Find playlists missing images
-    const userId = ctx.services.token.currentUser?.id || user.freezeId
+    const userId = ctx.services.token.currentUser?.id
     const accessToken = ctx.services.token.accessToken
 
     if (!userId) throw Error('Cannot get playlist images. No userId found')
@@ -140,7 +140,7 @@ spotifyRouter.get("/api/spotify/playlists",
         playlist.images = imageInfo
         return playlist
       }))
-      console.log('!playlistsToUpdate -> ', playlistsToUpdate);
+      console.log('!playlistsToUpdate -> ', playlistsToUpdate.length);
       ctx.body = playlistsToUpdate;
       ctx.status = 200;
     } catch (error) {

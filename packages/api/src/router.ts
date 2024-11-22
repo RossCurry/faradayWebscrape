@@ -13,6 +13,7 @@ import type { FaradayItemData, ScrapedData } from '#controllers/faraday/getItemD
 // routers
 import faradayRouter from '#controllers/faraday/index.js'
 import spotifyRouter from '#controllers/spotify/index.js'
+import userRouter from '#controllers/user/index.js'
 import { SpotifySearchProjection } from '#middlewares/spotify/getAlbumInfo.js'
 
 
@@ -67,6 +68,7 @@ router.use(
 // TODO investigate more if this is best way to extend routes.
 router.use(faradayRouter.routes(), faradayRouter.allowedMethods())
 router.use(spotifyRouter.routes(), spotifyRouter.allowedMethods())
+router.use(userRouter.routes(), userRouter.allowedMethods())
 
 // router.get('/api/faraday/playlists', test)
 

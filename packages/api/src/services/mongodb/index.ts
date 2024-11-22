@@ -408,6 +408,19 @@ class MongoDb {
     return tracks;
   }
 
+  /**
+   * Gets user info from mongo by spotify uri or id
+   * TODO should just use id in future
+   * @param id uri or mongo id
+   */
+  async getUserInfoById(uri: string){
+    if (!this.db) throw new Error('No DB found')
+    const userCollection = this.db.collection('users')
+    if (!userCollection) throw new Error('No userCollection found')
+    const user = await userCollection.findOne({ uri: uri })
+    console.log('!getUserInfoById user -> ', user);
+    return user
+  }
 }
 
 export default MongoDb;

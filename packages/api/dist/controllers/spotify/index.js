@@ -1,7 +1,6 @@
 import Router from 'koa-router';
 import mw from '#middlewares/index.js';
 import { redirectToSpotifyAuthorize } from './auth/PKCE/1.codeChallenge.js';
-import { user } from '../../constants.js';
 import { getPlaylistImage } from '#middlewares/spotify/playlists/updateCoverImage.js';
 const spotifyRouter = new Router();
 // // Temporary Route to update missing genre field for existing
@@ -33,7 +32,7 @@ spotifyRouter.get('/api/spotify/connect', async (ctx, _next) => {
     ctx.status = 201; // created
 });
 /**
- * Spoti Auth redirects user to here
+ * This is used by the FE to create the playlist.
  * We only get the code from the url redirect from Spotify
  * We need the codeChallenge from the previous connect step
  */
@@ -76,7 +75,7 @@ async (ctx, next) => {
     if (!mongo)
         throw new Error('No mongo object found');
     try {
-        const userId = ctx.services.token.getUserInfo()?.id || user.freezeId;
+        const userId = ctx.services.token.getUserInfo()?.id;
         if (!userId)
             throw Error('Cannot get playlist info. No userId given');
         const playlistsData = await mongo.getFaradayPlaylistData(userId);
@@ -91,7 +90,7 @@ async (ctx, next) => {
     }
 }, async (ctx, _next) => {
     // Find playlists missing images
-    const userId = ctx.services.token.currentUser?.id || user.freezeId;
+    const userId = ctx.services.token.currentUser?.id;
     const accessToken = ctx.services.token.accessToken;
     if (!userId)
         throw Error('Cannot get playlist images. No userId found');
@@ -108,7 +107,7 @@ async (ctx, next) => {
             playlist.images = imageInfo;
             return playlist;
         }));
-        console.log('!playlistsToUpdate -> ', playlistsToUpdate);
+        console.log('!playlistsToUpdate -> ', playlistsToUpdate.length);
         ctx.body = playlistsToUpdate;
         ctx.status = 200;
     }

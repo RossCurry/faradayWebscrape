@@ -10,9 +10,9 @@ export default async function getPCKECredentialsToken(ctx, next) {
         console.log('!getTokenPCKE response -> ', token);
         ctx.services.token.set(token);
         ctx.state.accessToken = token.access_token;
+        await next();
     }
     catch (error) {
         ctx.body = { code };
     }
-    next();
 }

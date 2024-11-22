@@ -15,7 +15,7 @@ export default async function getCurrentUser(ctx: AppContext, next: Application.
     })
     const jsonResponse: SpotifyUserProfile = await response.json()
     ctx.services.token.setUserInfo(jsonResponse)
-    ctx.services.mongo.setUserInfo(jsonResponse, ctx.services.token.getEndpointInfo())
+    await ctx.services.mongo.setUserInfo(jsonResponse, ctx.services.token.getEndpointInfo())
   } catch (error) {
     throw error
   }

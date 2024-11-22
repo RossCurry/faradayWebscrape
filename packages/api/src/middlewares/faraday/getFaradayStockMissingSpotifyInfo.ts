@@ -12,10 +12,10 @@ export default async function getFaradayStockMissingSpotifyInfo(ctx: AppContext,
     const faradayData = await mongo.getFaradayDataMissingSpotifyInfo()
     // Assuming data in the DB is clean 😅
     ctx.state.data.faraday = { cleanItems: faradayData }
+    await next()
   } catch (error) {
     console.error('Error in middleware:', error);
     ctx.status = 500;
     ctx.body = 'Internal Server Error';
   }
-  next()
 }
