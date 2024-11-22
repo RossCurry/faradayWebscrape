@@ -25,7 +25,7 @@ export default async function updateCoverImage(ctx: AppContext, next: Applicatio
     if (!response.ok) throw new Error(`Failed to get image for playlist: ${response.statusText}`)
     const playlistImageInfo: SpotifyCoverImageResponse = await response.json()
     // TODO use dynamic userId
-    const userId = ctx.services.token.getUserInfo()?.id || user.freezeId
+    const userId = ctx.services.token.getUserInfo()?.id
     if (!userId) throw new Error('updateCoverImage No user id was found')
     const updated = await ctx.services.mongo.setCoverImage(userId, playlistId, playlistImageInfo)
     console.log('!updated -> ', updated);
@@ -53,7 +53,6 @@ export async function getPlaylistImage(playlistId: string, accessToken: string )
   return playlistImageInfo
 }
 
-export async function updatePlaylistImagesById(userId: string,playlistId: string, playlistImageInfo: SpotifyCoverImageResponse){
-  const updated = await ctx.services.mongo.setCoverImage(userId, playlistId, playlistImageInfo)
-
-}
+// export async function updatePlaylistImagesById(userId: string,playlistId: string, playlistImageInfo: SpotifyCoverImageResponse){
+//   const updated = await ctx.services.mongo.setCoverImage(userId, playlistId, playlistImageInfo)
+// }

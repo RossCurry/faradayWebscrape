@@ -6,7 +6,7 @@ import {
 } from 'react';
 import { CheckedAlbumDict, CheckedTrackDict } from '../components/RSB/Tables/Albums/AlbumTable';
 import { CONSTANTS, Views } from './constants';
-import { SpotifySearchResult } from '../types/spotify.types';
+import { SpotifySearchResult, SpotifyUserProfile } from '../types/spotify.types';
 import { TrackListData } from '../components/RSB/Tables/Tracks/TrackTable';
 
 type AppState = {
@@ -27,7 +27,7 @@ type AppState = {
     audioUrl: string | null,
     track: TrackListData | null
   }
-
+  user: SpotifyUserProfile | null
 };
 const initialAppState = {
   albumCollection: null,
@@ -46,7 +46,8 @@ const initialAppState = {
   player: {
     audioUrl: null,
     track: null,
-  }
+  },
+  user: null
 }
 
 type ActionTypes = 
@@ -70,6 +71,8 @@ type ActionTypes =
 | { type: 'setAlbumCollection', albums: SpotifySearchResult[] | null }
 // Player
 | { type: 'setAudioUrl', track: TrackListData | null }
+// User
+| { type: 'setUserInfo', userInfo: SpotifyUserProfile | null }
 
 export type AppStateDispatch = Dispatch<ActionTypes>;
 
@@ -150,9 +153,18 @@ function stateReducer(state: AppState, action: ActionTypes) {
       };
     }
     case 'addSelectedAlbum': {
+      // TODO This shuold work but its off by 1 less
+      const selectedAlbumsCount = Object.keys(state.rsb.selectedAlbums).length + 1
+      const fullCollectionCount = state.albumCollection?.length || 0
+      const setAllAlbumsSelected = (selectedAlbumsCount === fullCollectionCount)
+      // console.log('!addSelectedAlbum -> ', {selectedAlbumsCount, fullCollectionCount});
       return { 
         ...state,
-        rsb: { ...state.rsb, selectedAlbums: { ...state.rsb.selectedAlbums, [action.albumId]: true } } 
+        rsb: { 
+          ...state.rsb, 
+          selectedAlbums: { ...state.rsb.selectedAlbums, [action.albumId]: true },
+          areAllAlbumsSelected: setAllAlbumsSelected
+        } 
       };
     }
     case 'deleteSelectedAlbum': {
@@ -199,6 +211,13 @@ function stateReducer(state: AppState, action: ActionTypes) {
         ...state,
         player: { ...state.player, audioUrl: action.track?.preview_url || null, track: action.track }
       };
+    }
+    // User Reducers
+    case 'setUserInfo': {
+      return { 
+        ...state,
+        user: action.userInfo
+      }
     }
     default: {
       return state

@@ -6,14 +6,16 @@ import { faradayLogo } from '../Header/Header'
 import { useAppDispatch, useAppState } from '../../state/AppStateHooks'
 
 export default function LeftSidebar() {
-  const [playlistCollection, setPalylistCollection] = useState<SpotifyPlaylist[] | null>(null)
+  const [playlistCollection, setPlaylistCollection] = useState<SpotifyPlaylist[] | null>(null)
 
   useEffect(() => {
-    async function updateAlbums(){
-      const availableAlbums = await getAvailablePlaylists()
-      if (availableAlbums) setPalylistCollection(availableAlbums)
+    async function updatePlaylists(){
+      const availablePlaylists = await getAvailablePlaylists()
+      if (availablePlaylists) setPlaylistCollection(availablePlaylists)
     }
-    updateAlbums()
+    // TODO is user logged in to spotfiy?
+    const isUserLoggedIn = false
+    if (isUserLoggedIn) updatePlaylists()
   }, [])
   return (
     <div id={'LeftSidebar'} className={styles.leftSidebar}>
