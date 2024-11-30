@@ -24,5 +24,5 @@ export default async function writeToDisk(ctx: AppContext, next: Application.Nex
     throw new Error(`Error writing Json to disk: ${error}`);
 
   }
-  next()
+  await next()
 }

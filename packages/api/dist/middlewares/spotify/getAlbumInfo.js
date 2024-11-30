@@ -339,7 +339,7 @@ export default async function getAlbumInfoSpotify(ctx, next) {
         };
         ctx.body = { updated: albumsInfo.length, albumsInfo };
         ctx.status = 200;
-        next();
+        await next();
     }
     catch (error) {
         ctx.body = { message: 'Something went wrong searching spotify searchSingleAlbum', error };

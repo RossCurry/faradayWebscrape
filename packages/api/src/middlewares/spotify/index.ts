@@ -1,6 +1,7 @@
 import CreatePlaylist from "./CreatePlaylist.js";
 import getAlbumInfoSpotify from "./getAlbumInfo.js";
-import getCurrentUser from "./getCurrentUser.js";
+import getCurrentUserFromSpotify from "./getCurrentUserFromSpotify.js";
+import getCurrentUserFromMongo from "./getCurrentUserFromMongo.js";
 import getSpotifyAlbumInfo from "./getSpotifyAlbumInfo.js";
 import getSpotifyTracksInfo from "./getSpotifyTracksInfo.js";
 import PopulatePlaylist from "./PopulatePlaylist.js";
@@ -14,7 +15,7 @@ import updateCoverImage from "./playlists/updateCoverImage.js"
 export default {
   // CreatePlaylist,
   getAlbumInfoSpotify,
-  getCurrentUser,
+  getCurrentUserFromSpotify,
   getAlbumsAndSetProperties,
   getSpotifyAlbumInfo,
   getSpotifyTracksInfo,
@@ -23,6 +24,7 @@ export default {
   setSpotifyTrackInfo,
   searchSingleTitle,
   getTracksById,
+  getCurrentUserFromMongo,
   playlists: {
     CreatePlaylist,
     PopulatePlaylist,

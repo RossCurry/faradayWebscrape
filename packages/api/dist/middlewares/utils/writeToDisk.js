@@ -21,5 +21,5 @@ export default async function writeToDisk(ctx, next) {
     catch (error) {
         throw new Error(`Error writing Json to disk: ${error}`);
     }
-    next();
+    await next();
 }

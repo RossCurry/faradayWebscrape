@@ -1,5 +1,5 @@
 // get user info
-export default async function getCurrentUser(ctx, next) {
+export default async function getCurrentUserFromSpotify(ctx, next) {
     try {
         const accessToken = ctx.services.token.get();
         const authString = `Bearer ${accessToken}`;
@@ -16,5 +16,5 @@ export default async function getCurrentUser(ctx, next) {
     catch (error) {
         throw error;
     }
-    next();
+    await next();
 }

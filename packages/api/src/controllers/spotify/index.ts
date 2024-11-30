@@ -33,11 +33,11 @@ spotifyRouter.post("/api/spotify/tracks/update",
   mw.spotify.setSpotifyTrackInfo
 )
 
-spotifyRouter.post('/api/spotify/playlist/create',
-  mw.auth.getClientCredentialToken,
-  mw.spotify.playlists.CreatePlaylist,
-  mw.spotify.playlists.PopulatePlaylist,
-) 
+// spotifyRouter.post('/api/spotify/playlist/create',
+//   mw.auth.getClientCredentialToken,
+//   mw.spotify.playlists.CreatePlaylist,
+//   mw.spotify.playlists.PopulatePlaylist,
+// ) 
 
 // Helper route to update playlist images for user X
 spotifyRouter.post('/api/spotify/playlist/updateCoverImage/:playlistId',
@@ -65,7 +65,16 @@ spotifyRouter.get('/api/spotify/connect', async (ctx: AppContext, _next: Applica
  */
 spotifyRouter.post("/api/spotify/redirect", 
   mw.auth.getPCKECredentialsToken, // use code from url
-  mw.spotify.getCurrentUser, // get user info
+  mw.spotify.getCurrentUserFromSpotify, // get user info
+  mw.spotify.playlists.CreatePlaylist, // user info needed for playlist creation
+  mw.spotify.playlists.PopulatePlaylist,
+)
+
+/**
+ * Create a playlist getting user from db
+ */
+spotifyRouter.post("/api/spotify/playlist/create", 
+  mw.spotify.getCurrentUserFromMongo, // get user info from mongo
   mw.spotify.playlists.CreatePlaylist, // user info needed for playlist creation
   mw.spotify.playlists.PopulatePlaylist,
 )

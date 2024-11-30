@@ -2,9 +2,12 @@ export default async function CreatePlaylist(ctx, next) {
     const params = new URLSearchParams(ctx.querystring);
     const playlistTitle = params.get('playlistTitle');
     const description = params.get('description');
-    console.log('!CreatePlaylist -> ', playlistTitle);
-    const accessToken = ctx.services.token.get();
+    // const accessToken = ctx.services.token.get()
+    const accessToken = ctx.services.token.getUserInfo()?.endpoint.access_token;
     const user_id = ctx.services.token.getUserInfo()?.id;
+    console.log('!CreatePlaylist -> ', playlistTitle, accessToken, user_id);
+    if (!accessToken)
+        throw new Error('No accessToken found for spotify account');
     if (!user_id)
         throw new Error('No user id found for spotify account');
     const url = `https://api.spotify.com/v1/users/${user_id}/playlists`;
@@ -44,5 +47,5 @@ export default async function CreatePlaylist(ctx, next) {
         console.error(error);
         throw error;
     }
-    next();
+    await next();
 }

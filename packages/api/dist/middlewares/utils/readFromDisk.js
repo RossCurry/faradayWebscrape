@@ -36,5 +36,5 @@ export default async function readFromDisk(ctx, next) {
     catch (error) {
         throw new Error(`Error reading Json from disk: ${error}`);
     }
-    next();
+    await next();
 }

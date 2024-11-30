@@ -12,7 +12,7 @@ const userRouter = new Router<AppState, AppContext>()
 
 userRouter.get("/api/user/verify",
   mw.auth.getPCKECredentialsToken, // use code from url
-  mw.spotify.getCurrentUser, // get user info
+  mw.spotify.getCurrentUserFromSpotify, // get user info
   async (ctx: AppContext) => {
     try {
       // TODO use mongo info and send _id

@@ -19,5 +19,5 @@ export default async function setSpotifyTrackInfo(ctx, next) {
         ctx.status = 500;
         ctx.body = 'Internal Server Error';
     }
-    next();
+    await next();
 }

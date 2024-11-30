@@ -33,7 +33,7 @@ export default async function getSpotifyTracksInfo(ctx, next) {
     ctx.state.data = {
         spotifyTrackInfo: allTracksInfo.filter(info => !!info)
     };
-    next();
+    await next();
 }
 async function searchTracksSingleAlbum(albumId, authString) {
     console.log('!albumId, typeof albumId -> ', albumId, typeof albumId);

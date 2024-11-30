@@ -31,7 +31,7 @@ export default async function updateCoverImage(ctx: AppContext, next: Applicatio
     console.log('!updated -> ', updated);
     ctx.body = playlistImageInfo
     ctx.status = 200;
-    next()
+    await next()
   } catch (error) {
     console.error('Error in middleware:', error);
     ctx.status = 500;
