@@ -18,5 +18,5 @@ export default async function setFaradayStock(ctx: AppContext, next: Application
     ctx.status = 500;
     ctx.body = 'Internal Server Error';
   }
-  next()
+  await next()
 }

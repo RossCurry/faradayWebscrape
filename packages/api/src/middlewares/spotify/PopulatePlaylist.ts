@@ -10,6 +10,11 @@ type SnapshotResponse = {
 export default async function PopulatePlaylist(ctx: AppContext, next: Application.Next) {
   const playlistData =  await ctx.services.mongo.getPlaylistData()
   if (!playlistData.length) throw new Error('No spotify track ids found')
+  
+  console.log('!PopulatePlaylist token.getUserInfo() -> ', ctx.services.token.getUserInfo()); 
+  const accessToken = (ctx.services.token.getUserInfo() as any)?.endpoint.access_token
+  if (!accessToken) throw new Error('No accessToken')
+
   const playlist = ctx.state.playlist
   const playlistId = playlist?.id
   const playlistEndpoint = `https://api.spotify.com/v1/playlists/${playlistId}/tracks`
@@ -30,7 +35,9 @@ export default async function PopulatePlaylist(ctx: AppContext, next: Applicatio
         uris: uriBatch,
         position: i === 0 ? 0 : i * 100
       }
-      const accessToken = ctx.state.accessToken || ctx.state.userToken.get()
+      // TODO re-write this
+      // const accessToken = ctx.state.accessToken || ctx.state.userToken?.get() || (ctx.services.token.getUserInfo() as any)?.endpoint?.access_token
+      
       const authString = `Bearer ${accessToken}`
       console.log('!playlistEndpoint -> ', playlistEndpoint);
       console.log('!authString -> ', authString);
@@ -57,5 +64,5 @@ export default async function PopulatePlaylist(ctx: AppContext, next: Applicatio
     }
   ctx.body = JSON.stringify(snapshots)
   ctx.status = 200
-  next()
+  await next()
 }

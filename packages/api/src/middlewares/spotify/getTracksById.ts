@@ -22,7 +22,7 @@ export default async function getTracksById(ctx: AppContext, next: Application.N
     const tracks = await ctx.services.mongo.getSpotifyTracksById(trackIds)
     ctx.body = tracks
     ctx.status = 200
-    next()
+    await next()
   } catch (error) {
     ctx.body = { message: 'Something went wrong getting spotify tracks', error }
     ctx.status = 500

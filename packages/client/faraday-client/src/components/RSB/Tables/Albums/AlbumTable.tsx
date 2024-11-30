@@ -169,7 +169,8 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
           {table
             .getRowModel()
             // TODO virtualize or use pagination
-            .rows.slice(0,60)
+            .rows
+            // .rows.slice(0,60)
             .map(row => {
               // Each row is actually going to be 2 rows
               // 1. the tanStack data row (album)

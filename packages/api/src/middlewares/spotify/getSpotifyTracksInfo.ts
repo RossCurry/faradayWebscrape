@@ -38,7 +38,7 @@ export default async function getSpotifyTracksInfo(ctx: AppContext, next: Applic
   ctx.state.data = {
     spotifyTrackInfo: allTracksInfo.filter(info => !!info)
   }
-  next()
+  await next()
 }
 
 async function searchTracksSingleAlbum(albumId: string, authString: string): Promise<SpotifyAlbumTracksResponse | { error?: Record<string, unknown>}> {

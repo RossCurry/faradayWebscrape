@@ -19,7 +19,7 @@ export default async function searchSingleTitle(ctx: AppContext, next: Applicati
     console.log('!searchSingleAlbum result -> ', spotify);
     ctx.body = { result: spotify || 'none found' }
     ctx.status = 200
-    next()
+    await next()
   } catch (error) {
     ctx.body = { message: 'Something went wrong searching spotify searchSingleAlbum', error }
     ctx.status = 500

@@ -39,5 +39,5 @@ export default async function readFromDisk(ctx: AppContext, next: Application.Ne
     throw new Error(`Error reading Json from disk: ${error}`);
 
   }
-  next()
+  await next()
 }

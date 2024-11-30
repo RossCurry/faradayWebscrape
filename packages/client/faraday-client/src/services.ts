@@ -2,7 +2,7 @@ import {  SpotifyPlaylist, SpotifySearchResult, SpotifyUserProfile } from "./typ
 
 const localConnectEndpoint = 'http://localhost:3000/api/spotify/connect'
 // TODO change endpoint to suit purpose
-const localPlaylistEndpoint = 'http://localhost:3000/api/spotify/redirect'
+const localPlaylistEndpoint = 'http://localhost:3000/api/spotify/playlist/create'
 export const baseUrlDev = 'http://localhost:3000'
 
 export async function connectToSpoti(){
@@ -34,10 +34,12 @@ export async function connectToSpoti(){
 
 const DESCRIPTION = 'Faraday Collection of what is available on Spotify'
 export async function createPlaylist(code: string, playlistTitle: string){
+  const token = window.localStorage.getItem('jwt') || ''
   const url = new URL(localPlaylistEndpoint)
   url.searchParams.set('code', code)
   url.searchParams.set('playlistTitle', playlistTitle)
   url.searchParams.set('description', DESCRIPTION)
+  url.searchParams.set('token', token)
   try {
     const response = await fetch(url.toString(), {
       method: 'POST',

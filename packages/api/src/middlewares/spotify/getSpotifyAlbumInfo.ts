@@ -17,5 +17,5 @@ export default async function getSpotifyAlbumInfo(ctx: AppContext, next: Applica
     ctx.status = 500;
     ctx.body = 'Internal Server Error';
   }
-  next()
+  await next()
 }

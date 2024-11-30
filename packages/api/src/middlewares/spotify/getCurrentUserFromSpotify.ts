@@ -3,7 +3,7 @@ import { AppContext } from "../../router.js"
 import { SpotifyUserProfile } from "../../controllers/spotify/spotify.types.js"
 
 // get user info
-export default async function getCurrentUser(ctx: AppContext, next: Application.Next) {
+export default async function getCurrentUserFromSpotify(ctx: AppContext, next: Application.Next) {
   try {
     const accessToken = ctx.services.token.get()
     const authString = `Bearer ${accessToken}`
@@ -19,5 +19,5 @@ export default async function getCurrentUser(ctx: AppContext, next: Application.
   } catch (error) {
     throw error
   }
-  next()
+  await next()
 }
