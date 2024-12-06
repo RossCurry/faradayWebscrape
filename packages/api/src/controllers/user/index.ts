@@ -23,7 +23,7 @@ userRouter.get("/api/user/verify",
       if (!JWT_SECRET) throw new Error('No ENV vars found for secret')
       console.log('!JWT_SECRET -> ', JWT_SECRET);
       // Create JWT token
-      const token = jwt.sign(userInfo, JWT_SECRET, { expiresIn: '1h' });
+      const token = jwt.sign(userInfo, JWT_SECRET, { expiresIn: '4h' });
       console.log('!token -> ', token);
       ctx.body = {
         token,

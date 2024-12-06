@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import styles from './Views.module.css'
 import { useAppDispatch, useAppState } from '../../../state/AppStateHooks';
 import AlbumTable from '../Tables/Albums/AlbumTable';
-import { getTracksByIds } from '../../../services';
+import { createPlaylist, getTracksByIds } from '../../../services';
 import TrackTable from '../Tables/Tracks/TrackTable';
 
 export default function Views() {
@@ -66,6 +66,7 @@ export function PlaylistView() {
       {showPlaylist &&
         <>
         <PlaylistTitle />
+        
         <TrackTable
           data={tracks}
           key={'playlist-table'}
@@ -79,18 +80,33 @@ export function PlaylistView() {
 
 const PlaylistTitle = () => {
   const [editMode, setEditMode] = useState<boolean>(false)
-  const { newTitle } = useAppState().playlist
+  const { title } = useAppState().playlist
   const dispatch = useAppDispatch()
   return (
     <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', gap: '1rem' }}>
-      { editMode 
-        ? <input type='text' value={newTitle} onChange={(e) => dispatch({ type: 'setNewPlaylistTitle', title: e.target.value })} style={{ fontSize: '1.4rem', fontWeight: '600', padding: '.25em .5em'}}/>
-        : <h2 style={{ margin: 0 }}>{newTitle}</h2>
-      }
       <button onClick={() => setEditMode(!editMode)}>{editMode ? 'done' : 'edit'}</button>
+      { editMode 
+        ? <input type='text' value={title} onChange={(e) => dispatch({ type: 'setNewPlaylistTitle', title: e.target.value })} style={{ fontSize: '1.4rem', fontWeight: '600', padding: '.25em .5em'}}/>
+        : <h2 style={{ margin: 0 }}>{title}</h2>
+      }
+      <CreatePlaylistButton />
     </div>
   )
 }
+
+
+export function CreatePlaylistButton() {
+  const { title, tracksCollection } = useAppState().playlist
+  
+  // TODO prob better to disable the button
+  if (!tracksCollection) return null
+  return (
+    <div>
+      <button onClick={() => createPlaylist(title, tracksCollection)}>Create Playlist</button>
+    </div>
+  )
+}
+
 
 const PlaylistEmptyContainer = () => {
   const dispatch = useAppDispatch();

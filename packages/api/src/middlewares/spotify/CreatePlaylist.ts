@@ -27,7 +27,7 @@ export default async function CreatePlaylist(ctx: AppContext, next: Application.
       }
     });
     let jsonResponse;
-    console.log('!about to parse -> ', response);
+    console.log('!CreatePlaylist parse response -> ', response);
     try {
       jsonResponse = await response.json();
     } catch (error) {

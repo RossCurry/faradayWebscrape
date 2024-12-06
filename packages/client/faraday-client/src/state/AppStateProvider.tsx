@@ -15,7 +15,7 @@ type AppState = {
     custom: CheckedTrackDict,
     selectedPlaylistId: string | null,
     tracksCollection: SpotifySearchResult["trackList"] | null,
-    newTitle: string,
+    title: string,
     isLoading: boolean
   },
   rsb: {
@@ -29,13 +29,16 @@ type AppState = {
   }
   user: SpotifyUserProfile | null
 };
+
+const playlistPlaceholderTitle = `Faraday ${new Date().toLocaleString('en-US', { month: 'long' })} ${new Date().toLocaleString('en-US', { year: 'numeric' })}`
+
 const initialAppState = {
   albumCollection: null,
   playlist: {
     custom: {},
     selectedPlaylistId: null,
     tracksCollection: null,
-    newTitle: 'Your new playlist',
+    title: playlistPlaceholderTitle,
     isLoading: false,
   },
   rsb: {
@@ -135,7 +138,7 @@ function stateReducer(state: AppState, action: ActionTypes) {
     case 'setNewPlaylistTitle': {
       return {
         ...state,
-        playlist: { ...state.playlist, newTitle: action.title }
+        playlist: { ...state.playlist, title: action.title }
       }
     }
     case 'setIsLoading': {

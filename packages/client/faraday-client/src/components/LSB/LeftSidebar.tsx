@@ -39,7 +39,7 @@ export default function LeftSidebar() {
 
 
 export function PlaceholderItem() {
-  const { newTitle } = useAppState().playlist
+  const { title } = useAppState().playlist
   const dispatch = useAppDispatch();
   const handleOnClick = () => {
     dispatch({
@@ -60,8 +60,8 @@ export function PlaceholderItem() {
     >
       <img src={faradayLogo} className={styles.playlistItemImg} alt="Vite logo" />
       <div className={styles.playlistItemInfo}>
-        <p>{newTitle}</p>
-        <p style={{ fontSize: '.85rem' }}>{'Not logged in'}</p>
+        <p>{title}</p>
+        {/* <p style={{ fontSize: '.85rem' }}>{'Not logged in'}</p> */}
       </div>
     </li>
   )
