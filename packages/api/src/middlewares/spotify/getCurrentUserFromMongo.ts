@@ -9,13 +9,20 @@ export default async function getCurrentUserFromMongo(ctx: AppContext, next: App
     console.log('!getCurrentUserFromMongo -> ');
     const params = new URLSearchParams(ctx.querystring)
     
-    const token = params.get('token')
+    // TODO make sure token is always sent in header
+    let token = params.get('token')
+    if (!token){
+      const { headers } = ctx
+      console.log('headers', headers.authorization)
+      const authHeader  = headers.authorization
+      token = authHeader?.split(' ').at(1) || null
+    }
     if (!token) throw new Error('No JWT token found in request')
     
-      const JWT_SECRET = process.env.JWT_SECRET;
+    const JWT_SECRET = process.env.JWT_SECRET;
     if (!JWT_SECRET) throw new Error('No ENV vars found for secret')
     
-      const verifiedToken = jwt.verify(token, JWT_SECRET);
+    const verifiedToken = jwt.verify(token, JWT_SECRET);
     if (typeof verifiedToken === 'string') throw new Error('Typeof verified token does not match')
     console.log('!verifiedToken -> ', verifiedToken);
     const user = await ctx.services.mongo.getUserInfoById(verifiedToken.uri)

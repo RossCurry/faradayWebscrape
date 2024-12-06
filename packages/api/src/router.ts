@@ -33,7 +33,8 @@ export interface AppState extends Application.DefaultState {
     userPlaylists?: SpotifyPlaylist[] | null
   },
 }
-export interface AppContext extends Application.BaseContext {
+export interface AppContext extends Application.ExtendableContext {
+  body: any
   params: Record<string, string>
   state: AppState,
   services: {

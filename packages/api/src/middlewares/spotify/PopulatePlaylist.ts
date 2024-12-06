@@ -8,8 +8,15 @@ type SnapshotResponse = {
 }
 
 export default async function PopulatePlaylist(ctx: AppContext, next: Application.Next) {
-  const playlistData =  await ctx.services.mongo.getPlaylistData()
-  if (!playlistData.length) throw new Error('No spotify track ids found')
+  // const playlistData =  await ctx.services.mongo.getPlaylistData()
+  // if (!playlistData.length) throw new Error('No spotify track ids found')
+  console.log('!PopulatePlaylist ctx.body -> ', ctx.request.body);
+  let playlistTracks;
+  if (ctx.request.body){ 
+    playlistTracks = (ctx.request.body as Record<string, any>).playlistTracks
+  }
+  console.log('!playlistTracks -> ', playlistTracks);
+  if (!playlistTracks || !playlistTracks.length) throw new Error('No spotify track ids found')
   
   console.log('!PopulatePlaylist token.getUserInfo() -> ', ctx.services.token.getUserInfo()); 
   const accessToken = (ctx.services.token.getUserInfo() as any)?.endpoint.access_token
@@ -19,9 +26,9 @@ export default async function PopulatePlaylist(ctx: AppContext, next: Applicatio
   const playlistId = playlist?.id
   const playlistEndpoint = `https://api.spotify.com/v1/playlists/${playlistId}/tracks`
   // TODO 100 max uris per request
-  let batches = [playlistData]
-  if (playlistData.length > 100){
-    batches = getBatches(playlistData, 100)
+  let batches = [playlistTracks]
+  if (playlistTracks.length > 100){
+    batches = getBatches(playlistTracks, 100)
   }
   console.log('!batches.length -> ', batches.length);
   // TODO this needs to be sequential

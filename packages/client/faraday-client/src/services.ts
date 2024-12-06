@@ -2,7 +2,7 @@ import {  SpotifyPlaylist, SpotifySearchResult, SpotifyUserProfile } from "./typ
 
 const localConnectEndpoint = 'http://localhost:3000/api/spotify/connect'
 // TODO change endpoint to suit purpose
-const localPlaylistEndpoint = 'http://localhost:3000/api/spotify/playlist/create'
+
 export const baseUrlDev = 'http://localhost:3000'
 
 export async function connectToSpoti(){
@@ -32,21 +32,26 @@ export async function connectToSpoti(){
   }
 }
 
+// TODO create playlist using selected options
 const DESCRIPTION = 'Faraday Collection of what is available on Spotify'
-export async function createPlaylist(code: string, playlistTitle: string){
+export async function createPlaylist(playlistTitle: string, playlistTracks: SpotifySearchResult["trackList"]) {
+  const createPath = '/api/spotify/playlist/create';
   const token = window.localStorage.getItem('jwt') || ''
-  const url = new URL(localPlaylistEndpoint)
-  url.searchParams.set('code', code)
+  const url = new URL(baseUrlDev + createPath)
   url.searchParams.set('playlistTitle', playlistTitle)
   url.searchParams.set('description', DESCRIPTION)
-  url.searchParams.set('token', token)
+  console.log('!FE createPlaylist -> ', playlistTracks);
+  const trackUris = playlistTracks.map(track => track.uri)
   try {
     const response = await fetch(url.toString(), {
       method: 'POST',
       headers: {
-        'Content-type': 'application/json'
+        'Content-type': 'application/json',
+        'Authorization': `Bearer ${token}`,
       },
-      body: JSON.stringify({}),
+      body: JSON.stringify({
+        playlistTracks: trackUris
+      }),
       mode: 'cors',
       credentials: 'include',
     })

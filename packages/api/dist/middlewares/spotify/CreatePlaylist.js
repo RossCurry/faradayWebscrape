@@ -26,7 +26,7 @@ export default async function CreatePlaylist(ctx, next) {
             }
         });
         let jsonResponse;
-        console.log('!about to parse -> ', response);
+        console.log('!CreatePlaylist parse response -> ', response);
         try {
             jsonResponse = await response.json();
         }
