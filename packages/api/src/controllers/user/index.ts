@@ -42,7 +42,6 @@ userRouter.get("/api/user",
   // mw.spotify.getCurrentUserFromDB, // get user info
   async (ctx: AppContext) => {
     try {
-      const params = new URLSearchParams(ctx.querystring)
       const token = parseAuthHeaderFromContext(ctx)
       if (!token) throw new Error('No JWT token found in request')
       const JWT_SECRET = process.env.JWT_SECRET;

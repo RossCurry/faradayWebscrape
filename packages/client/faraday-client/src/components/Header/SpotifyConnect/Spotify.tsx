@@ -36,20 +36,28 @@ const User = () => {
   console.log('!User component -> ', user);
   const { images } = user
   console.log('!images -> ', images);
+  
   const inlineStyles: React.CSSProperties = {}
-  if (images){
-    const [big] = images
-    inlineStyles.backgroundImage = `url(${big.url})`
+  if (images.length){
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [_big, small] = images
+    inlineStyles.backgroundImage = `url(${small.url})`
   }
 
   return (
     <>
-    <div
-      className={styles.userImage}
-      style={inlineStyles}
-    />
-    <p>{user.display_name}</p>
-    <p>Logged In 🚀</p>
+    {images.length
+      ? 
+        <div
+          className={styles.userImage}
+          style={inlineStyles}
+        /> 
+      : 
+        <span className={styles.userInitialWrapper}>
+          <h3 className={styles.userInitial}>{user.display_name.at(0)?.toUpperCase()}</h3>
+        </span>
+    }
+    {/* TODO add popover on hover for name */}
     </>
   )
 }

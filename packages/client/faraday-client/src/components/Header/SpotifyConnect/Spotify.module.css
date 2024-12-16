@@ -1,5 +1,39 @@
+.userInitial{
+  padding: 0;
+  margin: 0;
+  font-size: 2rem;
+}
+
+.userInitialWrapper{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 3rem;
+  height: 3rem;
+  position: relative;
+  
+  margin: 1rem;
+  
+  border-radius: 50%;
+  box-shadow: 0px 0px 8px 3px rgb(206 206 206);
+}
+.userInitialWrapper::before {
+  --imageBorder: 1rem;
+  isolation: isolate;
+  z-index: -1;
+  position: absolute;
+  content: '';
+  width: calc(100% + var(--imageBorder));
+  aspect-ratio: 1/1;
+  background-color: rgba(107, 107, 106, 0.399);
+  border-radius: 50%;
+}
+
+
+/* Not all users have images */
 .userImage { 
-  width: 2rem;
+  width: 3rem;
   aspect-ratio: 1/1;
   content: '';
   /* for bg-image */
@@ -8,5 +42,22 @@
   background-repeat: no-repeat;
   position: relative;
   padding: 0;
-  margin: 0;
+  margin: 1rem;
+
+  border-radius: 50%;
+  box-shadow: 0px 0px 8px 3px rgb(206 206 206);
+}
+
+
+.userImage::before {
+  --imageBorder: 1rem;
+  isolation: isolate;
+  z-index: -1;
+  position: absolute;
+  content: '';
+  width: calc(100% + var(--imageBorder));
+  aspect-ratio: 1/1;
+  background-color: rgba(107, 107, 106, 0.399);
+  transform: translate(-50%, calc(var(--imageBorder)/2 * -1 ));
+  border-radius: 50%;
 }
