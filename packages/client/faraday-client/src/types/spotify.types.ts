@@ -614,7 +614,7 @@ export type SearchResponse =
     };
     href: string;
     id: string;
-    images: Array<any>; // Assuming images is an array that could hold objects or any type. Adjust if you know the specific structure.
+    images: Array<{ width: number, height: number, url: string}>; // Assuming images is an array that could hold objects or any type. Adjust if you know the specific structure.
     type: string;
     uri: string;
     followers: {

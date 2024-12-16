@@ -7,35 +7,23 @@ import RightSidebar from './components/RSB'
 import { getAvailableAlbums, getUserInfo } from './services'
 import { useAppDispatch, useAppState } from './state/AppStateHooks'
 import useQuery from './hooks/useQueryParams'
+import { getIsJwtExpired } from './utils/decodeJwt'
+import useUpdateAlbums from './hooks/useUpdateAlbums'
+import useValidateJwtTokenExpiration from './hooks/useValidateJwtTokenExpiration'
+import useGetAndSetUserInfo from './hooks/useGetAndSetUserInfo'
 
 
 
 function App({ redirected }: { redirected?: true }) {
+  useUpdateAlbums()
+  useGetAndSetUserInfo(redirected)
+  
   const [isUserdataLoading, setIsUserdataLoading] = useState<boolean>(false)
   const dispatch = useAppDispatch();
   const { searchParams } = useQuery()
   const code = searchParams.get('code')
 
   useEffect(() => {
-    async function updateAlbums(){
-      const availableAlbums = await getAvailableAlbums()
-      if (availableAlbums) dispatch({ type: 'setAlbumCollection', albums: availableAlbums })
-    }
-    updateAlbums()
-
-    async function checkIsUserLoggedIn(){
-      console.log('!CALL checkIsUserLoggedIn -> ');
-      const token = window.localStorage.getItem('jwt')
-      console.log('!token -> ', token);
-      if (token) {
-        const userInfo = await getUserInfo(null, token)
-        dispatch({ type: 'setUserInfo', userInfo })
-        setIsUserdataLoading(false)
-      }
-    }
-    if (!redirected){
-      checkIsUserLoggedIn()
-    }
     async function updateUserInfo(){
       console.log('!CALL updateUserInfo -> ');
       if (!code) return;

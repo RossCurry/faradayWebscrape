@@ -1,0 +1,12 @@
+.userImage { 
+  width: 2rem;
+  aspect-ratio: 1/1;
+  content: '';
+  /* for bg-image */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  padding: 0;
+  margin: 0;
+}

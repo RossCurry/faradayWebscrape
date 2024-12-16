@@ -5,6 +5,7 @@ import jwt, { Jwt } from 'jsonwebtoken';
 import { AppContext, AppState } from "../../router.js";
 // env variables
 import dotenv from 'dotenv';
+import { parseAuthHeaderFromContext } from '#middlewares/utils/parseAuthHeader.js';
 dotenv.config();
 
 const userRouter = new Router<AppState, AppContext>()
@@ -42,7 +43,7 @@ userRouter.get("/api/user",
   async (ctx: AppContext) => {
     try {
       const params = new URLSearchParams(ctx.querystring)
-      const token = params.get('token')
+      const token = parseAuthHeaderFromContext(ctx)
       if (!token) throw new Error('No JWT token found in request')
       const JWT_SECRET = process.env.JWT_SECRET;
       if (!JWT_SECRET) throw new Error('No ENV vars found for secret')

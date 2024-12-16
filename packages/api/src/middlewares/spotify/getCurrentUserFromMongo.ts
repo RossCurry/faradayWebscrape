@@ -2,6 +2,8 @@ import Application from "koa"
 import jwt from 'jsonwebtoken';
 import { AppContext } from "../../router.js"
 import { SpotifyUserProfile } from "../../controllers/spotify/spotify.types.js"
+import { parseAuthHeaderFromContext } from "#middlewares/utils/parseAuthHeader.js";
+
 
 // get user info
 export default async function getCurrentUserFromMongo(ctx: AppContext, next: Application.Next) {
@@ -9,13 +11,9 @@ export default async function getCurrentUserFromMongo(ctx: AppContext, next: App
     console.log('!getCurrentUserFromMongo -> ');
     const params = new URLSearchParams(ctx.querystring)
     
-    // TODO make sure token is always sent in header
     let token = params.get('token')
     if (!token){
-      const { headers } = ctx
-      console.log('headers', headers.authorization)
-      const authHeader  = headers.authorization
-      token = authHeader?.split(' ').at(1) || null
+      token = parseAuthHeaderFromContext(ctx)
     }
     if (!token) throw new Error('No JWT token found in request')
     
