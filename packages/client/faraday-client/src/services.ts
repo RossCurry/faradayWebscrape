@@ -98,9 +98,14 @@ export async function getUserInfo(code: string | null, token?: string) {
   const url = new URL(baseUrlDev + (code ? verifyPath : tokenPath))
   console.log('!url.toString() -> ', url.toString());
   if (code) url.searchParams.set('code', code)
-  if (token) url.searchParams.set('token', token)
+  // if (token) url.searchParams.set('token', token)
   // TODO send auth in header
-  const response = await fetch(url.toString())
+  const response = await fetch(url.toString(),{
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+  // TODO what if token is expired.
   if (response.ok){
     const jsonRes: { userInfo: SpotifyUserProfile | null,  token: string } = await response.json()
     console.log('!getUserInfo -> ', jsonRes);

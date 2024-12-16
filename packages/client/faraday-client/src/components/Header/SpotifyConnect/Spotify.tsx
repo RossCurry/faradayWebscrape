@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 import { useSearchParams } from 'react-router-dom';
+import styles from './Spotify.module.css'
+
 import { connectToSpoti } from '../../../services';
 import { useAppState } from '../../../state/AppStateHooks';
 
@@ -21,8 +23,28 @@ export default function SpotifyConnect() {
           <button onClick={() => connectToSpoti()}>Connect to Spotify</button>
         </>
       :
-        <p>LoggedIn</p>
+        <User />
       }
     </fieldset>
+  )
+}
+
+const User = () => {
+  const { user } = useAppState()
+  if (!user) return null;
+
+  const { images } = user
+  console.log('!images -> ', images);
+  // const [big] = images
+  return (
+    <>
+    <div
+      className={styles.userImage}
+      style={{
+        // backgroundImage: `url(${})`
+      }}
+    />
+    <p>LoggedIn</p>
+    </>
   )
 }

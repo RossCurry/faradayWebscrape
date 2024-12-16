@@ -21,3 +21,4 @@ export function getBatches<T extends any>(array: T[], batchNum: number) {
   recurse(array)
   return batches
 }
+

@@ -80,7 +80,7 @@ export default function TrackTable({
   const table = useReactTable({
     columns,
     data: dataWithCheckbox,
-    debugTable: true,
+    // debugTable: true,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(), //client-side sorting
     onSortingChange: setSorting, //optionally control sorting state in your own scope for easy access
