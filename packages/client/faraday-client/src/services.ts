@@ -91,29 +91,47 @@ export async function getTrackList(albumId: string) {
 }
 
 
-export async function getUserInfo(code: string | null, token?: string) {
-  console.log('!getUserInfo -> ', !!code, !!token);
-  const verifyPath = `/api/user/verify`
+export async function getUserInfoWithToken(token: string) {
   const tokenPath = `/api/user`
-  const url = new URL(baseUrlDev + (code ? verifyPath : tokenPath))
-  console.log('!url.toString() -> ', url.toString());
-  if (code) url.searchParams.set('code', code)
-  // if (token) url.searchParams.set('token', token)
-  // TODO send auth in header
+  const url = new URL(baseUrlDev + tokenPath)
+
   const response = await fetch(url.toString(),{
     headers: {
       Authorization: `Bearer ${token}`
     }
   })
-  // TODO what if token is expired.
+
+  if (response.ok) {
+    // Handling token expiration on the BE
+    const jsonRes: { userInfo: SpotifyUserProfile | null, token: string } = await response.json()
+    if (jsonRes.token) {
+      window.localStorage.setItem('jwt', jsonRes.token)
+    }
+    return jsonRes.userInfo || null
+  }
+
+  return null
+}
+
+
+export async function getUserInfoWithCode(code: string) {
+  console.log('!getUserInfo -> ', !!code);
+  const verifyPath = `/api/user/verify`
+  const url = new URL(baseUrlDev + verifyPath)
+  console.log('!url.toString() -> ', url.toString());
+  url.searchParams.set('code', code)
+
+  const response = await fetch(url.toString())
+
   if (response.ok){
-    const jsonRes: { userInfo: SpotifyUserProfile | null,  token: string } = await response.json()
-    console.log('!getUserInfo -> ', jsonRes);
+    // Handling token expiration on the BE
+    const jsonRes: { userInfo: SpotifyUserProfile | null, token: string } = await response.json()
     if (jsonRes.token) {
       window.localStorage.setItem('jwt', jsonRes.token)
     }
     return jsonRes.userInfo || null 
   }
+
   return null
 }
 

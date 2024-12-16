@@ -1,13 +1,13 @@
 import { useEffect } from 'react'
 import { getIsJwtExpired } from '../utils/decodeJwt';
-import { getUserInfo } from '../services';
+import { getUserInfoWithToken } from '../services';
 import { useAppDispatch } from '../state/AppStateHooks';
 import { AppStateDispatch } from '../state/AppStateProvider';
 import useValidateJwtTokenExpiration from './useValidateJwtTokenExpiration';
 
 
 async function getAndSetUserInfo(token: string, dispatch: AppStateDispatch) {
-  const userInfo = await getUserInfo(null, token)
+  const userInfo = await getUserInfoWithToken(token)
   dispatch({ type: 'setUserInfo', userInfo })
 }
 
