@@ -276,26 +276,38 @@ class MongoDb {
     }
     async setUserInfo(userInfo, tokenInfo) {
         console.log('!setUserInfo -> ', userInfo);
+        if ('error' in userInfo)
+            throw new Error(`No userInfo set: Error in userInfo. userInfo: ${userInfo}`);
         const usersCollection = this.db?.collection('users');
         if (!usersCollection)
             throw new Error('No users collecion found');
         const [user] = await usersCollection.find({ id: userInfo.id, href: userInfo.href }).toArray();
-        console.log('!user -> ', user);
-        if (!user) {
-            const insertedDocs = await usersCollection.insertOne({
-                ...userInfo,
-                endpoint: tokenInfo,
-                createdDate: new Date().toISOString(),
-                playlists: []
-            });
-            console.log('!insertedDocs -> ', insertedDocs);
+        // Update token info
+        if (user) {
+            const modifiedFields = Object.keys(userInfo).reduce((newFields, field) => {
+                const newValue = userInfo[field];
+                const currentValue = user[field];
+                if (JSON.stringify(newValue) !== JSON.stringify(currentValue)) {
+                    newFields[field] = userInfo[field];
+                }
+                return newFields;
+            }, {});
+            console.log(`setUserInfo Updating user endpoint info: ${tokenInfo}`);
+            const insertedDocs = await usersCollection.updateOne({ _id: user._id }, { $set: {
+                    ...modifiedFields,
+                    endpoint: tokenInfo,
+                    updatedDate: new Date().toISOString()
+                } });
             return insertedDocs;
         }
-        const insertedDocs = await usersCollection.updateOne({ _id: user._id }, { $set: {
-                endpoint: tokenInfo,
-                updatedDate: new Date().toISOString()
-            } });
-        console.log('!insertedDocs -> ', insertedDocs);
+        // Insert new user
+        console.log(`setUserInfo Inserting new user: ${userInfo}`);
+        const insertedDocs = await usersCollection.insertOne({
+            ...userInfo,
+            endpoint: tokenInfo,
+            createdDate: new Date().toISOString(),
+            playlists: []
+        });
         return insertedDocs;
     }
     async setUsersPlaylist(userUri, spotifyPlaylist) {

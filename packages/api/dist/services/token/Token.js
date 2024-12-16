@@ -16,6 +16,10 @@ export default class Token {
         return !!this.accessToken;
     }
     set(token) {
+        if (!token.access_token) {
+            console.warn('No valid token.access_token, no token set');
+            return;
+        }
         console.log('Token set', token);
         this.accessToken = token.access_token;
         this.expiresIn = token.expires_in;

@@ -1,15 +1,13 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import styles from './App.module.css'
 
 import Header from './components/Header/Header'
 import LeftSidebar from './components/LSB/LeftSidebar'
 import RightSidebar from './components/RSB'
-import { getAvailableAlbums, getUserInfo } from './services'
-import { useAppDispatch, useAppState } from './state/AppStateHooks'
+import { getUserInfoWithCode } from './services'
+import { useAppDispatch } from './state/AppStateHooks'
 import useQuery from './hooks/useQueryParams'
-import { getIsJwtExpired } from './utils/decodeJwt'
 import useUpdateAlbums from './hooks/useUpdateAlbums'
-import useValidateJwtTokenExpiration from './hooks/useValidateJwtTokenExpiration'
 import useGetAndSetUserInfo from './hooks/useGetAndSetUserInfo'
 
 
@@ -27,8 +25,8 @@ function App({ redirected }: { redirected?: true }) {
     async function updateUserInfo(){
       console.log('!CALL updateUserInfo -> ');
       if (!code) return;
-      const userInfo = await getUserInfo(code)
-      console.log('!FE userInfo -> ', userInfo);
+      const userInfo = await getUserInfoWithCode(code)
+      console.log('!FE get userInfo with code -> ', userInfo);
       dispatch({ type: 'setUserInfo', userInfo })
       setIsUserdataLoading(false)
     }

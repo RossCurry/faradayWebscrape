@@ -33,18 +33,23 @@ const User = () => {
   const { user } = useAppState()
   if (!user) return null;
 
+  console.log('!User component -> ', user);
   const { images } = user
   console.log('!images -> ', images);
-  // const [big] = images
+  const inlineStyles: React.CSSProperties = {}
+  if (images){
+    const [big] = images
+    inlineStyles.backgroundImage = `url(${big.url})`
+  }
+
   return (
     <>
     <div
       className={styles.userImage}
-      style={{
-        // backgroundImage: `url(${})`
-      }}
+      style={inlineStyles}
     />
-    <p>LoggedIn</p>
+    <p>{user.display_name}</p>
+    <p>Logged In 🚀</p>
     </>
   )
 }
