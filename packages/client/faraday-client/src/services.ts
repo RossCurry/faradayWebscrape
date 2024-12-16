@@ -95,6 +95,7 @@ export async function getUserInfoWithToken(token: string) {
   const tokenPath = `/api/user`
   const url = new URL(baseUrlDev + tokenPath)
 
+  console.log('!getUserInfoWithToken -> ', token);
   const response = await fetch(url.toString(),{
     headers: {
       Authorization: `Bearer ${token}`
