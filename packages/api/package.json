@@ -17,7 +17,7 @@
     "build": "pwd && rm -rf ./dist && ./node_modules/typescript/bin/tsc -p . && cp -r ./public ./dist/public",
     "tsc": "./node_modules/typescript/bin/tsc -p .",
     "watch": "yarn tsc -w",
-    "dev": "yarn watch & nodemon ./dist/index.js"
+    "dev": "nodemon ./dist/index.js"
   },
   "dependencies": {
     "@types/fs-extra": "^11.0.4",

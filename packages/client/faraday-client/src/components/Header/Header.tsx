@@ -16,9 +16,12 @@ export default function Header() {
     <header className={styles.outerHeader}>
       <section className={styles.header}>
         <a href="/">
-          <img src={faradayLogo} className="logo" alt="Vite logo" />
+          <img src={faradayLogo} className={styles.logo} alt="Vite logo" />
         </a>
-        <h1 onClick={handleOnClick}>Faraday Collection</h1>
+        <div className={styles.headerText}>
+          <h1 onClick={handleOnClick}>Faraday Collection</h1>
+          <p>A collection of what is available on Spotify</p>
+        </div>
       </section>
       <SpotifyConnect />
   </header>
