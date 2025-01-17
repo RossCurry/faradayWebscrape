@@ -44,7 +44,7 @@ class MongoDb {
             if (matched) {
                 await albumCollection.updateOne({ 'faraday.id': album.id }, { $set: {
                         spotify: matched.spotify,
-                        updatedDate: new Date().toISOString()
+                        updatedDate: new Date()
                     } });
                 matchedCount++;
             }
@@ -71,7 +71,7 @@ class MongoDb {
             await albumCollection.updateOne({ 'spotify.id': spotifyTrackInfo.album.id }, { $set: {
                     'spotify.trackIds': trackIds,
                     'spotify.trackInfo': spotifyTrackInfo.tracks,
-                    updatedDate: new Date().toISOString()
+                    updatedDate: new Date()
                 } });
         }));
         console.log('!insertedDocs -> ', insertedDocs.length);
@@ -91,7 +91,7 @@ class MongoDb {
         }, {});
         const insertedDoc = await albumCollection.updateOne(match, { $set: {
                 ...update,
-                updatedDate: new Date().toISOString()
+                updatedDate: new Date()
             } });
         console.log('!insertedDoc -> ', insertedDoc);
         return insertedDoc;
@@ -176,7 +176,7 @@ class MongoDb {
             throw new Error('No album collecion found');
         const newData = data.filter(d => !prevStockIds.includes(d.id));
         // TODO maybe we don't always just want to add on, or I need date info
-        const newFaradayData = newData.map(d => ({ faraday: d, createdDate: new Date().toISOString() }));
+        const newFaradayData = newData.map(d => ({ faraday: d, createdDate: new Date() }));
         /**
          * Insert new data
          */
@@ -214,7 +214,7 @@ class MongoDb {
                 const { _id, ...rest } = stock;
                 const updatedDoc = await albumCollection.updateOne({ _id: new ObjectId(_id) }, { $set: {
                         faraday: rest,
-                        updatedDate: new Date().toISOString()
+                        updatedDate: new Date()
                     } });
                 return updatedDoc;
             }));
@@ -295,8 +295,11 @@ class MongoDb {
             console.log(`setUserInfo Updating user endpoint info: ${tokenInfo}`);
             const insertedDocs = await usersCollection.updateOne({ _id: user._id }, { $set: {
                     ...modifiedFields,
-                    endpoint: tokenInfo,
-                    updatedDate: new Date().toISOString()
+                    endpoint: {
+                        ...tokenInfo,
+                        setAt: new Date(),
+                    },
+                    updatedDate: new Date()
                 } });
             return insertedDocs;
         }
@@ -304,8 +307,11 @@ class MongoDb {
         console.log(`setUserInfo Inserting new user: ${userInfo}`);
         const insertedDocs = await usersCollection.insertOne({
             ...userInfo,
-            endpoint: tokenInfo,
-            createdDate: new Date().toISOString(),
+            endpoint: {
+                ...tokenInfo,
+                setAt: new Date(),
+            },
+            createdDate: new Date(),
             playlists: []
         });
         return insertedDocs;
@@ -318,7 +324,7 @@ class MongoDb {
         const updated = await usersCollection.findOneAndUpdate({ uri: userUri }, { $push: {
                 playlists: {
                     ...spotifyPlaylist,
-                    createdTime: new Date().toISOString()
+                    createdTime: new Date()
                 }
             } });
     }
