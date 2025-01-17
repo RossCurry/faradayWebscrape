@@ -19,7 +19,6 @@ export default function SpotifyConnect() {
       {!isUserLoggedIn 
       ? 
         <>
-          <p>A collection of what is available on Spotify</p>
           <button onClick={() => connectToSpoti()}>Connect to Spotify</button>
         </>
       :
