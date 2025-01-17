@@ -55,7 +55,7 @@ class MongoDb {
           { 'faraday.id': album.id },
           { $set: { 
             spotify: matched.spotify,
-            updatedDate: new Date().toISOString()
+            updatedDate: new Date()
           }}
         )
         matchedCount++
@@ -82,7 +82,7 @@ class MongoDb {
         { $set: { 
           'spotify.trackIds': trackIds,
           'spotify.trackInfo':  spotifyTrackInfo.tracks,
-          updatedDate: new Date().toISOString()
+          updatedDate: new Date()
         }}
       )
     }))
@@ -106,7 +106,7 @@ class MongoDb {
         match,
         { $set: { 
           ...update,
-          updatedDate: new Date().toISOString()
+          updatedDate: new Date()
         }}
       )
     console.log('!insertedDoc -> ', insertedDoc);
@@ -194,7 +194,7 @@ class MongoDb {
     if (!albumCollection) throw new Error('No album collecion found')
     const newData = data.filter( d => !prevStockIds.includes(d.id) )
     // TODO maybe we don't always just want to add on, or I need date info
-    const newFaradayData = newData.map( d => ({ faraday: d, createdDate: new Date().toISOString() }))
+    const newFaradayData = newData.map( d => ({ faraday: d, createdDate: new Date() }))
 
     /**
      * Insert new data
@@ -236,7 +236,7 @@ class MongoDb {
         { _id: new ObjectId(_id) }, 
         { $set: { 
           faraday: rest,
-          updatedDate: new Date().toISOString()
+          updatedDate: new Date()
         }})
        return updatedDoc
      }))
@@ -327,8 +327,11 @@ class MongoDb {
         { _id: user._id},
         { $set: {
           ...modifiedFields,
-          endpoint: tokenInfo,
-          updatedDate: new Date().toISOString()
+          endpoint: {
+            ...tokenInfo,
+            setAt: new Date(),
+          },
+          updatedDate: new Date()
         }}
       )
       return insertedDocs
@@ -338,8 +341,11 @@ class MongoDb {
     console.log(`setUserInfo Inserting new user: ${userInfo}`)
     const insertedDocs = await usersCollection.insertOne({ 
       ...userInfo, 
-      endpoint: tokenInfo,
-      createdDate: new Date().toISOString(),
+      endpoint: {
+        ...tokenInfo,
+        setAt: new Date(),
+      },
+      createdDate: new Date(),
       playlists: []
     })
    
@@ -353,7 +359,7 @@ class MongoDb {
     const updated = await usersCollection.findOneAndUpdate({ uri: userUri }, { $push: { 
       playlists: {
         ...spotifyPlaylist,
-        createdTime: new Date().toISOString()
+        createdTime: new Date()
       }
     }})
   }
