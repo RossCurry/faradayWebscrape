@@ -129,6 +129,7 @@ export async function getUserInfoWithCode(code: string) {
     const jsonRes: { userInfo: SpotifyUserProfile | null, token: string } = await response.json()
     if (jsonRes.token) {
       window.localStorage.setItem('jwt', jsonRes.token)
+      window.location.href = '/'
     }
     return jsonRes.userInfo || null 
   }

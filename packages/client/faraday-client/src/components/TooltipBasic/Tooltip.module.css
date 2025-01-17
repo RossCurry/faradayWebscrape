@@ -1,0 +1,14 @@
+.tooltip {
+  position: relative;
+  display: inline-block;
+  padding: 0;
+  margin: 0;
+}
+
+.popover {
+  position: absolute;
+}
+
+.tooltip[popovertarget]:hover .popover {
+  display: block;
+}

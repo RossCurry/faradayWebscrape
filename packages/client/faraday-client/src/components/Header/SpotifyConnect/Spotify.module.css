@@ -1,3 +1,8 @@
+.connectToSpotifyButton{
+  display: flex;
+  align-items: center;
+}
+
 .userInitial{
   padding: 0;
   margin: 0;
