@@ -5,7 +5,7 @@ import AlbumTable from '../Tables/Albums/AlbumTable';
 import { createPlaylist, getTracksByIds } from '../../../services';
 import TrackTable from '../Tables/Tracks/TrackTable';
 import { msToTime } from '../../../utils/msToTime';
-import { CheckCircleIcon, EditIcon, LibraryAddIcon, PlaylistAddIcon } from '../../../icons';
+import { CheckCircleIcon, EditIcon, LibraryAddIcon, PlaylistAddIcon, PlaylistRemoveIcon } from '../../../icons';
 import IconButton from '../../Shared/IconButton/IconButton';
 import IconButtonWithTooltip from '../../Shared/IconButtonWithTooltip/IconButtonWithTooltip';
 
@@ -152,30 +152,42 @@ function DialogCreatePlaylist({
 
 function HeaderAlbumView() {
   const { albumCollection } = useAppState()
+
+  return (
+    <header className={styles.headerAlbumView}>
+      <p>Album collection size: {albumCollection?.length || 0}</p>
+    </header>
+  )
+}
+
+function TracksCollectionStats() {
+// TODO move stat logic to state
   const { tracksCollection } = useAppState().playlist
   const { hours, minutes, seconds } = useMemo( () => {
     const duration = tracksCollection?.reduce((sumOfDuration, track) => sumOfDuration + track.duration_ms, 0)
     return msToTime(duration || 0)
   }, [tracksCollection])
-
-  
-  
+  const durationString = `${hours > 0 ? `${hours}h` : ''} ${minutes}m ${seconds}s`
   return (
-    <header className={styles.headerAlbumView}>
-      <p>Album collection size: {albumCollection?.length}</p>
-      <p>Tracks selected: {tracksCollection?.length}</p>
-      <p>Total Duration: {hours}h {minutes}m {seconds}s</p>
-    </header>
+    <div className={styles.tracksCollectionStats}>
+      <p>Tracks selected: {tracksCollection?.length || 0}</p>
+      <p>Total Duration: {durationString}</p>
+    </div>
   )
- }
+}
 
 const HeaderPlaylistView = () => {
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
   console.log('!isDialogOpen -> ', isDialogOpen);
+  
   return (
     <div className={styles.headerPlaylistView}>
       {/* <PlaylistTitle /> */}
-      <CreatePlaylistButton setOpenDialog={setIsDialogOpen} />
+      <TracksCollectionStats />
+      <fieldset>
+        <ResetPlaylistButton />
+        <CreatePlaylistButton setOpenDialog={setIsDialogOpen} />
+      </fieldset>
       <DialogCreatePlaylist
         setOpenDialog={setIsDialogOpen}
         isDialogOpen={isDialogOpen}
@@ -212,12 +224,24 @@ function PlaylistTitle() {
   )
 }
 
+function ResetPlaylistButton() {
+  const dispatch = useAppDispatch()
+  const handleReset = () => {
+    dispatch({ type: 'resetCustomPlaylist' })
+    dispatch({ type: 'updateView', view: 'albums', playlistId: null })
+  }
+  return (
+    <IconButton
+      handleOnClick={handleReset}
+      Icon={PlaylistRemoveIcon}
+      text={'Reset'}
+    />
+  )
+}
 
 export function CreatePlaylistButton({ setOpenDialog }: { setOpenDialog: React.Dispatch<React.SetStateAction<boolean>> }) {
-  const { title, tracksCollection } = useAppState().playlist
+  const { tracksCollection } = useAppState().playlist
   const handleOnClick = () => {
-    // TODO open a dialog
-    // createPlaylist(title, tracksCollection)
     setOpenDialog(true)
   }
   // TODO prob better to disable the button

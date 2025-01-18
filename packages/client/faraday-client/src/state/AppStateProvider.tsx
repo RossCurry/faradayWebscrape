@@ -126,7 +126,15 @@ function stateReducer(state: AppState, action: ActionTypes) {
     case 'resetCustomPlaylist': {
       return { 
         ...state, 
-        playlist: { ...state.playlist, custom: {} } 
+        playlist: { 
+          ...state.playlist, 
+          custom: {}, 
+          tracksCollection: null 
+        },
+        rsb: { ...state.rsb, 
+          selectedAlbums: {}, 
+          areAllAlbumsSelected: false 
+        }
       };
     }
     case 'setCustomTracksCollection': {
