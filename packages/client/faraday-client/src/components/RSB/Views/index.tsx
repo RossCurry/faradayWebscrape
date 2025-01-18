@@ -5,7 +5,7 @@ import AlbumTable from '../Tables/Albums/AlbumTable';
 import { createPlaylist, getTracksByIds } from '../../../services';
 import TrackTable from '../Tables/Tracks/TrackTable';
 import { msToTime } from '../../../utils/msToTime';
-import { CheckCircleIcon, EditIcon } from '../../../icons';
+import { CheckCircleIcon, EditIcon, LibraryAddIcon } from '../../../icons';
 import IconButton from '../../Shared/IconButton/IconButton';
 import IconButtonWithTooltip from '../../Shared/IconButtonWithTooltip/IconButtonWithTooltip';
 
@@ -152,10 +152,12 @@ export function CreatePlaylistButton() {
   if (!tracksCollection) return null
   return (
     <div>
-      <button 
-        onClick={() => createPlaylist(title, tracksCollection)}
-        >Create Playlist
-      </button>
+      <IconButton 
+        handleOnClick={() => createPlaylist(title, tracksCollection)} 
+        Icon={LibraryAddIcon} 
+        text={'Create Playlist'}
+        className={styles.createPlaylistButton}
+      />
     </div>
   )
 }
