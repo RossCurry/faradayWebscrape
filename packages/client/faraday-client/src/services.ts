@@ -59,6 +59,7 @@ export async function createPlaylist(playlistTitle: string, playlistTracks: Spot
     console.log('!CONFIRM PLAYLIST jsonRes -> ',jsonRes );
     if (response.ok) {
       // TODO confirm playlist creation
+      return true
     }    
   } catch (error) {
     console.log('!Failed fetch to create playlist -> ', error);

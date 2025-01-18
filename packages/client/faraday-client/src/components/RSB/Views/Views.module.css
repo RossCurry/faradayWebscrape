@@ -34,13 +34,15 @@
   gap: .5em;
 }
 
+/* Just modify the playlist view */
 .headerPlaylistView {
-  justify-content: space-between;
+  justify-content: right;
 }
 
 .playlistTitle{
   display: flex;
   flex-direction: row;
+  justify-content: center;
   align-items: center;
   gap: .5em;
 }
@@ -76,4 +78,22 @@
 }
 .createPlaylistButton:hover svg {
   fill:  #E4E4E4;
+}
+
+dialog {
+  width: 60dvw;
+  height: 30dvw;
+}
+
+ dialog[open].dialogCreatePlaylist {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  padding: 1em;
+  background-color: #242424;
+  border-radius: 8px;
+  color: #E4E4E4;
+}
+dialog[open].dialogCreatePlaylist::backdrop  {
+  background-color: rgba(82, 82, 82, 0.602);
 }
