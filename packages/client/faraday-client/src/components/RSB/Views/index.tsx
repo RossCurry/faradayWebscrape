@@ -5,7 +5,7 @@ import AlbumTable from '../Tables/Albums/AlbumTable';
 import { createPlaylist, getTracksByIds } from '../../../services';
 import TrackTable from '../Tables/Tracks/TrackTable';
 import { msToTime } from '../../../utils/msToTime';
-import { CheckCircleIcon, EditIcon, LibraryAddIcon } from '../../../icons';
+import { CheckCircleIcon, EditIcon, LibraryAddIcon, PlaylistAddIcon } from '../../../icons';
 import IconButton from '../../Shared/IconButton/IconButton';
 import IconButtonWithTooltip from '../../Shared/IconButtonWithTooltip/IconButtonWithTooltip';
 
@@ -81,10 +81,73 @@ export function PlaylistView() {
         />
         </>
       }
+
     </section>
   )
 }
 
+function DialogCreatePlaylist({
+  setOpenDialog,
+  isDialogOpen
+}: {
+  setOpenDialog: React.Dispatch<React.SetStateAction<boolean>>, isDialogOpen: boolean
+}) {
+  const { title, tracksCollection } = useAppState().playlist
+  const dialogRef = React.useRef<HTMLDialogElement>(null)
+
+  const handleOnClick = async () => {
+    if (tracksCollection) {
+      // TODO Loading state
+      const created = await createPlaylist(title, tracksCollection)
+      if (created) {
+        setOpenDialog(false)
+      }
+    }
+  }
+  // Open and close the dialog via parent state
+  useEffect(() => {
+    if (isDialogOpen) {
+      dialogRef.current?.showModal()
+    } else {
+      dialogRef.current?.close()
+    }
+  },[isDialogOpen])
+  
+  // Attach parent state setter to dialog close event
+  useEffect(() => {
+    const dialogVar = dialogRef.current;
+    if (dialogVar) {
+      dialogRef.current.addEventListener('close', () => {
+        setOpenDialog(false)
+      })
+    }
+    return () => {
+      dialogVar?.removeEventListener('close', () => {
+        setOpenDialog(false)
+      })
+    }
+    // Only run on component mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[])
+
+  return (
+    <dialog
+      ref={dialogRef}
+      className={styles.dialogCreatePlaylist}
+    > 
+      <section className={styles.dialogContainer}>
+        <h2>Add your playlist to Spotify</h2>
+        <PlaylistTitle />
+        <IconButton 
+          handleOnClick={handleOnClick} 
+          Icon={PlaylistAddIcon} 
+          text={'Add Playlist'}
+          className={styles.createPlaylistButton}
+        />
+      </section>
+    </dialog>
+  )
+}
 
 
 function HeaderAlbumView() {
@@ -107,11 +170,16 @@ function HeaderAlbumView() {
  }
 
 const HeaderPlaylistView = () => {
-
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
+  console.log('!isDialogOpen -> ', isDialogOpen);
   return (
     <div className={styles.headerPlaylistView}>
-      <PlaylistTitle />
-      <CreatePlaylistButton />
+      {/* <PlaylistTitle /> */}
+      <CreatePlaylistButton setOpenDialog={setIsDialogOpen} />
+      <DialogCreatePlaylist
+        setOpenDialog={setIsDialogOpen}
+        isDialogOpen={isDialogOpen}
+      />
     </div>
   )
 }
@@ -145,15 +213,19 @@ function PlaylistTitle() {
 }
 
 
-export function CreatePlaylistButton() {
+export function CreatePlaylistButton({ setOpenDialog }: { setOpenDialog: React.Dispatch<React.SetStateAction<boolean>> }) {
   const { title, tracksCollection } = useAppState().playlist
-  
+  const handleOnClick = () => {
+    // TODO open a dialog
+    // createPlaylist(title, tracksCollection)
+    setOpenDialog(true)
+  }
   // TODO prob better to disable the button
   if (!tracksCollection) return null
   return (
     <div>
       <IconButton 
-        handleOnClick={() => createPlaylist(title, tracksCollection)} 
+        handleOnClick={handleOnClick} 
         Icon={LibraryAddIcon} 
         text={'Create Playlist'}
         className={styles.createPlaylistButton}
