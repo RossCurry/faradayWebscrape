@@ -4,6 +4,8 @@ import { SpotifyPlaylist } from '../../types/spotify.types'
 import { getAvailablePlaylists } from '../../services'
 import { faradayLogo } from '../Header/Header'
 import { useAppDispatch, useAppState } from '../../state/AppStateHooks'
+import { ListIcon, MusicCollectionIcon } from '../../icons'
+import type { Views } from '../../state/constants'
 
 export default function LeftSidebar() {
   const [playlistCollection, setPlaylistCollection] = useState<SpotifyPlaylist[] | null>(null)
@@ -19,24 +21,93 @@ export default function LeftSidebar() {
   }, [])
   return (
     <div id={'LeftSidebar'} className={styles.leftSidebar}>
-        <section 
-        id='playlistCollection' 
-        className={styles.playlistContainer}
-        >
-          {/* <h2>grid section</h2> */}
-          <ol className={styles.playlistCollection}>
-            <PlaceholderItem />
-            {playlistCollection?.map(playlist => {
-              return (
-                <PlaylistItem playlist={playlist} key={playlist.id}/>
-              )
-            })}
-          </ol>
-        </section>
+      <PlaylistHeader />
+      {/* <PlaylistsList playlistCollection={playlistCollection} /> */}
     </div>
   )
 }
 
+
+function PlaylistHeader() {
+  return (
+    <header className={styles.playlistHeader}>
+      <AlbumCollectionButton />
+      <PlaylistButton />
+    </header>
+  )
+}
+
+
+function PlaylistButton() {
+  const { view } = useAppState().rsb
+  const dispatch = useAppDispatch();
+  const isSelected = view === 'playlist'
+  const handleOnClick = () => {
+    dispatch({
+      type: 'updateView',
+      view: 'playlist',
+      playlistId: 'custom'
+    })
+  }
+  return (
+    <button
+      className={`
+        ${styles.playlistHeaderButton}  
+        ${isSelected ? styles.playlistHeaderButtonSelected : ''}
+      `}
+      onClick={handleOnClick}
+    >
+      <span>
+        <ListIcon />
+        <h4>Playlist</h4>
+      </span>
+    </button>
+  )
+}
+function AlbumCollectionButton() {
+  const { view } = useAppState().rsb
+  const dispatch = useAppDispatch();
+  const isSelected = view === 'albums'
+  const handleOnClick = () => {
+    dispatch({
+      type: 'updateView',
+      view: 'albums',
+      playlistId: null
+    })
+  }
+  return (
+    <button
+      className={`
+        ${styles.playlistHeaderButton}  
+        ${isSelected ? styles.playlistHeaderButtonSelected : ''}
+      `}
+      onClick={handleOnClick}
+    >
+      <span>
+        <MusicCollectionIcon />
+        <h4>Collection</h4>
+      </span>
+    </button>
+  )
+}
+
+function PlaylistsList({ playlistCollection }: { playlistCollection: SpotifyPlaylist[] | null }) {
+  return (
+    <section 
+      id='playlistCollection' 
+      className={styles.playlistContainer}
+    >
+      <ol className={styles.playlistCollection}>
+        <PlaceholderItem />
+        {playlistCollection?.map(playlist => {
+          return (
+            <PlaylistItem playlist={playlist} key={playlist.id}/>
+          )
+        })}
+      </ol>
+    </section>
+  )
+}
 
 export function PlaceholderItem() {
   const { title } = useAppState().playlist
