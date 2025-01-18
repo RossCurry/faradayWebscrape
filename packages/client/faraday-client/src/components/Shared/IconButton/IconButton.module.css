@@ -1,0 +1,25 @@
+.IconButton span h4,
+.IconButton span,
+.IconButton {
+  padding: 0;
+  margin: 0;
+}
+.IconButton {
+  border: transparent;
+}
+
+.playlistHeaderButtonSelected{
+  border-color: #FFFF00;
+}
+
+.IconButton span {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  gap: .5em;
+  padding: .5em;
+  border-radius: 8px;
+}
+.IconButton span h4 {
+  /* background-color: blue; */
+}

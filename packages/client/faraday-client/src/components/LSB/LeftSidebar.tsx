@@ -8,17 +8,17 @@ import { ListIcon, MusicCollectionIcon } from '../../icons'
 import type { Views } from '../../state/constants'
 
 export default function LeftSidebar() {
-  const [playlistCollection, setPlaylistCollection] = useState<SpotifyPlaylist[] | null>(null)
+  // const [playlistCollection, setPlaylistCollection] = useState<SpotifyPlaylist[] | null>(null)
 
-  useEffect(() => {
-    async function updatePlaylists(){
-      const availablePlaylists = await getAvailablePlaylists()
-      if (availablePlaylists) setPlaylistCollection(availablePlaylists)
-    }
-    // TODO is user logged in to spotfiy?
-    const isUserLoggedIn = false
-    if (isUserLoggedIn) updatePlaylists()
-  }, [])
+  // useEffect(() => {
+  //   async function updatePlaylists(){
+  //     const availablePlaylists = await getAvailablePlaylists()
+  //     if (availablePlaylists) setPlaylistCollection(availablePlaylists)
+  //   }
+  //   // TODO is user logged in to spotfiy?
+  //   const isUserLoggedIn = false
+  //   if (isUserLoggedIn) updatePlaylists()
+  // }, [])
   return (
     <div id={'LeftSidebar'} className={styles.leftSidebar}>
       <PlaylistHeader />

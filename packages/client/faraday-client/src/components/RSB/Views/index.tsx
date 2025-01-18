@@ -4,6 +4,10 @@ import { useAppDispatch, useAppState } from '../../../state/AppStateHooks';
 import AlbumTable from '../Tables/Albums/AlbumTable';
 import { createPlaylist, getTracksByIds } from '../../../services';
 import TrackTable from '../Tables/Tracks/TrackTable';
+import { msToTime } from '../../../utils/msToTime';
+import { CheckCircleIcon, EditIcon } from '../../../icons';
+import IconButton from '../../Shared/IconButton/IconButton';
+import IconButtonWithTooltip from '../../Shared/IconButtonWithTooltip/IconButtonWithTooltip';
 
 export default function Views() {
   const state = useAppState()
@@ -25,7 +29,8 @@ export function AlbumView() {
   const { albumCollection } = useAppState()
   return (
     <section id='albumView' className={styles.albumCollection}>
-      {/* <h2>grid section</h2> */}
+      {/* TODO add statistic */}
+      <HeaderAlbumView />
       {albumCollection &&
         <AlbumTable data={albumCollection} />
       }
@@ -68,7 +73,7 @@ export function PlaylistView() {
       {!showPlaylist && <PlaylistEmptyContainer />}
       {showPlaylist &&
         <>
-        <PlaylistTitle />
+        <HeaderPlaylistView />
         
         <TrackTable
           data={tracks}
@@ -81,19 +86,61 @@ export function PlaylistView() {
 }
 
 
-const PlaylistTitle = () => {
+
+function HeaderAlbumView() {
+  const { albumCollection } = useAppState()
+  const { tracksCollection } = useAppState().playlist
+  const { hours, minutes, seconds } = useMemo( () => {
+    const duration = tracksCollection?.reduce((sumOfDuration, track) => sumOfDuration + track.duration_ms, 0)
+    return msToTime(duration || 0)
+  }, [tracksCollection])
+
+  
+  
+  return (
+    <header className={styles.headerAlbumView}>
+      <p>Album collection size: {albumCollection?.length}</p>
+      <p>Tracks selected: {tracksCollection?.length}</p>
+      <p>Total Duration: {hours}h {minutes}m {seconds}s</p>
+    </header>
+  )
+ }
+
+const HeaderPlaylistView = () => {
+
+  return (
+    <div className={styles.headerPlaylistView}>
+      <PlaylistTitle />
+      <CreatePlaylistButton />
+    </div>
+  )
+}
+
+function PlaylistTitle() {
   const [editMode, setEditMode] = useState<boolean>(false)
   const { title } = useAppState().playlist
   const dispatch = useAppDispatch()
+  const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch({ type: 'setNewPlaylistTitle', title: e.target.value })
+  }
+  
   return (
-    <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', gap: '1rem' }}>
-      <button onClick={() => setEditMode(!editMode)}>{editMode ? 'done' : 'edit'}</button>
+    <section className={styles.playlistTitle}>
       { editMode 
-        ? <input type='text' value={title} onChange={(e) => dispatch({ type: 'setNewPlaylistTitle', title: e.target.value })} style={{ fontSize: '1.4rem', fontWeight: '600', padding: '.25em .5em'}}/>
-        : <h2 style={{ margin: 0 }}>{title}</h2>
+        ? <input 
+            type='text'
+            value={title} 
+            onChange={handleOnChange}
+            className={styles.playlistTitleInput}
+          />
+        : <h3>{title}</h3>
       }
-      <CreatePlaylistButton />
-    </div>
+      <IconButtonWithTooltip
+        handleOnClick={() => setEditMode(!editMode)}
+        Icon={editMode ? CheckCircleIcon : EditIcon}
+        text={editMode ? 'done' : 'edit'}
+      />
+    </section>
   )
 }
 
@@ -105,7 +152,10 @@ export function CreatePlaylistButton() {
   if (!tracksCollection) return null
   return (
     <div>
-      <button onClick={() => createPlaylist(title, tracksCollection)}>Create Playlist</button>
+      <button 
+        onClick={() => createPlaylist(title, tracksCollection)}
+        >Create Playlist
+      </button>
     </div>
   )
 }
