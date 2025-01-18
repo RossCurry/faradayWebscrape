@@ -44,11 +44,14 @@ export function PlaylistView() {
   // Dont call if nothing is selected
   useEffect(()=>{
     async function updateAlbums(){
+      dispatch({ type: 'setIsLoading', isLoading: true })
       const tracksCollection = await getTracksByIds(ids)
-      if (tracksCollection) dispatch({ type: 'setCustomTracksCollection', tracks: tracksCollection })
+      if (tracksCollection){ 
+        dispatch({ type: 'setCustomTracksCollection', tracks: tracksCollection })
+        dispatch({ type: 'setIsLoading', isLoading: false })
+      }
       }
     if (ids.length) updateAlbums()
-    dispatch({ type: 'setIsLoading', isLoading: true })
   // Only run on component mount
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[])
