@@ -59,3 +59,21 @@
 .playlistTitle h3 {
   margin: 0;
 }
+
+.createPlaylistButton {
+  background-color: rgb(244, 235, 70);
+  border-color: rgb(244, 235, 70);
+  color: #242424;
+}
+.createPlaylistButton svg {
+  fill: #242424;
+}
+.createPlaylistButton:hover {
+  background-color: #242424;
+  border-color: rgb(244, 235, 70);
+  color: #E4E4E4; 
+  /* box-shadow: rgb(244, 235, 70) 0px 0px 5px; */
+}
+.createPlaylistButton:hover svg {
+  fill:  #E4E4E4;
+}

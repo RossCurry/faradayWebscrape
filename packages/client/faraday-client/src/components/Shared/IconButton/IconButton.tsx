@@ -7,7 +7,7 @@ type IconButtonProps = {
   isSelected?: boolean,
   Icon: React.FC,
   text: string,
-  className?: CSSModuleClasses
+  className?: string
 }
 export default function IconButton({ 
   handleOnClick, 
@@ -16,7 +16,6 @@ export default function IconButton({
   text, 
   className 
 }: IconButtonProps) {
-
   return (
     <button
       className={`
