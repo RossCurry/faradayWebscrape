@@ -5,3 +5,4 @@ export { default as EditIcon } from './EditIcon';
 export { default as CheckCircleIcon } from './CheckCircleIcon';
 export { default as LibraryAddIcon } from './LibraryAddIcon';
 export { default as PlaylistAddIcon } from './PlaylistAddIcon';
+export { default as PlaylistRemoveIcon } from './PlaylistRemoveIcon';

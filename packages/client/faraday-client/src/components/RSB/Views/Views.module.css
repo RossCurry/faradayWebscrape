@@ -36,7 +36,26 @@
 
 /* Just modify the playlist view */
 .headerPlaylistView {
-  justify-content: right;
+  justify-content: space-between;
+}
+
+.headerPlaylistView fieldset {
+  border: transparent;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: row;
+  gap: .5em;
+}
+
+.tracksCollectionStats {
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+}
+.tracksCollectionStats p {
+  padding: 0;
+  margin: 0;
 }
 
 .playlistTitle{

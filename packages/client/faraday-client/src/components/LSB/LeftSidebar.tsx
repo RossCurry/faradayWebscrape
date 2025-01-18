@@ -59,7 +59,7 @@ function PlaylistButton() {
     >
       <span>
         <ListIcon />
-        <h4>Playlist</h4>
+        <h4>New Playlist</h4>
       </span>
     </button>
   )
