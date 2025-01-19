@@ -4,7 +4,7 @@ import { InfoIcon } from '../../../icons/index';
 
 import { connectToSpoti } from '../../../services';
 import { useAppState } from '../../../state/AppStateHooks';
-import Tooltip from '../../Tooltip/Tooltip';
+import Tooltip from '../../Shared/Tooltip/Tooltip';
 
 
 export default function SpotifyConnect() {

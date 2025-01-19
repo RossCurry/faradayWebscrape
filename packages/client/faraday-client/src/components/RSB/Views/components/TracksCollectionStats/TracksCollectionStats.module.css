@@ -1,0 +1,9 @@
+.tracksCollectionStats {
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+}
+.tracksCollectionStats p {
+  padding: 0;
+  margin: 0;
+}
