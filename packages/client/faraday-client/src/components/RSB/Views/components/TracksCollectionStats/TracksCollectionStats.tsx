@@ -1,7 +1,7 @@
 import { useMemo } from "react"
 import { useAppState } from "../../../../../state/AppStateHooks"
 import { msToTime } from "../../../../../utils/msToTime"
-import styles from './TracksCollectionStats.module.scss'
+import styles from './TracksCollectionStats.module.css'
 
 export function TracksCollectionStats() {
   // TODO move stat logic to state

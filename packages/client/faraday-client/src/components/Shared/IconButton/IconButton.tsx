@@ -8,13 +8,15 @@ type IconButtonProps = {
   Icon: React.FC,
   text: string,
   className?: string
+  disabled?: boolean
 }
 export default function IconButton({ 
   handleOnClick, 
   isSelected, 
   Icon, 
   text, 
-  className 
+  className,
+  disabled,
 }: IconButtonProps) {
   return (
     <button
@@ -24,6 +26,7 @@ export default function IconButton({
         ${className ? className : ''}
       `}
       onClick={handleOnClick}
+      disabled={disabled}
     >
       <span>
         <Icon />

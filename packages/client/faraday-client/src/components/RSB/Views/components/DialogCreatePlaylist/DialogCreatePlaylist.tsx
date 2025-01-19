@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { useAppState } from '../../../../../state/AppStateHooks'
-import styles from './DialogCreatePlaylist.module.scss'
+import styles from './DialogCreatePlaylist.module.css'
 import { PlaylistAddIcon } from '../../../../../icons'
 import { createPlaylist } from '../../../../../services'
 import IconButton from '../../../../Shared/IconButton/IconButton'

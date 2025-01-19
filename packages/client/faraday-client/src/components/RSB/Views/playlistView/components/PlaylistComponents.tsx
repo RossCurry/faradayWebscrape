@@ -6,6 +6,7 @@ import IconButtonWithTooltip from "../../../../Shared/IconButtonWithTooltip/Icon
 import { DialogCreatePlaylist } from "../../components/DialogCreatePlaylist/DialogCreatePlaylist";
 import { TracksCollectionStats } from "../../components/TracksCollectionStats/TracksCollectionStats";
 import styles from './PlaylistComponents.module.css'
+import Tooltip from "../../../../Shared/Tooltip/Tooltip";
 
 export const HeaderPlaylistView = () => {
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
@@ -72,6 +73,9 @@ function ResetPlaylistButton() {
 
 export function CreatePlaylistButton({ setOpenDialog }: { setOpenDialog: React.Dispatch<React.SetStateAction<boolean>> }) {
   const { tracksCollection } = useAppState().playlist
+  const {user}  = useAppState()
+  const isUserLoggedIn = !!user
+
   const handleOnClick = () => {
     setOpenDialog(true)
   }
@@ -79,11 +83,18 @@ export function CreatePlaylistButton({ setOpenDialog }: { setOpenDialog: React.D
   if (!tracksCollection) return null
   return (
     <div>
-      <IconButton 
-        handleOnClick={handleOnClick} 
-        Icon={LibraryAddIcon} 
-        text={'Create Playlist'}
-        className={styles.createPlaylistButton}
+      <Tooltip 
+        Component={
+            <IconButton 
+            handleOnClick={handleOnClick} 
+            Icon={LibraryAddIcon} 
+            text={'Create Playlist'}
+            className={styles.createPlaylistButton}
+            disabled={!isUserLoggedIn}
+          />
+        }
+        tooltipText={'You must be logged into Spotify to create a playlist'} 
+        hideTooltip={isUserLoggedIn}
       />
     </div>
   )
