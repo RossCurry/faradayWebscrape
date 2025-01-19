@@ -18,7 +18,7 @@ export default function SpotifyConnect() {
         <div className={styles.connectToSpotifyButton}>
           <Tooltip
             Component={<InfoIcon />}
-            tooltipText="you must be logged in to create a playlist"
+            tooltipText="Log into Spotify to create a playlist."
             componentStyle={{ width: '24px', height: '24px', marginRight: '8px' }}
           />
           <button onClick={() => connectToSpoti()}>Connect to Spotify</button>
