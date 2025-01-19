@@ -2,23 +2,12 @@ import React, { useEffect, useState } from 'react'
 import styles from './LeftSidebar.module.css'
 import { SpotifyPlaylist } from '../../types/spotify.types'
 import { getAvailablePlaylists } from '../../services'
-import { faradayLogo } from '../Header/Header'
 import { useAppDispatch, useAppState } from '../../state/AppStateHooks'
 import { ListIcon, MusicCollectionIcon } from '../../icons'
 import type { Views } from '../../state/constants'
+import { FaradayLogo, faradayLogo } from '../../logos/FaradayLogo'
 
 export default function LeftSidebar() {
-  // const [playlistCollection, setPlaylistCollection] = useState<SpotifyPlaylist[] | null>(null)
-
-  // useEffect(() => {
-  //   async function updatePlaylists(){
-  //     const availablePlaylists = await getAvailablePlaylists()
-  //     if (availablePlaylists) setPlaylistCollection(availablePlaylists)
-  //   }
-  //   // TODO is user logged in to spotfiy?
-  //   const isUserLoggedIn = false
-  //   if (isUserLoggedIn) updatePlaylists()
-  // }, [])
   return (
     <div id={'LeftSidebar'} className={styles.leftSidebar}>
       <PlaylistHeader />
@@ -129,7 +118,7 @@ export function PlaceholderItem() {
         padding: '1em'
       }}
     >
-      <img src={faradayLogo} className={styles.playlistItemImg} alt="Vite logo" />
+      <FaradayLogo className={styles.playlistItemImg} />
       <div className={styles.playlistItemInfo}>
         <p>{title}</p>
         {/* <p style={{ fontSize: '.85rem' }}>{'Not logged in'}</p> */}

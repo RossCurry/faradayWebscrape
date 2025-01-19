@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import styles from '../Footer.module.css'
 import { useAppState } from '../../../../state/AppStateHooks';
-import { faradayLogo } from '../../../Header/Header';
+import { faradayLogo } from '../../../../logos/FaradayLogo';
 
 export default function Player() {
   const { audioUrl, track } = useAppState().player
