@@ -1,6 +1,7 @@
 dialog {
-  width: 60dvw;
-  height: 30dvw;
+  min-width: 30dvw;
+  /* height: 30dvw; */
+  padding: 0;
 }
 
  dialog[open].dialogCreatePlaylist {
@@ -16,10 +17,24 @@ dialog[open].dialogCreatePlaylist::backdrop  {
   background-color: rgba(82, 82, 82, 0.602);
 }
 
+.dialogContainer{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 2em;
+  padding: 2rem;
+}
+.dialogContainer h3{
+  padding: 0;
+  margin: 0;
+}
+
 .createPlaylistButton {
   background-color: rgb(244, 235, 70);
   border-color: rgb(244, 235, 70);
   color: #242424;
+  width: fit-content;
 }
 .createPlaylistButton svg {
   fill: #242424;
@@ -32,4 +47,54 @@ dialog[open].dialogCreatePlaylist::backdrop  {
 }
 .createPlaylistButton:hover svg {
   fill:  #E4E4E4;
+}
+
+.logosContainer{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3em;
+}
+
+.faradaylogo {
+  width: 7em;
+  aspect-ratio: 1/1;
+  object-fit: contain;
+  border-radius: 50%;
+}
+
+.playlistTitle{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: .5em;
+}
+
+.playlistTitleInputContainer {
+  display: flex;
+  flex-direction: column;
+  /* width: 100%; */
+}
+
+.playlistTitle textarea.playlistTitleInput {
+  font-size: 2em; 
+  font-weight: bold; 
+}
+
+.playlistTitle label {
+  position: absolute;
+  opacity: 0;
+}
+
+textarea.playlistTitleInput {
+  padding: 0;
+  margin: 0;
+  border: transparent;
+  padding: .5em .5em;
+  background-color: inherit;
+  resize: none;
+  min-height: 2rem;
+  text-align: center;
 }

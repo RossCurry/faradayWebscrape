@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { CheckCircleIcon, EditIcon, PlaylistRemoveIcon, LibraryAddIcon } from "../../../../../icons";
+import { PlaylistRemoveIcon, LibraryAddIcon } from "../../../../../icons";
 import { useAppState, useAppDispatch } from "../../../../../state/AppStateHooks";
 import IconButton from "../../../../Shared/IconButton/IconButton";
-import IconButtonWithTooltip from "../../../../Shared/IconButtonWithTooltip/IconButtonWithTooltip";
 import { DialogCreatePlaylist } from "../../components/DialogCreatePlaylist/DialogCreatePlaylist";
 import { TracksCollectionStats } from "../../components/TracksCollectionStats/TracksCollectionStats";
 import styles from './PlaylistComponents.module.css'
@@ -14,7 +13,6 @@ export const HeaderPlaylistView = () => {
   
   return (
     <div className={styles.headerPlaylistView}>
-      {/* <PlaylistTitle /> */}
       <TracksCollectionStats />
       <fieldset>
         <ResetPlaylistButton />
@@ -25,34 +23,6 @@ export const HeaderPlaylistView = () => {
         isDialogOpen={isDialogOpen}
       />
     </div>
-  )
-}
-
-export function PlaylistTitle() {
-  const [editMode, setEditMode] = useState<boolean>(false)
-  const { title } = useAppState().playlist
-  const dispatch = useAppDispatch()
-  const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch({ type: 'setNewPlaylistTitle', title: e.target.value })
-  }
-  
-  return (
-    <section className={styles.playlistTitle}>
-      { editMode 
-        ? <input 
-            type='text'
-            value={title} 
-            onChange={handleOnChange}
-            className={styles.playlistTitleInput}
-          />
-        : <h3>{title}</h3>
-      }
-      <IconButtonWithTooltip
-        handleOnClick={() => setEditMode(!editMode)}
-        Icon={editMode ? CheckCircleIcon : EditIcon}
-        text={editMode ? 'done' : 'edit'}
-      />
-    </section>
   )
 }
 
