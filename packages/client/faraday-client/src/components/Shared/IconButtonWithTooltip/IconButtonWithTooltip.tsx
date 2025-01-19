@@ -1,6 +1,6 @@
 import React from 'react'
 import styles from './IconButton.module.css'
-import Tooltip from '../../Tooltip/Tooltip'
+import Tooltip from '../Tooltip/Tooltip'
 import IconButton from '../IconButton/IconButton'
 
 

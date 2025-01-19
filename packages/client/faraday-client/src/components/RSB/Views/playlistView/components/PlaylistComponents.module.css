@@ -1,0 +1,45 @@
+
+/* Shared with headerAlbumView */
+.headerPlaylistView{
+  padding: .5em 1em;
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+  gap: .5em;
+}
+
+/* Just modify the playlist view */
+.headerPlaylistView {
+  justify-content: space-between;
+}
+
+.headerPlaylistView fieldset {
+  border: transparent;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: row;
+  gap: .5em;
+}
+
+.playlistTitle{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: .5em;
+}
+
+.playlistTitleInput {
+  padding: 0;
+  margin: 0;
+  border: transparent;
+  font-size: 1.17em; 
+  font-weight: bold; 
+  padding: .25em .5em;
+  background-color: inherit;
+
+}
+.playlistTitle h3 {
+  margin: 0;
+}

@@ -1,0 +1,10 @@
+#albumCollection {
+  background: rgba(230, 230, 230, 0.25);
+}
+.albumCollection {
+  background: rgba(230, 230, 230, 0.25);
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  /* overflow: scroll */
+}
