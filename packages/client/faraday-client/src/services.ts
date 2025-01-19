@@ -58,6 +58,8 @@ export async function createPlaylist(playlistTitle: string, playlistTracks: Spot
     const jsonRes = await response.json()
     console.log('!CONFIRM PLAYLIST jsonRes -> ',jsonRes );
     if (response.ok) {
+      // error json response contains an array of errors
+      if (Array.isArray(jsonRes) && 'error' in jsonRes.at(0)) return false
       // TODO confirm playlist creation
       return true
     }    

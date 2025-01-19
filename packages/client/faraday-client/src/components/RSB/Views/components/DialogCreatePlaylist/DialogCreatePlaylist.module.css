@@ -25,6 +25,7 @@ dialog[open].dialogCreatePlaylist::backdrop  {
   gap: 2em;
   padding: 2rem;
 }
+
 .dialogContainer h3{
   padding: 0;
   margin: 0;
