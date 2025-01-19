@@ -16,15 +16,30 @@ export function DialogCreatePlaylist({
 }) {
   const { title, tracksCollection } = useAppState().playlist
   const dialogRef = React.useRef<HTMLDialogElement>(null)
+  const [response, setResponse] = useState<'ok' | 'error' | null>(null)
+  const [timeoutId, setTimeoutId] = useState<number | null>(null)
 
   const handleOnClick = async () => {
     if (tracksCollection) {
       // TODO Loading state
       const created = await createPlaylist(title, tracksCollection)
       if (created) {
-        setOpenDialog(false)
+        setResponse('ok')
+        // TODO wait then close dialog
+      } else {
+        setResponse('error')
       }
+      const timeoutId = setTimeout(() => {
+        setOpenDialog(false)
+      }, 1000)
+      setTimeoutId(timeoutId)
     }
+  }
+
+  const handleUnmount = () => {
+    setOpenDialog(false)
+    setResponse(null)
+    if (timeoutId) clearTimeout(timeoutId)
   }
   // Open and close the dialog via parent state
   useEffect(() => {
@@ -39,14 +54,10 @@ export function DialogCreatePlaylist({
   useEffect(() => {
     const dialogVar = dialogRef.current;
     if (dialogVar) {
-      dialogRef.current.addEventListener('close', () => {
-        setOpenDialog(false)
-      })
+      dialogRef.current.addEventListener('close', handleUnmount)
     }
     return () => {
-      dialogVar?.removeEventListener('close', () => {
-        setOpenDialog(false)
-      })
+      dialogVar?.removeEventListener('close', handleUnmount)
     }
     // Only run on component mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -58,7 +69,23 @@ export function DialogCreatePlaylist({
       className={styles.dialogCreatePlaylist}
     > 
       <section className={styles.dialogContainer}>
-        <h3>Add your playlist to Spotify</h3>
+        {!response && <SendPlaylist handleOnClick={handleOnClick}/>}
+        {response && 
+          response === 'ok' 
+          ? <DialogPlaylistSuccess /> 
+          : response === 'error' 
+          ? <DialogPlaylistError /> 
+          : null
+        }
+      </section>
+    </dialog>
+  )
+}
+
+function SendPlaylist({ handleOnClick }: { handleOnClick: () => void }) {
+  return (
+    <>
+      <h3>Add your playlist to Spotify</h3>
         <Logos />
         <PlaylistTitle />
         <IconButton 
@@ -67,8 +94,19 @@ export function DialogCreatePlaylist({
           text={'Add Playlist'}
           className={styles.createPlaylistButton}
         />
-      </section>
-    </dialog>
+    </>
+  )
+}
+
+// TODO beautify these components
+function DialogPlaylistSuccess() {
+  return (
+    <h3>Success</h3>
+  )
+}
+function DialogPlaylistError() {
+  return (
+    <h3>Error</h3>
   )
 }
 
