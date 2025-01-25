@@ -36,27 +36,30 @@ export default function SpotifyConnect() {
 const User = () => {
   const { user } = useAppState()
   if (!user) return null;
+  const { display_name, images } = user
 
-  const { images } = user
   
-  const inlineStyles: React.CSSProperties = {}
+  const inlineImageStyles: React.CSSProperties = {}
   if (images.length){
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [_big, small] = images
-    inlineStyles.backgroundImage = `url(${small.url})`
+    inlineImageStyles.backgroundImage = `url(${small.url})`
   }
 
   return (
     <>
     {images.length
       ? 
-        <div
-          className={styles.userImage}
-          style={inlineStyles}
-        /> 
+        <div className={styles.userInfoContainer}>
+          <h4>{display_name}</h4>
+          <div
+            className={styles.userImage}
+            style={inlineImageStyles}
+          /> 
+        </div>
       : 
-        <span className={styles.userInitialWrapper}>
-          <h3 className={styles.userInitial}>{user.display_name.at(0)?.toUpperCase()}</h3>
+        <span className={styles.usersInitialWrapper}>
+          <h3 className={styles.usersInitial}>{user.display_name.at(0)?.toUpperCase()}</h3>
         </span>
       }
     </>

@@ -5,20 +5,15 @@ import { useAppDispatch } from '../../state/AppStateHooks'
 import { FaradayLogo } from '../../logos/FaradayLogo';
 
 export default function Header() {
-  const dispatch = useAppDispatch();
-  const handleOnClick = () => {
-    dispatch({
-      type: 'updateView', view: 'albums', playlistId: null
-    })
-  }
+
   return (
     <header className={styles.outerHeader}>
       <section className={styles.header}>
-        <a href="/">
+        <a href="https://thisisfaraday.com" target="_blank" rel="noopener noreferrer">
           <FaradayLogo className={styles.logo} />
         </a>
         <div className={styles.headerText}>
-          <h1 onClick={handleOnClick}>Faraday Collection</h1>
+          <h1>Faraday Collection</h1>
           <p>A collection of what is available on Spotify</p>
         </div>
       </section>

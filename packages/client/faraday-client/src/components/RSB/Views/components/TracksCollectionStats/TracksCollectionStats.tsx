@@ -13,8 +13,8 @@ export function TracksCollectionStats() {
     const durationString = `${hours > 0 ? `${hours}h` : ''} ${minutes}m ${seconds}s`
     return (
       <div className={styles.tracksCollectionStats}>
-        <p>Tracks selected: {tracksCollection?.length || 0}</p>
-        <p>Total Duration: {durationString}</p>
+        <p>{tracksCollection?.length || 0} Tracks selected,</p>
+        <p>{durationString}</p>
       </div>
     )
   }

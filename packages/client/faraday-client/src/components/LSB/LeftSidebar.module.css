@@ -20,7 +20,7 @@
   /* background-color: red; */
   padding: .5em 1em;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: start;
   gap: .25em;
 }

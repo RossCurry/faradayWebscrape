@@ -12,9 +12,9 @@ export const HeaderPlaylistView = () => {
   
   return (
     <div className={styles.headerPlaylistView}>
+        <ResetPlaylistButton />
       <TracksCollectionStats />
       <fieldset>
-        <ResetPlaylistButton />
         <CreatePlaylistButton setOpenDialog={setIsDialogOpen} />
       </fieldset>
       <DialogCreatePlaylist
@@ -35,7 +35,8 @@ function ResetPlaylistButton() {
     <IconButton
       handleOnClick={handleReset}
       Icon={PlaylistRemoveIcon}
-      text={'Reset'}
+      text={'Reset Selection'}
+      className={styles.resetButton}
     />
   )
 }
