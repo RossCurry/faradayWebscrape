@@ -6,6 +6,11 @@
   flex-direction: row;
   justify-content: start;
   gap: .5em;
+  border-bottom: 1px solid #252525;
+  position: sticky;
+  top: 0; /* Stick to the top of the container */
+  z-index: 100;
+  background-color: grey;
 }
 
 /* Just modify the playlist view */
@@ -57,4 +62,9 @@
 .disabledButton:focus svg,
 .disabledButton svg {
   fill:  #E4E4E4;
+}
+
+.resetButton{
+  /* font-weight: 300;
+  background-color: rgb(244, 235, 70); */
 }

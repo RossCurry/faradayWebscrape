@@ -21,7 +21,8 @@ function HeaderAlbumView() {
 
   return (
     <header className={styles.headerAlbumView}>
-      <p>Album collection size: {albumCollection?.length || 0}</p>
+      <p>{albumCollection?.length || 0} Albums</p>
+      <section>FILTER SECTION</section>
     </header>
   )
 }
