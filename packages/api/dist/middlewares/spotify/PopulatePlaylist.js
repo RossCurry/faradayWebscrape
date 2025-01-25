@@ -60,7 +60,17 @@ export default async function PopulatePlaylist(ctx, next) {
             throw error;
         }
     }
-    ctx.body = JSON.stringify(snapshots);
-    ctx.status = 200;
+    try {
+        if (playlist && 'error' in playlist) {
+            throw new Error(JSON.stringify(playlist.error));
+        }
+        ctx.body = JSON.stringify({ playlist });
+        ctx.status = 200;
+    }
+    catch (error) {
+        console.error(error);
+        ctx.body = error;
+        ctx.status = error.status || 500;
+    }
     await next();
 }

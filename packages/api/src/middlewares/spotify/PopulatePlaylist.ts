@@ -69,7 +69,16 @@ export default async function PopulatePlaylist(ctx: AppContext, next: Applicatio
         throw error
       }
     }
-  ctx.body = JSON.stringify(snapshots)
-  ctx.status = 200
+  try {
+    if (playlist && 'error' in playlist){
+      throw new Error(JSON.stringify((playlist as { error: { message: string, status: number } }).error))
+    }
+    ctx.body = JSON.stringify({playlist})
+    ctx.status = 200
+  } catch (error: unknown) {
+    console.error(error);
+    ctx.body = error
+    ctx.status = (error as { message: string, status: number }).status || 500
+  }
   await next()
 }

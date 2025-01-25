@@ -55,16 +55,17 @@ export async function createPlaylist(playlistTitle: string, playlistTracks: Spot
       mode: 'cors',
       credentials: 'include',
     })
-    const jsonRes = await response.json()
-    console.log('!CONFIRM PLAYLIST jsonRes -> ',jsonRes );
+    const jsonRes: { playlist: SpotifyPlaylist } | { error: string} = await response.json()
+    console.log('!CONFIRM PLAYLIST jsonRes -> ', jsonRes );
+    console.log('!CONFIRM PLAYLIST response.ok -> ', response.ok);
     if (response.ok) {
-      // error json response contains an array of errors
-      if (Array.isArray(jsonRes) && 'error' in jsonRes.at(0)) return false
-      // TODO confirm playlist creation
-      return true
-    }    
+      if ('playlist' in jsonRes) return jsonRes.playlist
+      return false
+    } else {
+      return false
+    }
   } catch (error) {
-    console.log('!Failed fetch to create playlist -> ', error);
+    console.error('!Failed fetch to create playlist -> ', error);
   }
 }
 
@@ -98,7 +99,7 @@ export async function getUserInfoWithToken(token: string) {
   const tokenPath = `/api/user`
   const url = new URL(baseUrlDev + tokenPath)
 
-  console.log('!getUserInfoWithToken -> ', token);
+  console.log('!getUserInfoWithToken -> ', !!token);
   const response = await fetch(url.toString(),{
     headers: {
       Authorization: `Bearer ${token}`
