@@ -219,7 +219,6 @@ const AlbumRowMemoized = React.memo(({
 
   const albumId = row.original.id
   const handleOnClick = async (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
-    console.log('hello', e)
     const { tagName } = (e.target as HTMLElement)
     if (tagName === 'INPUT'){
       const { target } = e;

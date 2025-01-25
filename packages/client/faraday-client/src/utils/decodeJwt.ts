@@ -4,7 +4,6 @@ export function getIsJwtExpired(token: string) {
     const base64Payload = token.split('.')[1]; // The payload is the second part of the JWT
     const decodedPayload = JSON.parse(atob(base64Payload)); // Decode from Base64 and parse JSON
 
-    console.log('!decodedPayload -> ', decodedPayload);
     // Access the expiration time
     if (decodedPayload.exp) {
       const expirationTime = new Date(decodedPayload.exp * 1000); // Convert to milliseconds

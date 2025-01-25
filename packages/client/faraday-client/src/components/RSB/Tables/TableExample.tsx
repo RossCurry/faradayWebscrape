@@ -102,7 +102,6 @@ function App() {
   })
 
   //access sorting state from the table instance
-  console.log(table.getState().sorting)
 
   return (
     <div className="p-2">

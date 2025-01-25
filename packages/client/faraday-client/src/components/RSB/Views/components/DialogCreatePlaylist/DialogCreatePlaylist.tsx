@@ -1,12 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useAppDispatch, useAppState } from '../../../../../state/AppStateHooks'
 import styles from './DialogCreatePlaylist.module.css'
-import { CheckCircleIcon, DoubleArrowIcon, EditIcon, PlaylistAddIcon } from '../../../../../icons'
-import { createPlaylist } from '../../../../../services'
+import { ArrowBackIcon, CheckCircleIcon, DoubleArrowIcon, EditIcon, ErrorIcon, PlaylistAddIcon } from '../../../../../icons'
+import { connectToSpoti, createPlaylist } from '../../../../../services'
 import IconButton from '../../../../Shared/IconButton/IconButton'
 import { SpotifyGreenLogo } from '../../../../../logos'
 import { FaradayLogo } from '../../../../../logos/FaradayLogo'
-import IconButtonWithTooltip from '../../../../Shared/IconButtonWithTooltip/IconButtonWithTooltip'
 
 export function DialogCreatePlaylist({
   setOpenDialog,
@@ -17,29 +16,29 @@ export function DialogCreatePlaylist({
   const { title, tracksCollection } = useAppState().playlist
   const dialogRef = React.useRef<HTMLDialogElement>(null)
   const [response, setResponse] = useState<'ok' | 'error' | null>(null)
-  const [timeoutId, setTimeoutId] = useState<number | null>(null)
+  const [createdPlaylistUrl, setCreatedPlaylistUrl] = useState<string | null>(null)
 
   const handleOnClick = async () => {
     if (tracksCollection) {
       // TODO Loading state
-      const created = await createPlaylist(title, tracksCollection)
-      if (created) {
+      const playlistInfo = await createPlaylist(title, tracksCollection)
+      if (playlistInfo) {
+        console.log('!FE playlistInfo -> ', playlistInfo);
+        setCreatedPlaylistUrl(playlistInfo.external_urls.spotify)
         setResponse('ok')
-        // TODO wait then close dialog
       } else {
         setResponse('error')
       }
-      const timeoutId = setTimeout(() => {
-        setOpenDialog(false)
-      }, 1000)
-      setTimeoutId(timeoutId)
     }
   }
 
-  const handleUnmount = () => {
+  const handleOnCloseDialog = () => {
+    setOpenDialog(false)
+  }
+
+  const handleDialogUnmount = () => {
     setOpenDialog(false)
     setResponse(null)
-    if (timeoutId) clearTimeout(timeoutId)
   }
   // Open and close the dialog via parent state
   useEffect(() => {
@@ -54,10 +53,10 @@ export function DialogCreatePlaylist({
   useEffect(() => {
     const dialogVar = dialogRef.current;
     if (dialogVar) {
-      dialogRef.current.addEventListener('close', handleUnmount)
+      dialogRef.current.addEventListener('close', handleDialogUnmount)
     }
     return () => {
-      dialogVar?.removeEventListener('close', handleUnmount)
+      dialogVar?.removeEventListener('close', handleDialogUnmount)
     }
     // Only run on component mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -67,61 +66,123 @@ export function DialogCreatePlaylist({
     <dialog
       ref={dialogRef}
       className={styles.dialogCreatePlaylist}
-    > 
-      <section className={styles.dialogContainer}>
+    > <header className={styles.dialogHeader}>
+        <IconButton 
+          handleOnClick={handleOnCloseDialog} 
+          Icon={ArrowBackIcon} 
+          text={'Back'}
+          className={styles.closeDialogButton}
+        />
+        {!response && <h3>Add your playlist to Spotify</h3>}
+      </header>
+      <div className={styles.dialogContainer}>
         {!response && <SendPlaylist handleOnClick={handleOnClick}/>}
         {response && 
           response === 'ok' 
-          ? <DialogPlaylistSuccess /> 
+          ? <DialogPlaylistSuccess playlistUrl={createdPlaylistUrl} /> 
           : response === 'error' 
           ? <DialogPlaylistError /> 
           : null
         }
-      </section>
+      </div>
     </dialog>
   )
 }
 
-function SendPlaylist({ handleOnClick }: { handleOnClick: () => void }) {
+function SendPlaylist({ handleOnClick: handleAddPlaylist }: { handleOnClick: () => void }) {
   return (
-    <>
-      <h3>Add your playlist to Spotify</h3>
+    <section className={styles.dialogSection}>
         <Logos />
         <PlaylistTitle />
         <IconButton 
-          handleOnClick={handleOnClick} 
+          handleOnClick={handleAddPlaylist} 
           Icon={PlaylistAddIcon} 
           text={'Add Playlist'}
-          className={styles.createPlaylistButton}
+          className={styles.sendPlaylistButton}
         />
-    </>
+    </section>
   )
 }
 
 // TODO beautify these components
-function DialogPlaylistSuccess() {
+function DialogPlaylistSuccess({ playlistUrl }: { playlistUrl?: string | null }) {
+  const handleOpenPlaylistInSpoti = () => {
+    if (!playlistUrl) return
+    window.open(playlistUrl, '_blank')
+  }
   return (
-    <h3>Success</h3>
+    <section className={styles.dialogSection}>
+      <div className={`
+        ${styles.toastNotification}
+        ${styles.successMessage}
+        `}>
+        <CheckCircleIcon />
+        <h3>Success</h3>
+      </div>
+      {playlistUrl &&
+      <>
+        <p>Check out your new playlist</p>
+        <button onClick={handleOpenPlaylistInSpoti}>Open in Spotify</button>
+      </>
+      }
+    </section>
   )
 }
-function DialogPlaylistError() {
+function DialogPlaylistError({ errorMessage }: { errorMessage?: string }) {
+  if (errorMessage) { console.error(errorMessage)}
   return (
-    <h3>Error</h3>
+    <section className={styles.dialogSection}>
+      <div className={`
+        ${styles.toastNotification}
+        ${styles.errorMessage}
+        `}>
+        <ErrorIcon />
+        <h3>Error</h3>
+      </div>
+      <p>Please try re-connecting to Spotify</p>
+      <button onClick={() => connectToSpoti()}>Connect to Spotify</button>
+    </section>
   )
 }
 
 function PlaylistTitle() {
-  const ref = useRef<HTMLTextAreaElement>(null);
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const [textAreaHasFocus, setTextAreaHasFocus] = useState(false);
   const { title } = useAppState().playlist
   const dispatch = useAppDispatch()
   const playlistTitleId = `playlistTitle-${React.useId()}`
   const handleOnChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     dispatch({ type: 'setNewPlaylistTitle', title: e.target.value })
-    if (ref.current) {
-      ref.current.style.height = "auto";
-      ref.current.style.height = `${e.target.scrollHeight - 20}px`;
+    if (textAreaRef.current) {
+      textAreaRef.current.style.height = "auto";
+      textAreaRef.current.style.height = `${e.target.scrollHeight - 20}px`;
     }
   }
+
+  console.log('!textAreaHasFocus -> ', textAreaHasFocus);
+  const handleFocus = () => {
+    console.log('!handlefocus -> ');
+    setTextAreaHasFocus(true)
+  }
+  const handleBlur = () => {
+    console.log('!handleBlur -> ');
+    setTextAreaHasFocus(false)
+  }
+
+  useEffect(()=>{
+    let ref: React.RefObject<HTMLTextAreaElement>['current'] | null = null;
+    
+    if (textAreaRef.current) {
+      ref = textAreaRef.current
+      textAreaRef.current?.addEventListener('focus', handleFocus)
+      textAreaRef.current?.addEventListener('blur', handleBlur)
+    }
+    return () => {
+      ref?.removeEventListener('focus', handleFocus)
+      ref?.removeEventListener('blur', handleBlur)
+      ref = null;
+    }
+  },[textAreaRef, textAreaHasFocus])
 
   return (
     <section className={styles.playlistTitle}>
@@ -129,7 +190,7 @@ function PlaylistTitle() {
         <label htmlFor={playlistTitleId}>Playlist Title</label>
         <textarea
             rows={1}
-            ref={ref}
+            ref={textAreaRef}
             placeholder={title}
             value={title}
             maxLength={250}
@@ -138,8 +199,15 @@ function PlaylistTitle() {
             id={playlistTitleId}
             required
           />
+      
+        <div className={`
+          ${styles.playlistTitleEditIcon} 
+          ${textAreaHasFocus ? styles.hasFocus : ''}
+          `}>
+          <EditIcon  />
+        </div>
+      
       </span>
-      <EditIcon />
     </section>
   )
 }

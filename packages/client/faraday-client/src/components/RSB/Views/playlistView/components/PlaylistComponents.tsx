@@ -9,7 +9,6 @@ import Tooltip from "../../../../Shared/Tooltip/Tooltip";
 
 export const HeaderPlaylistView = () => {
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
-  console.log('!isDialogOpen -> ', isDialogOpen);
   
   return (
     <div className={styles.headerPlaylistView}>
@@ -59,7 +58,10 @@ export function CreatePlaylistButton({ setOpenDialog }: { setOpenDialog: React.D
             handleOnClick={handleOnClick} 
             Icon={LibraryAddIcon} 
             text={'Create Playlist'}
-            className={styles.createPlaylistButton}
+            className={`
+              ${styles.createPlaylistButton}
+              ${isUserLoggedIn ? '' : styles.disabledButton}
+            `}
             disabled={!isUserLoggedIn}
           />
         }

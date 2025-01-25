@@ -83,7 +83,6 @@ export const AppStateContext = createContext<AppState>(initialAppState);
 export const AppStateDispatchContext = createContext<AppStateDispatch>(() => {});
 
 function stateReducer(state: AppState, action: ActionTypes) {
-  console.log('!stateReducer CALLED-> ', action.type);
   switch (action.type) {
     case 'addTrackToCustomPlaylist': {
       const updatedList = {
@@ -168,7 +167,6 @@ function stateReducer(state: AppState, action: ActionTypes) {
       const selectedAlbumsCount = Object.keys(state.rsb.selectedAlbums).length + 1
       const fullCollectionCount = state.albumCollection?.length || 0
       const setAllAlbumsSelected = (selectedAlbumsCount === fullCollectionCount)
-      // console.log('!addSelectedAlbum -> ', {selectedAlbumsCount, fullCollectionCount});
       return { 
         ...state,
         rsb: { 

@@ -55,7 +55,6 @@ export default function TrackTable({
     const { target } = e
     const { tagName, checked, value: trackId } = target as HTMLInputElement;
     if (tagName  === 'INPUT'){
-      console.log('!I have selected a track -> checked', checked );
       if (checked){
         dispatch({ type: 'addTrackToCustomPlaylist', trackId: trackId })
       } else {
@@ -69,7 +68,6 @@ export default function TrackTable({
       }
       // Handle unClicking a bulk selection
       if (!checked){
-        console.log('!I am dispatching to  -> setAllAlbumsSelected');
         dispatch({ type: 'setAllAlbumsSelected', areSelected: false })
       }
       return
