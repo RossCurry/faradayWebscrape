@@ -15,6 +15,16 @@
   min-height: 100dvh;
   overflow: hidden;
   gap: var(--g-4);
-  margin-left: var(--m-4);
-  margin-right: var(--m-4);
+  /* margin-left: var(--m-4);
+  margin-right: var(--m-4); */
+}
+
+
+@media screen and (max-width: 820px) {
+  .appLayout {
+    grid-template-areas:
+    "header header"
+    "left-sidebar left-sidebar"
+    "right-sidebar right-sidebar";
+  } 
 }

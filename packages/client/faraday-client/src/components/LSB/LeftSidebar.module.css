@@ -23,7 +23,16 @@
   flex-direction: column;
   justify-content: start;
   gap: .25em;
+  container-type: inline-size;
 }
+
+@media screen and (max-width: 820px) {
+  .playlistHeader{
+    flex-direction: row;
+    justify-content: start;
+  }
+}
+
 .playlistHeaderButtonSelected{
   border-color: #FFFF00;
 }
