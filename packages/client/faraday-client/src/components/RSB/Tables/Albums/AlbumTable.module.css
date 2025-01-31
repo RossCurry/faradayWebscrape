@@ -23,14 +23,20 @@ td {}
 .table_albums thead {
   padding: var(--p-2);
 }
-.table_albums th {
+.table_albums th.albumTableHeader {
   text-align: left;
   font-size: 1rem;
   font-weight: 200;
-  background-color: rgb(80, 101, 101);
+  background-color: var(--bg-dark-1);
   position: sticky;
   top: 2.5rem;
-  z-index: 50;
+  z-index: 100;
+  min-width: 5rem;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: var(--bg-dark-3);
+  padding-top: var(--p-2);
+  padding-bottom: var(--p-2);
 }
 
 .table_albums tr,
@@ -41,6 +47,7 @@ td {}
   cursor: pointer;
 }
 
+/* Default Display Table Row - limits effective Css */
 .table_albums .albumRows {
   background: inherit;
   text-align: left;
@@ -49,6 +56,12 @@ td {}
   background:     var(--bg-dark-3);
 }
 
+/* TODO add some sort of visual indication when a row is selected */
+.table_albums .albumRows.albumRowsSelected {
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+  border-bottom-color: var(--bg-dark-4);
+}
 
 /* Album Track list styles */
 /* Table row wrapper to match table row width */

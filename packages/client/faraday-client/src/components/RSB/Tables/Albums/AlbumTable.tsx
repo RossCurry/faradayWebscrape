@@ -78,6 +78,9 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
   },[allTrackIds, areAllAlbumsSelected])
 
   const handleCheckbox = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    // TODO not working triggering the onClick for open track rows
+    e.preventDefault()
+    e.stopPropagation()
     const { checked, value: albumId } = e.target
     // Modify playlist and checkbox selection
     if (checked){
@@ -140,7 +143,7 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
             <tr key={headerGroup.id}>
               {headerGroup.headers.map(header => {
                 return (
-                  <th key={header.id} colSpan={header.colSpan}>
+                  <th key={header.id} colSpan={header.colSpan} className={styles.albumTableHeader}>
                     {header.isPlaceholder ? null : (
                       <div
                         className={
@@ -228,6 +231,7 @@ const AlbumRowMemoized = React.memo(({
   // 2. the track info for the album
 
   const albumId = row.original.id
+  const isSelected = tracklistVisible.albumId === albumId;
   const handleOnClick = async (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
     const { tagName } = (e.target as HTMLElement)
     if (tagName === 'INPUT'){
@@ -246,7 +250,7 @@ const AlbumRowMemoized = React.memo(({
       // if (!checked) setIsAllSelected(false)
       return
     }
-    const isSelected = tracklistVisible.albumId === albumId;
+
     if (!isSelected) e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest'})
     // Mapping imageUrl here but not isSelected so to re-render on selection
     setTracklist(row.original.trackList.map(track => ({ 
@@ -263,6 +267,7 @@ const AlbumRowMemoized = React.memo(({
       <AlbumCell  
         row={row}
         handleOnClick={handleOnClick}
+        isSelected={isSelected}
       />
       <AlbumTrackListCell 
         row={row}
@@ -277,13 +282,23 @@ const AlbumRowMemoized = React.memo(({
 type AlbumCellProps = {
   row: Row<AlbumItemTableData>,
   handleOnClick: (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => Promise<void>
+  isSelected: boolean
 }
 const AlbumCell = ({ 
   row,
   handleOnClick,
+  isSelected
 }: AlbumCellProps) => {
   return (
-    <tr key={row.id} className={styles.albumRows} onClick={handleOnClick}>
+    <tr 
+      key={row.id} 
+      className={`
+        ${styles.albumRows}
+        ${isSelected ? styles.albumRowsSelected : ''}
+        `
+      } 
+      onClick={handleOnClick}
+    >
       {row.getVisibleCells().map(cell => {
         return (
 
