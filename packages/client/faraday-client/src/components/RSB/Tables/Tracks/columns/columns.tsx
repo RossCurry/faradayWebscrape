@@ -43,7 +43,8 @@ export const songAndArtist: AccessorColumnDef<TrackListColumnData, TrackListColu
       </div>
     )
   },
-  header: () => <span>Title</span>,
+  header: () => null,
+  // header: () => <span>Title</span>,
   sortingFn: (a, b) => {
     return a.original.name.localeCompare(b.original.name)
   },
@@ -55,7 +56,8 @@ export const title: AccessorColumnDef<TrackListColumnData, TrackListColumnData["
   accessorFn: row => row.name,
   id: 'title',
   cell: info => <span className={styles.rowDataTrack}>{info.getValue()}</span>,
-  header: () => <span>title</span>,
+  header: () => null,
+  // header: () => <span>title</span>,
   sortUndefined: 'last', //force undefined values to the end
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
 }
@@ -73,7 +75,8 @@ export const duration: AccessorColumnDef<TrackListColumnData, string> = {
   },
   id: 'duration',
   cell: info => <span className={styles.rowDataTrack}>{info.getValue()}</span>,
-  header: () => <span>duration</span>,
+  header: () => null,
+  // header: () => <span>duration</span>,
   sortUndefined: 'last', //force undefined values to the end
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
 }
@@ -85,7 +88,8 @@ export const artists: AccessorColumnDef<TrackListColumnData, TrackListColumnData
   },
   id: 'artists',
   cell: info => <span className={styles.rowDataTrack}>{info.getValue().join(', ')}</span>,
-  header: () => <span>artists</span>,
+  header: () => null,
+  // header: () => <span>artists</span>,
   sortUndefined: 'last', //force undefined values to the end
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
 }
@@ -94,7 +98,8 @@ export const trackNumber: AccessorColumnDef<TrackListColumnData, TrackListColumn
   accessorFn: row => row.track_number,
   id: 'trackNumber',
   cell: info => <span className={styles.rowDataTrackNumber}>{info.getValue()}</span>,
-  header: () => <span className={styles.headerTrackNumber}>#</span>,
+  header: () => null,
+  // header: () => <span className={styles.headerTrackNumber}>#</span>,
   sortUndefined: 'last', //force undefined values to the end
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
   size: 50
@@ -112,6 +117,7 @@ export const player: AccessorColumnDef<TrackListColumnData, TrackListColumnData[
     )
   },
   header: () => null,
+  // header: () => null,
   sortUndefined: 'last', //force undefined values to the end
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
 }
