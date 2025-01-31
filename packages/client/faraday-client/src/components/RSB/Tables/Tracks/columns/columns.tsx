@@ -116,19 +116,29 @@ export const player: AccessorColumnDef<TrackListColumnData, TrackListColumnData[
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
 }
 
-export const checkBox: AccessorColumnDef<TrackListColumnData, { trackId: TrackListColumnData['id'], isChecked: boolean }> = {
-  accessorFn: row => ({ trackId: row.id, isChecked: row.isChecked }),
-  id: 'checkbox',
-  cell: info => {
-    const {trackId, isChecked} = info.getValue()
-    return (
-      <input
-        className={styles.rowDataTrack}
-        type="checkbox" 
-        value={trackId} 
-        checked={isChecked}
-      />
-    )
-  },
-  header: () => null,
+
+export const getCheckbox = ({
+  handleCheckbox,
+}: {
+  handleCheckbox: (e: React.ChangeEvent<HTMLInputElement>) => void
+}) => {
+  const checkBox: AccessorColumnDef<TrackListColumnData, { trackId: TrackListColumnData['id'], isChecked: boolean }> = {
+    accessorFn: row => ({ trackId: row.id, isChecked: row.isChecked }),
+    id: 'checkbox',
+    cell: info => {
+      const {trackId, isChecked} = info.getValue()
+      return (
+        <input
+          className={styles.rowDataTrack}
+          type="checkbox" 
+          value={trackId} 
+          checked={isChecked}
+          onChange={handleCheckbox}
+        />
+      )
+    },
+    header: () => null,
+  }
+  return checkBox
 }
+
