@@ -1,6 +1,6 @@
 import { useAppState } from "../../../../state/AppStateHooks"
 import AlbumTable from "../../Tables/Albums/AlbumTable"
-import styles from './AlbumView.module.css'
+// import styles from './AlbumView.module.css'
 import sharedStyles from '../SharedStyles.module.css'
 
 export function AlbumView() {
@@ -20,7 +20,7 @@ function HeaderAlbumView() {
   const { albumCollection } = useAppState()
 
   return (
-    <header className={styles.headerAlbumView}>
+    <header className={sharedStyles.viewHeaderShared}>
       <p>{albumCollection?.length || 0} Albums</p>
       <section>FILTER SECTION</section>
     </header>

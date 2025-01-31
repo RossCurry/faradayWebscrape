@@ -10,8 +10,11 @@
     "header header"
     "left-sidebar right-sidebar";
   grid-template-columns: 1fr 3fr;
-  grid-template-rows: 0.75fr 3fr;
+  grid-template-rows: auto 3fr;
   max-height: 100dvh;
   min-height: 100dvh;
   overflow: hidden;
+  gap: var(--g-4);
+  margin-left: var(--m-4);
+  margin-right: var(--m-4);
 }

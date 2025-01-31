@@ -1,6 +1,6 @@
 .playlistEmptyContainer {
   flex: 1;
-  background-color:rgba(230, 230, 230, 0.25);
+  background-color:var(--bg-dark-1);
   min-height: 100%;
   display: grid;
   place-items: center;

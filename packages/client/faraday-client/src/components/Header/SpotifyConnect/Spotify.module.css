@@ -40,7 +40,6 @@
   content: '';
   width: calc(100% + var(--imageBorder));
   aspect-ratio: 1/1;
-  background-color: rgba(107, 107, 106, 0.399);
   border-radius: 50%;
 }
 
@@ -59,19 +58,18 @@
   margin: 1rem;
 
   border-radius: 50%;
-  box-shadow: 0px 0px 8px 3px rgb(206 206 206);
+  box-shadow: 0px 0px 8px 3px rgba(3, 1, 37, 0.594);
 }
 
 
 .userImage::before {
-  --imageBorder: 1rem;
+  --imageBorder: .75rem;
   isolation: isolate;
   z-index: -1;
   position: absolute;
   content: '';
   width: calc(100% + var(--imageBorder));
   aspect-ratio: 1/1;
-  background-color: rgba(107, 107, 106, 0.399);
   transform: translate(-50%, calc(var(--imageBorder)/2 * -1 ));
   border-radius: 50%;
 }

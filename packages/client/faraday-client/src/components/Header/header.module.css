@@ -7,8 +7,9 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between ;
-  background-color: rgb(46, 46, 46);
+  background-color: var(--bg-dark-2);
   z-index: 100;
+  border-radius: var(--r-2); ;
 }
 
 .header {

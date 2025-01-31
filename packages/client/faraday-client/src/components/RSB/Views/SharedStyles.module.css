@@ -1,10 +1,31 @@
-#albumCollection {
-  background: rgba(230, 230, 230, 0.25);
-}
 .albumCollection {
-  background: rgba(230, 230, 230, 0.25);
+  background-color: var(--bg-dark-1);
   min-height: 100%;
   display: flex;
   flex-direction: column;
   /* overflow: scroll */
+}
+
+.viewHeaderShared > *,
+.viewHeaderShared {
+  padding: 0;
+  margin: 0;
+}
+
+/* Shared with headerPlaylistView */
+.viewHeaderShared{
+  padding: .5em 1em;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: .5em;
+  border-bottom: 1px solid #252525;
+  position: sticky;
+  top: 0; /* Stick to the top of the container */
+  z-index: 100;
+  background-color: var(--bg-dark-2);
+}
+
+.viewHeaderShared p {
+  font-size: 1.1rem;
 }

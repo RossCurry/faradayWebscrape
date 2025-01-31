@@ -1,6 +1,6 @@
 import { useAppState } from '../../../state/AppStateHooks';
-import { AlbumView } from './albumView/AlbumView';
-import { PlaylistView } from './playlistView/PlaylistView';
+import { AlbumView } from './AlbumView/AlbumView';
+import { PlaylistView } from './PlaylistView/PlaylistView';
 
 export default function Views() {
   const state = useAppState()

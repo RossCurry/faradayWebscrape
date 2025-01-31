@@ -1,24 +1,5 @@
 
-/* Shared with headerAlbumView */
-.headerPlaylistView{
-  padding: .5em 1em;
-  display: flex;
-  flex-direction: row;
-  justify-content: start;
-  gap: .5em;
-  border-bottom: 1px solid #252525;
-  position: sticky;
-  top: 0; /* Stick to the top of the container */
-  z-index: 100;
-  background-color: grey;
-}
-
-/* Just modify the playlist view */
-.headerPlaylistView {
-  justify-content: space-between;
-}
-
-.headerPlaylistView fieldset {
+fieldset {
   border: transparent;
   padding: 0;
   margin: 0;

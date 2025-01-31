@@ -1,0 +1,180 @@
+/* App colors so far */
+:root {
+  --yellow: hsl(60, 100%, 50%); /* #FFFF00 */
+  --dark-gray: hsl(0, 0%, 15%); /* #252525 */
+  --very-dark-gray: hsl(0, 0%, 14%); /* #242424 */
+  --light-gray: hsl(0, 0%, 89%); /* #E4E4E4 */
+  --gray-alpha: hsla(0, 0%, 45%, 0.47); /* #73737378 */
+  --light-gray-bg: hsl(0, 0%, 87%); /* #e0e0e0 */
+  --teal: hsl(174, 70%, 56%); /* #76c7c0 */
+  --blue: hsl(240, 100%, 50%); /* #646cff */
+  --dark-blue: hsl(240, 100%, 45%); /* #535bf2 */
+  --very-dark-bg: hsl(0, 0%, 10%); /* #1a1a1a */
+  --dark-blue-alt: hsl(210, 29%, 22%); /* #213547 */
+  --white: hsl(0, 0%, 100%); /* #ffffff */
+  --light-blue: hsl(210, 100%, 70%); /* #747bff */
+  --off-white: hsl(0, 0%, 98%); /* #f9f9f9 */
+  --green: hsl(165, 60%, 40%); /* #209a6d */
+  --red: hsl(0, 70%, 60%); /* #d96a6a */
+  --gray-1: hsl(0, 0%, 73%); /* #b8b8b8 */
+  --gray-2: hsl(0, 0%, 70%); /* #b4b4b4 */
+  --gray-3: hsl(0, 0%, 71%); /* #b6b6b6 */
+  --light-gray-1: hsl(0, 0%, 83%); /* #d4d4d4 */
+  --light-gray-2: hsl(0, 0%, 83%); /* #d3d3d3 */
+  --light-gray-3: hsl(0, 0%, 85%); /* #d9d9d9 */
+  --light-gray-4: hsl(0, 0%, 92%); /* #eaeaea */
+}
+
+:root {
+  /* White */
+  --white:#f9f9f9 ;
+
+  /* Greys */
+  --grey-50: #f9fafb;
+  --grey-100: ##e5e7eb;
+  --grey-200: #d4d4d4;
+  --grey-300: #b8b8b8;
+  --grey-400: #9ca3af;
+  --grey-500: #808080;
+  --grey-600: #717477;
+  --grey-700: #4F4F4F;
+  --grey-800: #2E2E2E;
+  --grey-900: #212121;
+
+  /* Black */
+  --black: #1c1c1c;
+
+  /* overlay */
+  --overlay: rgba(82, 82, 82, 0.602)
+}
+
+:root {
+  --yellow-50: #fefce8;
+  --yellow-100: #fef9c3;
+  --yellow-200: #fef08a;
+  --yellow-300: #fde047;
+  --yellow-400: #facc15;
+  --yellow-500: #eab308;
+  --yellow-600: #ca8a04;
+  --yellow-700: #a16207;
+  --yellow-800: #854d0e;
+  --yellow-900: #713f12;
+}
+
+:root {
+  --purple-50: #faf5ff;
+  --purple-100: #f3e8ff;
+  --purple-200: #e9d5ff;
+  --purple-300: #d8b4fe;
+  --purple-400: #c084fc;
+  --purple-500: #a855f7;
+  --purple-600: #9333ea;
+  --purple-700: #7e22ce;
+  --purple-800: #6b21a8;
+  --purple-900: #581c87;
+}
+
+:root {
+  --teal-50: #f0fdfa;
+  --teal-100: #ccfbf1;
+  --teal-200: #99f6e4;
+  --teal-300: #5eead4;
+  --teal-400: #2dd4bf;
+  --teal-500: #14b8a6;
+  --teal-600: #0d9488;
+  --teal-700: #0f766e;
+  --teal-800: #115e59;
+  --teal-900: #134e4a;
+}
+
+:root {
+  --blue-50: #eff6ff;
+  --blue-100: #dbeafe;
+  --blue-200: #bfdbfe;
+  --blue-300: #93c5fd;
+  --blue-400: #60a5fa;
+  --blue-500: #3b82f6;
+  --blue-600: #2563eb;
+  --blue-700: #1d4ed8;
+  --blue-800: #1e40af;
+  --blue-900: #1e3a8a;
+}
+
+/* BACKGROUNDS */
+:root {
+  /* TODO improve this namign scheme */
+  
+  --bg-dark: var(--black);
+  --bg-dark-1: var(--grey-900);
+  --bg-dark-2: var(--grey-800);
+  --bg-dark-3: var(--grey-700);
+  --bg-dark-4: var(--grey-600);
+  
+}
+
+/* BUTTONS */
+:root {  
+  --primary-btn: hsl(240, 100%, 50%); /* Primary button color */
+  --secondary-btn: hsl(60, 100%, 50%); /* Secondary button color */
+  --tertiary-btn: hsl(0, 0%, 70%); /* Tertiary button color */
+
+  --primary-btn-hover: hsl(240, 100%, 60%); /* Lighter shade for hover */
+  --primary-btn-focus: hsl(240, 100%, 40%); /* Darker shade for focus */
+  
+  --secondary-btn-hover: hsl(60, 100%, 60%); /* Lighter shade for hover */
+  --secondary-btn-focus: hsl(60, 100%, 40%); /* Darker shade for focus */
+  
+  --tertiary-btn-hover: hsl(0, 0%, 60%); /* Lighter shade for hover */
+  --tertiary-btn-focus: hsl(0, 0%, 50%); /* Darker shade for focus */
+}
+
+/* SPACING */
+
+:root {
+  --g-0: 0;
+  --g-1: 0.25rem;
+  --g-2: 0.5rem;
+  --g-3: 0.75rem;
+  --g-4: 1rem;
+  --g-5: 1.25rem;
+  --g-6: 1.5rem;
+  --g-7: 2rem;
+  --g-8: 2.5rem;
+}
+
+:root {
+ --m-0: 0;
+ --m-1: 0.25rem;
+ --m-2: 0.5rem;
+ --m-3: 0.75rem;
+ --m-4: 1rem;
+ --m-5: 1.25rem;
+ --m-6: 1.5rem;
+ --m-7: 2rem;
+ --m-8: 2.5rem; 
+}
+
+:root {
+ --p-0: 0;
+ --p-1: 0.25rem;
+ --p-2: 0.5rem;
+ --p-3: 0.75rem;
+ --p-4: 1rem;
+ --p-5: 1.25rem;
+ --p-6: 1.5rem;
+ --p-7: 2rem;
+ --p-8: 2.5rem; 
+}
+
+/* RADIUS */
+:root{
+ --r-0: 0;
+ --r-1: 0.25rem;
+ --r-2: 0.5rem;
+ --r-3: 0.75rem;
+ --r-4: 1rem;
+ --r-5: 1.25rem;
+ --r-6: 1.5rem;
+ --r-7: 2rem;
+ --r-8: 2.5rem;
+}

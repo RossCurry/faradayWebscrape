@@ -1,6 +1,6 @@
 .footer {
   grid-area: footer;
-  background-color: rgb(33 33 33);
+  background-color: var(--bg-dark-2);
   max-height: 3rem;
   overflow: hidden;
   padding: 0.5rem 1rem;

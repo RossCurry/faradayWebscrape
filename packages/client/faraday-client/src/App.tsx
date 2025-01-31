@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import styles from './App.module.css'
+import './Colors.module.css'
 
 import Header from './components/Header/Header'
 import LeftSidebar from './components/LSB/LeftSidebar'
@@ -15,7 +16,7 @@ import useGetAndSetUserInfo from './hooks/useGetAndSetUserInfo'
 function App({ redirected }: { redirected?: true }) {
   useUpdateAlbums()
   useGetAndSetUserInfo(redirected)
-  
+
   const [isUserdataLoading, setIsUserdataLoading] = useState<boolean>(false)
   const dispatch = useAppDispatch();
   const { searchParams } = useQuery()
