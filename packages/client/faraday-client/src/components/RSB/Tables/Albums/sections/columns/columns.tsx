@@ -3,6 +3,8 @@ import styles from './columns.module.css'
 import { SpotifySearchResult } from "../../../../../../types/spotify.types"
 import { AlbumItemTableData } from "../../AlbumTable"
 import React from "react"
+import { AddIcon, LibraryAddIcon, PlaylistAddIcon, PlaylistRemoveIcon, RemoveIcon } from "../../../../../../icons"
+import Tooltip from "../../../../../Shared/Tooltip/Tooltip"
 
 
 export const image: AccessorColumnDef<AlbumItemTableData, { url: SpotifySearchResult["image"]["url"], isSoldOut: SpotifySearchResult["isSoldOut"] }> = {
@@ -130,7 +132,7 @@ export const releaseDate: AccessorColumnDef<AlbumItemTableData, SpotifySearchRes
       <div>{asYear}</div>
     )
   },
-  header: () => <span>Release Date</span>,
+  header: () => <span>Release</span>,
   sortUndefined: 'last', //force undefined values to the end
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
 }
@@ -158,14 +160,25 @@ export const getCheckbox = ({
     id: 'checkbox',
     cell: info => {
       const {albumId, isChecked} = info.getValue()
+      const inputId = `album-checkbox-id-${albumId.toString()}`
       return (
-        <input
-          className={styles.rowDataCheckbox}
-          type="checkbox" 
-          value={albumId} 
-          checked={isChecked}
-          onChange={handleCheckbox}
-        />
+        <div className={styles.rowDataCheckboxWrapper}>
+          <input
+            className={styles.rowDataCheckbox}
+            type="checkbox" 
+            value={albumId} 
+            checked={isChecked}
+            onChange={handleCheckbox}
+            id={inputId}
+            style={{display: 'none'}}
+          />
+          <label htmlFor={inputId} className={styles.rowDataCheckboxLabel}>
+            {isChecked 
+              ? <RemoveIcon />
+              : <AddIcon  /> 
+            }
+          </label>
+        </div>
       )
     },
     // This needs to be a function for the React hook to work
@@ -175,8 +188,9 @@ export const getCheckbox = ({
         <div style={{
           display: 'flex',
           flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
         }}>
-          <label htmlFor={checkBoxId} style={{ textAlign: 'left' }}>Select All</label>
           <input
             id={checkBoxId}
             className={styles.rowDataCheckbox}
@@ -184,7 +198,14 @@ export const getCheckbox = ({
             value={'all'} 
             checked={areAllAlbumsSelected}
             onChange={(e) => handleSelectAll(e.target.checked)}
+            style={{display: 'none'}}
           />
+          <label htmlFor={checkBoxId}>
+            <Tooltip 
+              Component={<LibraryAddIcon />}
+              tooltipText="Select All"
+            />
+          </label>
         </div>
       )
     },

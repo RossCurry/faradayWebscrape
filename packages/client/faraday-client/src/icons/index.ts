@@ -9,3 +9,5 @@ export { default as PlaylistRemoveIcon } from './PlaylistRemoveIcon';
 export { default as DoubleArrowIcon } from './DoubleArrowIcon';
 export { default as ArrowBackIcon } from './ArrowBackIcon';
 export { default as ErrorIcon } from './ErrorIcon';
+export { default as AddIcon } from './AddIcon';
+export { default as RemoveIcon } from './RemoveIcon';
