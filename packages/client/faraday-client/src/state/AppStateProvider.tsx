@@ -33,7 +33,7 @@ type AppState = {
 const playlistPlaceholderTitle = `Faraday ${new Date().toLocaleString('en-US', { month: 'long' })} ${new Date().toLocaleString('en-US', { year: 'numeric' })}`
 
 const initialAppState = {
-  albumCollection: null,
+  albumCollection: [],
   playlist: {
     custom: {},
     selectedPlaylistId: null,

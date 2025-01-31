@@ -2,16 +2,17 @@ import { useState } from "react";
 import { PlaylistRemoveIcon, LibraryAddIcon } from "../../../../../icons";
 import { useAppState, useAppDispatch } from "../../../../../state/AppStateHooks";
 import IconButton from "../../../../Shared/IconButton/IconButton";
-import { DialogCreatePlaylist } from "../../components/DialogCreatePlaylist/DialogCreatePlaylist";
-import { TracksCollectionStats } from "../../components/TracksCollectionStats/TracksCollectionStats";
+import { TracksCollectionStats } from "../../Shared/TracksCollectionStats/TracksCollectionStats";
 import styles from './PlaylistComponents.module.css'
+import sharedStyles from '../../SharedStyles.module.css'
 import Tooltip from "../../../../Shared/Tooltip/Tooltip";
+import { DialogCreatePlaylist } from "../../../../Dialogs/DialogCreatePlaylist/DialogCreatePlaylist";
 
 export const HeaderPlaylistView = () => {
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
   
   return (
-    <div className={styles.headerPlaylistView}>
+    <div className={sharedStyles.viewHeaderShared}>
         <ResetPlaylistButton />
       <TracksCollectionStats />
       <fieldset>

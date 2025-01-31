@@ -9,9 +9,9 @@ export default function useUpdateAlbums() {
   useEffect(() => {
     async function updateAlbums(){
       const availableAlbums = await getAvailableAlbums()
-      if (availableAlbums) dispatch({ type: 'setAlbumCollection', albums: availableAlbums })
+      if (availableAlbums && availableAlbums.length) dispatch({ type: 'setAlbumCollection', albums: availableAlbums })
     }
-    if (!albumCollection) updateAlbums()
+    if (!albumCollection?.length) updateAlbums()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [albumCollection])
 

@@ -13,6 +13,9 @@
   grid-template-rows: 2fr auto;
   height: 100%;
   overflow: hidden; /* Prevent overall scrolling */
+
+  border-radius: var(--r-2);
+  background-color: var(--bg-dark-2);
 }
 
 .viewContainer {

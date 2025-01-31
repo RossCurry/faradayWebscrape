@@ -1,0 +1,49 @@
+dialog {
+  min-width: 30dvw;
+  /* height: 30dvw; */
+  padding: 0;
+  justify-self: center;
+  align-self: center;
+}
+
+ dialog[open].dialogCreatePlaylist {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  padding: 1em;
+  background-color:  var(--bg-dark-1);
+  border-radius: 8px;
+  color: #E4E4E4;
+}
+dialog[open].dialogCreatePlaylist::backdrop  {
+  background-color:   var(--overlay)
+}
+
+.dialogHeader {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  padding: 1em 0em;
+}
+
+.dialogHeader h3 {
+  padding: 0;
+  margin: 0;
+  text-align: center;
+}
+
+.closeDialogButton {
+  background-color: transparent;
+  position: absolute;
+  left: 0;
+}
+
+.dialogContainer{}
+
+.dialogContainer h3 {
+  padding: 0;
+  margin: 0;
+}
+
