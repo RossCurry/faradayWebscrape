@@ -1,10 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import styles from './LeftSidebar.module.css'
 import { SpotifyPlaylist } from '../../types/spotify.types'
-import { getAvailablePlaylists } from '../../services'
 import { useAppDispatch, useAppState } from '../../state/AppStateHooks'
 import { ListIcon, MusicCollectionIcon } from '../../icons'
-import type { Views } from '../../state/constants'
 import { FaradayLogo, faradayLogo } from '../../logos/FaradayLogo'
 
 export default function LeftSidebar() {
@@ -80,6 +78,7 @@ function AlbumCollectionButton() {
   )
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function PlaylistsList({ playlistCollection }: { playlistCollection: SpotifyPlaylist[] | null }) {
   return (
     <section 
