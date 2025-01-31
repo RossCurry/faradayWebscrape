@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
 import {
   flexRender,
   getCoreRowModel,
@@ -13,7 +13,7 @@ import {
   songAndArtist,
   duration,
   trackNumber,
-  checkBox
+  getCheckbox
 } from './columns/columns'
 import { SpotifySearchResult } from '../../../../types/spotify.types'
 import { useAppDispatch, useAppState } from '../../../../state/AppStateHooks'
@@ -40,14 +40,26 @@ export default function TrackTable({
     }
   }),[data, customPlaylist])
 
+  const handleCheckbox = useCallback(() => (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { value: trackId, checked } = e.target as HTMLInputElement
+      if (checked){
+        dispatch({ type: 'addTrackToCustomPlaylist', trackId: trackId })
+      } else {
+        dispatch({ type: 'deleteTrackFromCustomPlaylist', trackId: trackId })
+      }
+    // Don't put dispatch in the dependency array
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []
+  )
+
   const columns = React.useMemo(
     () => [
-      checkBox,
+      getCheckbox({ handleCheckbox }),
       image,
       trackNumber,
       songAndArtist,
       duration,
-    ], []
+    ], [handleCheckbox]
   )
 
   const handleOnClick = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, track: TrackListData) => {

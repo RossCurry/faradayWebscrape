@@ -50,7 +50,7 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
   const dataWithCheckbox = useMemo(() => data.map(album => {
     return {
       ...album,
-      isChecked: selectedAlbums[album.id]
+      isChecked: !!selectedAlbums[album.id]
     }
   }),[selectedAlbums, data])
 
@@ -77,10 +77,21 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[allTrackIds, areAllAlbumsSelected])
 
+  const handleCheckbox = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('!handleCheckbox', e.target )
+    const { checked, value: albumId } = e.target
+    // Modify playlist and checkbox selection
+    if (checked){
+      appDispatch({type: 'addSelectedAlbum', albumId })
+    } else {
+      appDispatch({ type: 'deleteSelectedAlbum', albumId })
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[])
 
   const columns = React.useMemo(
     () => [
-      getCheckbox({ areAllAlbumsSelected, handleSelectAll}),
+      getCheckbox({ areAllAlbumsSelected, handleSelectAll, handleCheckbox}),
       image,
       albumAndArtist,
       category,

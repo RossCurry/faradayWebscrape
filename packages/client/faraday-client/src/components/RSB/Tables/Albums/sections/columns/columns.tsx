@@ -146,9 +146,11 @@ export const genre: AccessorColumnDef<AlbumItemTableData, SpotifySearchResult["g
 export const getCheckbox = ({
   areAllAlbumsSelected,
   handleSelectAll,
+  handleCheckbox,
 }: {
   areAllAlbumsSelected: boolean,
   handleSelectAll: (checked?: boolean) => void,
+  handleCheckbox: (e: React.ChangeEvent<HTMLInputElement>) => void,
 }) => {
   const checkbox: AccessorColumnDef<AlbumItemTableData, { albumId: SpotifySearchResult['id'], isChecked: boolean }> = {
     accessorFn: row => ({ albumId: row.id, isChecked: row.isChecked }),
@@ -161,6 +163,7 @@ export const getCheckbox = ({
           type="checkbox" 
           value={albumId} 
           checked={isChecked}
+          onChange={handleCheckbox}
         />
       )
     },
