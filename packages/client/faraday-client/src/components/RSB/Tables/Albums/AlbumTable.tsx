@@ -78,7 +78,6 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
   },[allTrackIds, areAllAlbumsSelected])
 
   const handleCheckbox = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('!handleCheckbox', e.target )
     const { checked, value: albumId } = e.target
     // Modify playlist and checkbox selection
     if (checked){
@@ -97,7 +96,7 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
       category,
       releaseDate,
       price,
-    ], [areAllAlbumsSelected, handleSelectAll]
+    ], [areAllAlbumsSelected, handleSelectAll, handleCheckbox]
   )
   const table = useReactTable({
     columns,
@@ -180,8 +179,8 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
           {table
             .getRowModel()
             // TODO virtualize or use pagination
-            .rows
-            // .rows.slice(0,60)
+            // .rows
+            .rows.slice(0,30)
             .map(row => {
               // Each row is actually going to be 2 rows
               // 1. the tanStack data row (album)

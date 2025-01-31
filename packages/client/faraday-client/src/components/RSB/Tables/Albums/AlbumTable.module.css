@@ -12,7 +12,25 @@ td {}
   margin: 0 auto;
   --trackListRowHeight: 4rem;
   --trackListNumTracks: 3;
-  width: calc(100% - 4rem);
+  width: 100%;
+  /* width: calc(100% - 4rem); */
+  /* width: calc(100% - 2rem); */
+  padding: 0 1em;
+  /* position: relative; */
+  /* overflow: auto; */
+}
+
+.table_albums thead {
+  padding: var(--p-2);
+}
+.table_albums th {
+  text-align: left;
+  font-size: 1rem;
+  font-weight: 200;
+  background-color: rgb(80, 101, 101);
+  position: sticky;
+  top: 2.5rem;
+  z-index: 50;
 }
 
 .table_albums tr,
@@ -28,7 +46,7 @@ td {}
   text-align: left;
 }
 .table_albums .albumRows:hover {
-  background: rgba(201, 201, 200, 0.411);
+  background:     var(--bg-dark-3);
 }
 
 
@@ -41,7 +59,7 @@ td {}
 
 /* Container start state */
 .table_albums .albumTrackList {
-  background-color: rgba(200, 124, 23, 0.634);
+  background-color: var(--bg-dark);
   max-height: 0;  /* Start at 0 height for the collapsed state */
   overflow: hidden; /* Hide content when collapsed */
   transition: max-height 500ms ease; /* Transition the height */

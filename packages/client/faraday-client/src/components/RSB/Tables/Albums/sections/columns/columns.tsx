@@ -2,6 +2,7 @@ import { AccessorColumnDef } from "@tanstack/react-table"
 import styles from './columns.module.css'
 import { SpotifySearchResult } from "../../../../../../types/spotify.types"
 import { AlbumItemTableData } from "../../AlbumTable"
+import React from "react"
 
 
 export const image: AccessorColumnDef<AlbumItemTableData, { url: SpotifySearchResult["image"]["url"], isSoldOut: SpotifySearchResult["isSoldOut"] }> = {
@@ -167,14 +168,17 @@ export const getCheckbox = ({
         />
       )
     },
-    header: () => {
+    // This needs to be a function for the React hook to work
+    header: function Header(){
+      const checkBoxId = `album-checkbox-select-all-id-${React.useId()}`
       return (
         <div style={{
           display: 'flex',
           flexDirection: 'column',
         }}>
-          <p style={{ textAlign: 'left' }}>Select All</p>
+          <label htmlFor={checkBoxId} style={{ textAlign: 'left' }}>Select All</label>
           <input
+            id={checkBoxId}
             className={styles.rowDataCheckbox}
             type="checkbox" 
             value={'all'} 
