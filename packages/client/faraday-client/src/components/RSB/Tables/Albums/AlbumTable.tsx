@@ -289,12 +289,15 @@ const AlbumCell = ({
   handleOnClick,
   isSelected
 }: AlbumCellProps) => {
+  // TODO also should be true if any track of the album is selected
+  const isAddedToPlaylist = row.original.isChecked
   return (
     <tr 
       key={row.id} 
       className={`
         ${styles.albumRows}
         ${isSelected ? styles.albumRowsSelected : ''}
+        ${isAddedToPlaylist ? styles.albumRowsAddedToPlaylist : ''}
         `
       } 
       onClick={handleOnClick}

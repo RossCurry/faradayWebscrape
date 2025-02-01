@@ -30,7 +30,7 @@ td {}
   background-color: var(--bg-dark-1);
   position: sticky;
   top: 2.5rem;
-  z-index: 100;
+  z-index: 50;
   min-width: 5rem;
   border-bottom-style: solid;
   border-bottom-width: 2px;
@@ -61,6 +61,12 @@ td {}
   border-bottom-style: solid;
   border-bottom-width: 1px;
   border-bottom-color: var(--bg-dark-4);
+  background-color: var(--grey-700);
+}
+.table_albums .albumRows.albumRowsAddedToPlaylist {
+  outline: 1px solid var(--yellow-4);
+  outline-offset: -1px;
+  background-color: rgba(229, 141, 26, 0.25);
 }
 
 /* Album Track list styles */

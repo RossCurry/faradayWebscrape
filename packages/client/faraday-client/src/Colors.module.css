@@ -45,20 +45,24 @@
   --black: #1c1c1c;
 
   /* overlay */
-  --overlay: rgba(82, 82, 82, 0.602)
+  --overlay: rgba(82, 82, 82, 0.602);
+
+  /* AlbumRowSelected */
+  --isAlbumOpen: #e0a40c4a;;
+  --isAlbumAdded: #0c4fe04a;
 }
 
 :root {
-  --yellow-50: #fefce8;
-  --yellow-100: #fef9c3;
-  --yellow-200: #fef08a;
-  --yellow-300: #fde047;
-  --yellow-400: #facc15;
-  --yellow-500: #eab308;
-  --yellow-600: #ca8a04;
-  --yellow-700: #a16207;
-  --yellow-800: #854d0e;
-  --yellow-900: #713f12;
+  --yellow-0: #fefce8;
+  --yellow-1: #fef9c3;
+  --yellow-2: #fef08a;
+  --yellow-3: #fde047;
+  --yellow-4: #facc15;
+  --yellow-5: #eab308;
+  --yellow-6: #ca8a04;
+  --yellow-7: #a16207;
+  --yellow-8: #854d0e;
+  --yellow-9: #713f12;
 }
 
 :root {
