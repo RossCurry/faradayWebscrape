@@ -7,6 +7,10 @@ import { AppState } from '../../router.js'
 import { SpotifyAlbum, SpotifyCoverImageResponse, SpotifyPlaylist, SpotifySearchResult, SpotifyUserProfile } from '#controllers/spotify/spotify.types.js'
 import { AuthToken } from '#services/token/Token.js';
 
+export type GetSpotifyDataFilter = {
+  isSoldOut?: boolean
+}
+export type GetSpotifyDataMatch = Record<keyof SpotifySearchResult, any> | null
 class MongoDb {
   db: mongoDB.Db | null = null
   // TODO redo this class to have an OOP spotify & faraday classes
@@ -121,6 +125,7 @@ class MongoDb {
     return spotifyData ? spotifyData : []
   }
   
+
   /**
    * This is the main GET for the landing page.
    * At the moment, just return everything
@@ -128,8 +133,8 @@ class MongoDb {
    * @param match 
    * @returns 
    */
-  async getSpotifyAlbumData(match?: Record<keyof SpotifySearchResult, any>){
-    console.log('!getSpotifyAlbumData -> ');
+  async getSpotifyAlbumData(match?: GetSpotifyDataMatch, limit?: number, offset?: number, filter?: GetSpotifyDataFilter){
+    console.log('!getSpotifyAlbumData -> ', { limit, offset });
     const albumProjection = {
       'spotify.artists': 1,
       'spotify.href': 1,
@@ -164,9 +169,16 @@ class MongoDb {
       ...match,
       $or: [{notFound: false}, {notFound: {$exists: false}}],
       // TODO remove
-      'faraday.isSoldOut': false
+      'faraday.isSoldOut': !!filter?.isSoldOut
     }
-    const albums = await albumCollection?.find(notFoundMatch || {}, { projection: albumProjection, limit: undefined }).toArray()
+    const albums = await albumCollection?.find(
+      notFoundMatch || {}, 
+      { 
+        projection: albumProjection, 
+        limit, 
+        skip: offset 
+      } 
+    ).toArray()
     console.log('!albums.length -> ', albums?.length);
     // TODO improve this return type
     const spotifyData: Array<Partial<any> & { _id: string }> | undefined = (albums || []).map(album => ( { _id: album._id.toString(),  ...album.spotify, ...album.faraday }))
@@ -182,6 +194,21 @@ class MongoDb {
       }
     })
     return reMapped
+  }
+ 
+  /**
+   * @returns totalCount for all Spotify Albums
+   */
+  async getSpotifyAlbumDataCount(match: GetSpotifyDataMatch, filter: GetSpotifyDataFilter){
+    const albumCollection = this.db?.collection('albums')
+    const notFoundMatch = {
+      ...match || {},
+      $or: [{notFound: false}, {notFound: {$exists: false}}],
+      // TODO remove
+      'faraday.isSoldOut': !!filter.isSoldOut
+    }
+    const albumCount = await albumCollection?.countDocuments(notFoundMatch)
+    return albumCount || 0
   }
 
   // TODO divide this into more methods

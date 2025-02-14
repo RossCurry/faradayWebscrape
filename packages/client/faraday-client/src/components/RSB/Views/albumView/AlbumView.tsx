@@ -1,5 +1,5 @@
 import { useAppState } from "../../../../state/AppStateHooks"
-import AlbumTable from "../../Tables/Albums/AlbumTable"
+import AlbumTable from "../../Tables/Albums/V_AlbumTable"
 // import styles from './AlbumView.module.css'
 import sharedStyles from '../SharedStyles.module.css'
 

@@ -4,7 +4,7 @@ import {
   useReducer, 
   Dispatch,
 } from 'react';
-import { CheckedAlbumDict, CheckedTrackDict } from '../components/RSB/Tables/Albums/AlbumTable';
+import { CheckedAlbumDict, CheckedTrackDict } from '../components/RSB/Tables/Albums/V_AlbumTable';
 import { CONSTANTS, Views } from './constants';
 import { SpotifySearchResult, SpotifyUserProfile } from '../types/spotify.types';
 import { TrackListData } from '../components/RSB/Tables/Tracks/TrackTable';

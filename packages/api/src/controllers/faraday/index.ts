@@ -30,6 +30,35 @@ faradayRouter.get("/api/faraday/albums",
   }
 )
 
+/**
+ * Return a json list of faraday albums in batches
+ */
+faradayRouter.get("/api/faraday/albums/batch",
+  async (ctx: AppContext, _next: Application.Next) => {
+    const { mongo } = ctx.services
+    if (!mongo) throw new Error('No mongo object found')
+    console.log('!ctx.params -> ', ctx.params);
+    const { limit, offset, filter } = ctx.query
+    const filterParsed = filter && typeof filter === 'string' ? JSON.parse(filter) : {}
+    try {
+      const spotifyData = await mongo.getSpotifyAlbumData(
+        null, 
+        Number(limit), 
+        Number(offset),
+        filterParsed,
+      )
+      const albumCount = await mongo.getSpotifyAlbumDataCount(null, filterParsed)
+      console.log('!spotify Batch length-> ', spotifyData.length, albumCount );
+      ctx.status = 200
+      ctx.body = { data: spotifyData, totalCount: albumCount };
+    } catch (error) {
+      console.error('Error in middleware:', error);
+      ctx.status = 500;
+      ctx.body = 'Internal Server Error';
+    }
+  }
+)
+
 // faradayRouter.post("/api/faraday/update",
 //   // (ctx, _next) => {
 //   //   ctx.body = 'all good'

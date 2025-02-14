@@ -110,8 +110,8 @@ class MongoDb {
      * @param match
      * @returns
      */
-    async getSpotifyAlbumData(match) {
-        console.log('!getSpotifyAlbumData -> ');
+    async getSpotifyAlbumData(match, limit, offset, filter) {
+        console.log('!getSpotifyAlbumData -> ', { limit, offset });
         const albumProjection = {
             'spotify.artists': 1,
             'spotify.href': 1,
@@ -146,9 +146,13 @@ class MongoDb {
             ...match,
             $or: [{ notFound: false }, { notFound: { $exists: false } }],
             // TODO remove
-            'faraday.isSoldOut': false
+            'faraday.isSoldOut': !!filter?.isSoldOut
         };
-        const albums = await albumCollection?.find(notFoundMatch || {}, { projection: albumProjection, limit: undefined }).toArray();
+        const albums = await albumCollection?.find(notFoundMatch || {}, {
+            projection: albumProjection,
+            limit,
+            skip: offset
+        }).toArray();
         console.log('!albums.length -> ', albums?.length);
         // TODO improve this return type
         const spotifyData = (albums || []).map(album => ({ _id: album._id.toString(), ...album.spotify, ...album.faraday }));
@@ -164,6 +168,20 @@ class MongoDb {
             };
         });
         return reMapped;
+    }
+    /**
+     * @returns totalCount for all Spotify Albums
+     */
+    async getSpotifyAlbumDataCount(match, filter) {
+        const albumCollection = this.db?.collection('albums');
+        const notFoundMatch = {
+            ...match || {},
+            $or: [{ notFound: false }, { notFound: { $exists: false } }],
+            // TODO remove
+            'faraday.isSoldOut': !!filter.isSoldOut
+        };
+        const albumCount = await albumCollection?.countDocuments(notFoundMatch);
+        return albumCount || 0;
     }
     // TODO divide this into more methods
     async setFaradayData(data) {

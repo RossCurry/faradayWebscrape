@@ -25,5 +25,7 @@
     "header header"
     "left-sidebar left-sidebar"
     "right-sidebar right-sidebar";
+    grid-template-columns: 6fr;
+    grid-template-rows: auto auto 3fr;
   } 
 }
