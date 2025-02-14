@@ -22,6 +22,8 @@ type AppState = {
     view: Views,
     selectedAlbums: CheckedAlbumDict
     areAllAlbumsSelected: boolean
+    scrollAction: 'fetch' | null
+    scrollElement: HTMLElement | null
   },
   player: {
     audioUrl: string | null,
@@ -45,6 +47,8 @@ const initialAppState = {
     view: CONSTANTS.views.albums,
     selectedAlbums: {},
     areAllAlbumsSelected: false,
+    scrollAction: null,
+    scrollElement: null,
   },
   player: {
     audioUrl: null,
@@ -70,6 +74,8 @@ type ActionTypes =
 | { type: 'selectAllAlbums' }
 | { type: 'deselectAllAlbums' }
 | { type: 'setAllAlbumsSelected', areSelected: boolean }
+| { type: 'scrollAction', scrollAction: 'fetch' | null }
+| { type: 'setScrollElement', scrollElement: HTMLElement | null }
 // Main album collection
 | { type: 'setAlbumCollection', albums: SpotifySearchResult[] | null }
 // Player
@@ -205,6 +211,20 @@ function stateReducer(state: AppState, action: ActionTypes) {
       return { 
         ...state,
         rsb: { ...state.rsb, areAllAlbumsSelected: areSelected } 
+      }; 
+    }
+    case 'scrollAction': {
+      const { scrollAction } = action;
+      return { 
+        ...state,
+        rsb: { ...state.rsb, scrollAction } 
+      }; 
+    }
+    case 'setScrollElement': {
+      const { scrollElement } = action;
+      return { 
+        ...state,
+        rsb: { ...state.rsb, scrollElement } 
       }; 
     }
     // Album Reducers

@@ -36,9 +36,9 @@ export type CheckedTrackDict = {
 }
 export type AlbumItemTableData = SpotifySearchResult & { isChecked: boolean }
 
-export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
+export default function AlbumTable({ data, scrollElement }: { data: SpotifySearchResult[], scrollElement: React.RefObject<HTMLElement> }) {
   const appDispatch = useAppDispatch()
-  const { selectedAlbums, areAllAlbumsSelected } = useAppState().rsb
+  const { selectedAlbums, areAllAlbumsSelected, scrollAction } = useAppState().rsb
 
   // TrackTable Logic
   const [tracklistVisible, setTrackListVisible] = useState<{ albumId: string | null }>({ albumId: null })
@@ -78,6 +78,7 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
     placeholderData: keepPreviousData,
   })
 
+  
   // TODO this is not pretty.
   const albumDataWithCheckbox = useMemo(
     () => albumData?.pages.flatMap(page => page?.data.map(album => ({
@@ -85,7 +86,7 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
       isChecked: !!selectedAlbums[album.id]
     }) as AlbumItemTableData)), [albumData?.pages, selectedAlbums]
   ) || []
-
+  
   // List of all track ids
   const allTrackIds = useMemo(() => {
     return albumDataWithCheckbox.reduce((tracks, album) => {
@@ -94,30 +95,17 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
     },[] as string[])
   }, [])
 
-  const totalDBRowCount = albumData?.pages.at(0)?.meta.totalCount
-  const totalFetched = albumData?.pages.at(0)?.meta.totalFetched
-
+  
 
   // HANDLERS //
   //called on scroll and possibly on mount to fetch more data as the user scrolls and reaches bottom of table
-  const fetchMoreOnBottomReached = React.useCallback(
-    (containerRefElement?: HTMLDivElement | null) => {
-      if (containerRefElement) {
-        const { scrollHeight, scrollTop, clientHeight } = containerRefElement
-        //once the user has scrolled within 500px of the bottom of the table, fetch more data if we can
-        if (
-          scrollHeight - scrollTop - clientHeight < 500
-          && !isFetching
-          && hasNextPage
-          // && totalFetched < totalDBRowCount
-        ) {
-          console.log('!CALL FETCH NEXT PAGE -> ');
-          // fetchNextPage()
-        }
-      }
-    },
-    [fetchNextPage, isFetching, totalFetched, totalDBRowCount]
-  )
+  const fetchMoreOnBottomReached = React.useCallback(() => {
+    const totalDBRowCount = albumData?.pages.at(0)?.meta.totalCount
+    const totalFetched = albumData?.pages.at(0)?.meta.totalFetched
+    if (!isFetching && hasNextPage && !!totalFetched && totalDBRowCount &&  totalFetched < totalDBRowCount){
+      fetchNextPage()
+    }
+  }, [fetchNextPage, isFetching, hasNextPage, albumData?.pages])
 
   const handleSelectAll = useCallback((checkboxValue?: boolean) => {
     const addAll = !!checkboxValue
@@ -184,7 +172,7 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     estimateSize: () => 96, //estimate row height for accurate scrollbar dragging
-    getScrollElement: () => tableAlbumsRef.current,
+    getScrollElement: () => tableAlbumsRef.current, //scrollable container
     //measure dynamic row height, except in firefox because it measures table border height incorrectly
     measureElement:
       typeof window !== 'undefined' &&
@@ -194,7 +182,6 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
     overscan: 5,
     gap: 16,
   })
-
 
   /**
    * Css variable useEffect. 
@@ -219,10 +206,11 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
   /**
    * a check on mount and after a fetch to see if the table is already scrolled to the bottom and immediately needs to fetch more data
    */
-  // useEffect(() => {
-  //   fetchMoreOnBottomReached(tableAlbumsRef.current)
-  //   // fetchMoreOnBottomReached(tableContainerRef.current)
-  // }, [fetchMoreOnBottomReached])
+  useEffect(() => {
+    if (scrollAction === 'fetch'){
+      fetchMoreOnBottomReached()
+    }
+  }, [fetchMoreOnBottomReached, scrollAction])
 
 
   if (isLoading) {
@@ -305,7 +293,6 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
                     setTracklist={setTracklist}
                     tracklistVisible={tracklistVisible}
                     tracklist={tracklist}
-                     // setIsAllSelected={setIsAllSelected}
                     virtualRow={virtualRow}
                     rowVirtualizer={rowVirtualizer}
                   />
@@ -371,7 +358,7 @@ const AlbumRowMemoized = React.memo(({
   return (
 
     <tr
-      key={row.id} 
+      key={'virtualrow' + row.id} 
       // <<<< || VIRTUALIZER PROPERTIES || >>>> //
       //needed for dynamic row height measurement
       data-index={virtualRow.index} 
