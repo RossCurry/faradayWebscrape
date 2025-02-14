@@ -1,7 +1,7 @@
 import { AccessorColumnDef } from "@tanstack/react-table"
 import styles from './columns.module.css'
 import { SpotifySearchResult } from "../../../../../../types/spotify.types"
-import { AlbumItemTableData } from "../../V_AlbumTable"
+import { AlbumItemTableData } from "../../Versions/virtualizedTableBasicWorking/AlbumTableWithVirtualization_Working"
 import React from "react"
 import { AddIcon, LibraryAddIcon, RemoveIcon } from "../../../../../../icons"
 import Tooltip from "../../../../../Shared/Tooltip/Tooltip"
