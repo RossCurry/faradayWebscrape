@@ -1,6 +1,7 @@
 
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
+  Cell,
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
@@ -16,9 +17,13 @@ import {
   albumAndArtist,
   category,
   price,
-  releaseDate} from './sections/columns/columns'
+  releaseDate,
+  getCheckbox
+} from './sections/columns/columns'
 import { SpotifySearchResult } from '../../../../types/spotify.types'
-import { useAppState } from '../../../../state/AppStateHooks'
+import { useAppDispatch, useAppState } from '../../../../state/AppStateHooks'
+import TrackTable, { TrackListData } from '../Tracks/TrackTable'
+import styles from './AlbumTableContainer.module.css'
 
 export type CheckedAlbumDict = {
   [K in SpotifySearchResult['id']]: boolean
@@ -32,7 +37,6 @@ export default function AlbumTableContainer({ data }: { data: SpotifySearchResul
   const { selectedAlbums } = useAppState().rsb
 
   const tableContainerRef = useRef<HTMLDivElement>(null);
-  const [sorting, setSorting] = useState<SortingState>([])
   const [parentElementHeight, setParentElementHeight] = useState<number>(800)
 
   const dataWithCheckbox = useMemo(() => data.map(album => {
@@ -41,6 +45,8 @@ export default function AlbumTableContainer({ data }: { data: SpotifySearchResul
       isChecked: !!selectedAlbums[album.id]
     }
   }), [selectedAlbums, data])
+
+
 
 
   useEffect(() => {
@@ -72,14 +78,66 @@ export default function AlbumTableContainer({ data }: { data: SpotifySearchResul
 
 
 function VirtualizedTable({ data, scrollableContainerRef }: { data: AlbumItemTableData[], scrollableContainerRef: React.RefObject<HTMLDivElement> }) {
+  const appDispatch = useAppDispatch()
+  const { areAllAlbumsSelected } = useAppState().rsb
+
+  const tableAlbumsRef = useRef<HTMLTableElement>(null)
+  const [tracklistNumTracks, setTracklistNumTracks] = useState<number>(0)
+
+  // List of all track ids
+  const allTrackIds = useMemo(() => {
+      return data.reduce((tracks, album) => {
+        const trackIds = album.trackList.map(track => track.id)
+        return tracks.concat(trackIds)
+      },[] as string[])
+    }, [data])
+
+  const handleSelectAll = useCallback((checkboxValue?: boolean) => {
+      const addAll = !!checkboxValue
+      // Modify playlist and checkbox selection
+      if (addAll){
+        // add all tracks to the custom playlist
+        appDispatch({type: 'addTracksToCustomPlaylist', trackIds: allTrackIds })
+        appDispatch({ type: 'selectAllAlbums' })
+      } else {
+        appDispatch({ type: 'resetCustomPlaylist' })
+        appDispatch({ type: 'deselectAllAlbums' })
+      }
+      // Toggle
+      appDispatch({ type: 'setAllAlbumsSelected', areSelected: !areAllAlbumsSelected })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    },[allTrackIds, areAllAlbumsSelected])
+  
+  const handleSelectCheckbox = useCallback((e: React.ChangeEvent<HTMLInputElement>, trackList: TrackListData[]) => {
+      // TODO not working triggering the onClick for open track rows
+      e.preventDefault()
+      e.stopPropagation()
+      const { target } = e;
+      const { value: albumId, checked } = (target as HTMLInputElement)
+      // controls input components for rows
+      if (checked) {
+        appDispatch({ type: 'addSelectedAlbum', albumId })
+        appDispatch({ type: 'addTracksToCustomPlaylist', trackIds: trackList.map(t => t.id) })
+      } else {
+        appDispatch({ type: 'deleteSelectedAlbum', albumId })
+        appDispatch({ type: 'deleteTracksFromCustomPlaylist', trackIds: trackList.map(t => t.id) })
+      }
+      // handle deselect bulk selection
+      if (!checked) appDispatch({ type: 'setAllAlbumsSelected', areSelected: false })
+      // We dont want appDispatch to be in the dependency array
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    },[])
+
+
   const columns = React.useMemo(
     () => [
+      getCheckbox({ areAllAlbumsSelected, handleSelectAll, handleSelectCheckbox }),
       image,
       albumAndArtist,
       category,
       releaseDate,
       price,
-    ], []
+    ], [areAllAlbumsSelected, handleSelectAll, handleSelectCheckbox]
   )
 
   // TABLE LOGIC //
@@ -90,13 +148,40 @@ function VirtualizedTable({ data, scrollableContainerRef }: { data: AlbumItemTab
     getSortedRowModel: getSortedRowModel(), //client-side sorting
   })
 
+  /**
+   * Css variable useEffect. 
+   * Sets num of tracks which sets height of tracklist
+   * calc(var(--trackListNumTracks) * var(--trackListRowHeight))
+   */
+  useEffect(() => {
+    let refCopy: HTMLTableElement | undefined;
+    if (tableAlbumsRef.current) {
+      // Copy for cleanup
+      refCopy = tableAlbumsRef.current
+      // Set a CSS variable when the component mounts
+      tableAlbumsRef.current.style.setProperty('--trackListNumTracks', `${tracklistNumTracks}`);
+
+    }
+    // Cleanup function to reset the variable if needed
+    return () => {
+      refCopy?.style.removeProperty('--trackListNumTracks');
+    };
+  }, [tracklistNumTracks]);
+
   return (
     <table
     id='table_albums'
     style={{ display: 'grid'}}
+    ref={tableAlbumsRef}
+    className={styles.table_albums}
   >
     <TableHeader table={table} />
-    <TableBody table={table} scrollableContainerRef={scrollableContainerRef}/>
+    <TableBody 
+      table={table} 
+      scrollableContainerRef={scrollableContainerRef}
+      tracklistNumTracks={tracklistNumTracks}
+      setTracklistNumTracks={setTracklistNumTracks}
+    />
   </table>
   )
 }
@@ -125,6 +210,7 @@ function TableHeader({ table }: { table: Table<AlbumItemTableData> }) {
                   display: 'flex',
                   width: header.getSize(),
                 }}
+                className={styles.albumTableHeader}
               >
                 {header.isPlaceholder ? null : (
                   <div
@@ -167,7 +253,22 @@ function TableHeader({ table }: { table: Table<AlbumItemTableData> }) {
  * The body contains the Virtualization logic
  * Important: Keep the row virtualizer in the lowest component possible to avoid unnecessary re-renders.
  */
-function TableBody ({ table, scrollableContainerRef }: { table: Table<AlbumItemTableData>, scrollableContainerRef: React.RefObject<HTMLDivElement> }){
+function TableBody ({ 
+  table, 
+  scrollableContainerRef,
+  tracklistNumTracks,
+  setTracklistNumTracks,
+}: { 
+  table: Table<AlbumItemTableData>, 
+  scrollableContainerRef: React.RefObject<HTMLDivElement> 
+  tracklistNumTracks: number
+  setTracklistNumTracks: React.Dispatch<React.SetStateAction<number>>
+}){
+
+  // TrackTable Logic
+  const [tracklistVisible, setTrackListVisible] = useState<{ albumId: string | null }>({ albumId: null })
+  const [tracklist, setTracklist] = useState<TrackListData[] | null>(null)
+
   // VIRTUALIZER LOGIC //
   // Important: Keep the row virtualizer in the lowest component possible to avoid unnecessary re-renders.
   const { rows } = table.getRowModel()
@@ -199,7 +300,17 @@ function TableBody ({ table, scrollableContainerRef }: { table: Table<AlbumItemT
           (virtualRow) => {
             const row = rows[virtualRow.index] as Row<AlbumItemTableData>
             return (
-              <TableBodyRow row={row} rowVirtualizer={rowVirtualizer} virtualRow={virtualRow} key={row.id}/>
+              <TableBodyRow 
+                key={row.id}
+                row={row} 
+                rowVirtualizer={rowVirtualizer} 
+                virtualRow={virtualRow}
+                tracklistVisible={tracklistVisible}
+                setTrackListVisible={setTrackListVisible}
+                setTracklistNumTracks={setTracklistNumTracks}
+                setTracklist={setTracklist}
+                tracklist={tracklist}
+              />
             )
           })
       }
@@ -207,32 +318,149 @@ function TableBody ({ table, scrollableContainerRef }: { table: Table<AlbumItemT
   )
 }
 
-function TableBodyRow({ row, rowVirtualizer, virtualRow }: { row: Row<AlbumItemTableData>, rowVirtualizer: Virtualizer<HTMLDivElement, Element>, virtualRow: VirtualItem }) {
+
+/**
+  * 
+  * Each row is actually going to be 2 rows
+  * 1. the tanStack data row (album)
+  * 2. the track info for the album
+  */
+function TableBodyRow({ 
+  row, 
+  rowVirtualizer, 
+  virtualRow,
+  setTracklist,
+  setTrackListVisible,
+  setTracklistNumTracks,
+  tracklist,
+  tracklistVisible
+}: { 
+  row: Row<AlbumItemTableData>, 
+  rowVirtualizer: Virtualizer<HTMLDivElement, Element>, 
+  virtualRow: VirtualItem 
+  setTracklist: React.Dispatch<React.SetStateAction<TrackListData[] | null>>,
+  setTracklistNumTracks: React.Dispatch<React.SetStateAction<number>>,
+  setTrackListVisible: React.Dispatch<React.SetStateAction<{albumId: string | null}>>,
+  tracklist: TrackListData[] | null,
+  tracklistVisible: { albumId: string | null },
+  // setIsAllSelected: React.Dispatch<React.SetStateAction<boolean>>
+}) {
+  const albumId = row.original.id
+  const isSelected = tracklistVisible.albumId === albumId;
+  
+  const handleOpenTrackList = (e: React.MouseEvent<HTMLTableCellElement, MouseEvent>) => {
+    const isCheckbox = 'id' in e.target && typeof e.target.id === 'string' && e.target.id.startsWith('album-checkbox-id')
+    e.stopPropagation()
+    if (isCheckbox) return
+
+    // Mapping imageUrl here but not isSelected so to re-render on selection
+    setTracklist(row.original.trackList.map(track => ({ 
+      ...track, 
+      imageUrl: row.original.image.url,
+    })))
+    // Sets the height for the dropdown
+    setTracklistNumTracks(row.original.totalTracks)
+    // Toggle
+    setTrackListVisible({ albumId: isSelected ? null : albumId })
+    // Scroll into view
+    if (!isSelected) {
+      e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' })
+    }
+  }
+
+   // TODO also should be true if any track of the album is selected
+   const isAddedToPlaylist = row.original.isChecked
   return (
-    <tr
-      data-index={virtualRow.index} //needed for dynamic row height measurement
-      ref={node => rowVirtualizer.measureElement(node)} //measure dynamic row height
-      key={row.id}
-      style={{
-        display: 'flex',
-        position: 'absolute',
-        transform: `translateY(${virtualRow.start}px)`, //this should always be a `style` as it changes on scroll
-        width: '100%',
-      }}
-    >
-      {row.getVisibleCells().map(cell => {
-        return (
-          <td
-            key={cell.id}
-            style={{
-              display: 'flex',
-              width: cell.column.getSize(),
-            }}
-          >
-            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-          </td>
-        )
-      })}
-    </tr>
+    <>
+      <tr
+        key={'virtualrow' + row.id} 
+        // <<<< || VIRTUALIZER PROPERTIES || >>>> //
+        data-index={virtualRow.index} //needed for dynamic row height measurement
+        ref={node => rowVirtualizer.measureElement(node)} //measure dynamic row height
+        style={{
+          display: 'flex',
+          position: 'absolute',
+          transform: `translateY(${virtualRow.start}px)`, //this should always be a `style` as it changes on scroll
+          width: '100%',
+        }}
+        className={`
+          ${styles.albumRows}
+          ${isSelected ? styles.albumRowsSelected : ''}
+          ${isAddedToPlaylist ? styles.albumRowsAddedToPlaylist : ''}
+          `
+        }
+      >
+        {row.getVisibleCells().map(cell => {
+          return (
+            <TableCell cell={cell} key={cell.id} handleOpenTrackList={handleOpenTrackList} />
+          )
+        })}
+      </tr>
+      <AlbumTrackListRow 
+        tracklist={tracklist}
+        albumId={albumId}
+        tracklistVisible={tracklistVisible}
+        row={row}
+      />
+    </>
   )
 }
+
+function TableCell({ cell, handleOpenTrackList }: { cell: Cell<AlbumItemTableData, unknown>, handleOpenTrackList: (e: React.MouseEvent<HTMLTableCellElement, MouseEvent>) => void }) {
+  return (
+    <td
+      key={cell.id}
+      style={{
+        display: 'flex',
+        width: cell.column.getSize(),
+      }}
+      onClick={
+        !cell.id.includes('checkbox')
+          ? handleOpenTrackList
+          : (e: React.MouseEvent<HTMLTableCellElement, MouseEvent>) => { e.stopPropagation() }
+      }
+    >
+      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+    </td>
+  )
+}
+
+type AlbumTrackListRowProps = {
+  albumId: string,
+  row: Row<AlbumItemTableData>,
+  tracklist: TrackListData[] | null,
+  tracklistVisible: { albumId: string | null },
+}
+const AlbumTrackListRow = React.memo(({
+  albumId,
+  row,
+  tracklist,
+  tracklistVisible,
+}: AlbumTrackListRowProps) => {
+  return (
+    <tr
+      // style={{display: 'contents'}}
+      className={styles.albumTrackList}
+    >
+      <td
+        colSpan={row.getVisibleCells().length}
+      >
+        <div
+          className={`
+            ${styles.albumTrackList}
+            ${tracklistVisible.albumId === albumId ? styles.albumTrackListOpen : ''}
+          `}
+        >
+          {tracklist &&
+            <TrackTable
+              data={tracklist}
+              key={row.original.id}
+              // deselect the album selection if selected
+              albumId={albumId}
+            />
+          }
+        </div>
+      </td>
+    </tr>
+  )
+})
