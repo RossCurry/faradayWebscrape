@@ -3,14 +3,14 @@ import AlbumTable from "../../Tables/Albums/V_AlbumTable"
 // import styles from './AlbumView.module.css'
 import sharedStyles from '../SharedStyles.module.css'
 
-export function AlbumView() {
+export function AlbumView({ scrollElement }: { scrollElement: React.RefObject<HTMLElement> }) {
   const { albumCollection } = useAppState()
   return (
     <section id='albumView' className={sharedStyles.albumCollection}>
       {/* TODO add statistic */}
       <HeaderAlbumView />
       {albumCollection &&
-        <AlbumTable data={albumCollection} />
+        <AlbumTable data={albumCollection} scrollElement={scrollElement} />
       }
     </section>
   )
