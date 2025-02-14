@@ -1,16 +1,17 @@
 import { useAppState } from "../../../../state/AppStateHooks"
-import AlbumTable from "../../Tables/Albums/V_AlbumTable"
+import AlbumTableContainer from "../../Tables/Albums/TableContainer"
+import AlbumTable from "../../Tables/Albums/Versions/virtualizedTableBasicWorking/AlbumTableWithVirtualization_Working"
 // import styles from './AlbumView.module.css'
 import sharedStyles from '../SharedStyles.module.css'
 
-export function AlbumView({ scrollElement }: { scrollElement: React.RefObject<HTMLElement> }) {
+export function AlbumView() {
   const { albumCollection } = useAppState()
   return (
     <section id='albumView' className={sharedStyles.albumCollection}>
       {/* TODO add statistic */}
       <HeaderAlbumView />
       {albumCollection &&
-        <AlbumTable data={albumCollection} scrollElement={scrollElement} />
+        <AlbumTableContainer data={albumCollection} />
       }
     </section>
   )

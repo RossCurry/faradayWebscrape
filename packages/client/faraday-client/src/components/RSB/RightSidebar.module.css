@@ -21,5 +21,6 @@
 .viewContainer {
   grid-area: view;
   min-height: 100%;
-  overflow-y: auto; /* Make only the main content scrollable */
+  overflow: hidden;  /* we dont want scroll here but in the Table component */
+  /* overflow-y: auto;  /* Make only the main content scrollable */
 }

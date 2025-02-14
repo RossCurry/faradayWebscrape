@@ -72,17 +72,11 @@ export async function createPlaylist(playlistTitle: string, playlistTracks: Spot
 
 
 export async function getAvailableAlbums(){
-  console.log('!getAvailableAlbums -> ');
-  return
   const getAlbumsPath = '/api/faraday/albums'
   const response = await fetch(baseUrlDev + getAlbumsPath)
   if (response.ok){
     const jsonRes: SpotifySearchResult[] = await response.json()
     return jsonRes
-    // const sortedOnFE = jsonRes.filter(album => !!album?.name)
-    // console.log('getAvailableAlbums: I no longer need sorting',jsonRes.length === sortedOnFE.length, jsonRes.length, sortedOnFE.length) 
-    // TODO this should be sorted on the BE
-    // setAlbumCollection(sortedOnFE)
   }
 }
 
