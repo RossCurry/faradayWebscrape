@@ -1,10 +1,11 @@
 import { AccessorColumnDef } from "@tanstack/react-table"
 import styles from './columns.module.css'
 import { SpotifySearchResult } from "../../../../../../types/spotify.types"
-import { AlbumItemTableData } from "../../AlbumTable"
+import { AlbumItemTableData } from "../../V_AlbumTable"
 import React from "react"
-import { AddIcon, LibraryAddIcon, PlaylistAddIcon, PlaylistRemoveIcon, RemoveIcon } from "../../../../../../icons"
+import { AddIcon, LibraryAddIcon, RemoveIcon } from "../../../../../../icons"
 import Tooltip from "../../../../../Shared/Tooltip/Tooltip"
+import { TrackListData } from "../../../Tracks/TrackTable"
 
 
 export const image: AccessorColumnDef<AlbumItemTableData, { url: SpotifySearchResult["image"]["url"], isSoldOut: SpotifySearchResult["isSoldOut"] }> = {
@@ -149,28 +150,40 @@ export const genre: AccessorColumnDef<AlbumItemTableData, SpotifySearchResult["g
 export const getCheckbox = ({
   areAllAlbumsSelected,
   handleSelectAll,
-  handleCheckbox,
+  handleSelectCheckbox,
 }: {
   areAllAlbumsSelected: boolean,
   handleSelectAll: (checked?: boolean) => void,
-  handleCheckbox: (e: React.ChangeEvent<HTMLInputElement>) => void,
+    handleSelectCheckbox: (e: React.ChangeEvent<HTMLInputElement>, trackList: TrackListData[]) => void,
 }) => {
-  const checkbox: AccessorColumnDef<AlbumItemTableData, { albumId: SpotifySearchResult['id'], isChecked: boolean }> = {
-    accessorFn: row => ({ albumId: row.id, isChecked: row.isChecked }),
+  const checkbox: AccessorColumnDef<AlbumItemTableData, { albumId: SpotifySearchResult['id'], isChecked: boolean, trackList: TrackListData[] }> = {
+    accessorFn: row => ({ albumId: row.id, isChecked: row.isChecked, trackList: row.trackList }),
     id: 'checkbox',
-    cell: info => {
-      const {albumId, isChecked} = info.getValue()
+    cell: function CheckboxCell(info) {
+      const inputRef = React.useRef<HTMLInputElement>(null)
+      const { albumId, isChecked, trackList } = info.getValue()
       const inputId = `album-checkbox-id-${albumId.toString()}`
+      const handleOnClick = (e: React.MouseEvent<HTMLDivElement | HTMLInputElement | SVGAElement>) => {
+        e.stopPropagation()
+        e.preventDefault()
+        console.log('!handleOnClick -> ', e.target);
+        console.log('!e.target instanceof HTMLInputElement || e.target instanceof SVGAElement -> ', e.target instanceof HTMLInputElement || e.target instanceof SVGAElement);
+        // inputRef.current?.click()
+        if (e.target instanceof HTMLInputElement || e.target instanceof SVGAElement) {
+          inputRef.current?.click()
+        }
+      }
       return (
-        <div className={styles.rowDataCheckboxWrapper}>
+        <div className={styles.rowDataCheckboxWrapper} onClick={handleOnClick}>
           <input
             className={styles.rowDataCheckbox}
             type="checkbox" 
             value={albumId} 
             checked={isChecked}
-            onChange={handleCheckbox}
+            onChange={(e) => handleSelectCheckbox(e, trackList)}
             id={inputId}
             style={{display: 'none'}}
+            ref={inputRef}
           />
           <label htmlFor={inputId} className={styles.rowDataCheckboxLabel}>
             {isChecked 

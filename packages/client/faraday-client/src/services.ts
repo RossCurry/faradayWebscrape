@@ -1,3 +1,4 @@
+import { ColumnSort, SortingState } from "@tanstack/react-table"
 import {  SpotifyPlaylist, SpotifySearchResult, SpotifyUserProfile } from "./types/spotify.types"
 
 const localConnectEndpoint = 'http://localhost:3000/api/spotify/connect'
@@ -71,7 +72,8 @@ export async function createPlaylist(playlistTitle: string, playlistTracks: Spot
 
 
 export async function getAvailableAlbums(){
-  console.log('!getAvailableAlbums -> ', getAvailableAlbums);
+  console.log('!getAvailableAlbums -> ');
+  return
   const getAlbumsPath = '/api/faraday/albums'
   const response = await fetch(baseUrlDev + getAlbumsPath)
   if (response.ok){
@@ -81,6 +83,52 @@ export async function getAvailableAlbums(){
     // console.log('getAvailableAlbums: I no longer need sorting',jsonRes.length === sortedOnFE.length, jsonRes.length, sortedOnFE.length) 
     // TODO this should be sorted on the BE
     // setAlbumCollection(sortedOnFE)
+  }
+}
+
+export type BatchResponse = Awaited<ReturnType<typeof getAlbumsInBatch>>
+export async function getAlbumsInBatch(offset: number, batchSize: number, cursor: number, sorting: SortingState){
+  console.log('!getAlbumsInBatch -> ', {offset, batchSize});
+  
+  const getAlbumsPath = '/api/faraday/albums/batch'
+  const url = new URL(baseUrlDev + getAlbumsPath)
+  url.searchParams.set('limit', batchSize.toString())
+  url.searchParams.set('offset', offset.toString())
+
+  
+  console.log('!getAlbumsInBatch URL -> ', url.toString());
+  const response = await fetch(url.toString())
+  if (response.ok){
+    const jsonRes: { 
+      data: SpotifySearchResult[], 
+      totalCount: number 
+    } = await response.json()
+    
+    if (sorting.length) {
+      // TODO implement sorting another request
+      // const sort = sorting[0] as ColumnSort
+      // const { id, desc } = sort as { id: keyof SpotifySearchResult; desc: boolean }
+      // dbData.sort((a, b) => {
+      //   if (desc) {
+      //     return a[id] < b[id] ? 1 : -1
+      //   }
+      //   return a[id] > b[id] ? 1 : -1
+      // })
+    }
+
+    const { data, totalCount } = jsonRes;
+    const totalFetched = offset + batchSize
+    const nextCursor = cursor + 1
+    
+    return {
+      data,
+      meta: {
+        totalCount,
+        totalFetched,
+        nextCursor,
+        prevCursor: Math.max(nextCursor - 1, 0),
+      }
+    }
   }
 }
 

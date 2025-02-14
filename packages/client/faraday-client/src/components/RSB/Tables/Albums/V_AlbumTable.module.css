@@ -1,0 +1,90 @@
+/* 
+table {}
+thead {}
+tbody {}
+tr {}
+td {} 
+*/
+
+/* reset margins and padding */
+.table_albums {
+  border-spacing: 0;
+  margin: 0 auto;
+  --trackListRowHeight: 4rem;
+  --trackListNumTracks: 3;
+  width: 100%;
+  /* width: calc(100% - 4rem); */
+  /* width: calc(100% - 2rem); */
+  padding: 0 1em;
+  /* position: relative; */
+  /* overflow: auto; */
+}
+
+.table_albums thead {
+  padding: var(--p-2);
+}
+.table_albums th.albumTableHeader {
+  text-align: left;
+  font-size: 1rem;
+  font-weight: 200;
+  background-color: var(--bg-dark-1);
+  position: sticky;
+  top: 2.5rem;
+  z-index: 50;
+  min-width: 5rem;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: var(--bg-dark-3);
+  padding-top: var(--p-2);
+  padding-bottom: var(--p-2);
+}
+
+.table_albums tr,
+.table_albums td
+{
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* Default Display Table Row - limits effective Css */
+.table_albums .albumRows {
+  background: inherit;
+  text-align: left;
+}
+.table_albums .albumRows:hover {
+  background:     var(--bg-dark-3);
+}
+
+/* TODO add some sort of visual indication when a row is selected */
+.table_albums .albumRows.albumRowsSelected {
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+  border-bottom-color: var(--bg-dark-4);
+  background-color: var(--grey-700);
+}
+.table_albums .albumRows.albumRowsAddedToPlaylist {
+  outline: 1px solid var(--yellow-4);
+  outline-offset: -1px;
+  background-color: rgba(229, 141, 26, 0.25);
+}
+
+/* Album Track list styles */
+/* Table row wrapper to match table row width */
+.table_albums .tableRowWidth {
+  display: table-row;
+  background-color: rgba(229, 141, 26, 0.25);
+}
+
+/* Container start state */
+.table_albums .albumTrackList {
+  background-color: var(--bg-dark);
+  max-height: 0;  /* Start at 0 height for the collapsed state */
+  overflow: hidden; /* Hide content when collapsed */
+  transition: max-height 500ms ease; /* Transition the height */
+}
+
+/* Container open state */
+.table_albums .albumTrackList.albumTrackListOpen {
+  max-height: calc(var(--trackListNumTracks) * var(--trackListRowHeight)); /* Allow it to expand */
+}
