@@ -164,6 +164,7 @@ export const getCheckbox = ({
       const { albumId, isChecked, trackList } = info.getValue()
       const inputId = `album-checkbox-id-${albumId.toString()}`
       const handleOnClick = (e: React.MouseEvent<HTMLDivElement | HTMLInputElement | SVGAElement>) => {
+        return
         e.stopPropagation()
         e.preventDefault()
         console.log('!handleOnClick -> ', e.target);

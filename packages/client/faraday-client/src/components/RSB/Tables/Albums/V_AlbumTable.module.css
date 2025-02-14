@@ -56,7 +56,7 @@ td {}
   background:     var(--bg-dark-3);
 }
 
-/* TODO add some sort of visual indication when a row is selected */
+
 .table_albums .albumRows.albumRowsSelected {
   border-bottom-style: solid;
   border-bottom-width: 1px;

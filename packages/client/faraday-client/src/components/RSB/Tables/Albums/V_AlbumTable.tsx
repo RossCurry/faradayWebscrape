@@ -1,9 +1,4 @@
 
-/**
- * Columnas
- * Artista, album title, disponible, genero, precio
- */
-
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   flexRender,
@@ -41,13 +36,10 @@ export type CheckedTrackDict = {
 }
 export type AlbumItemTableData = SpotifySearchResult & { isChecked: boolean }
 
-// TODO possible improvement use virtualizer from tanStack https://tanstack.com/virtual/latest
-
 export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
   const appDispatch = useAppDispatch()
   const { selectedAlbums, areAllAlbumsSelected } = useAppState().rsb
 
-  const tableContainerRef = React.useRef<HTMLDivElement>(null)
   // TrackTable Logic
   const [tracklistVisible, setTrackListVisible] = useState<{ albumId: string | null }>({ albumId: null })
   const tableAlbumsRef = useRef<HTMLTableElement>(null)
@@ -55,19 +47,77 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
   const [tracklist, setTracklist] = useState<TrackListData[] | null>(null)
   const [sorting, setSorting] = useState<SortingState>([])
   
-  // const dataWithCheckbox = useMemo(() => data.map(album => {
-  //   return {
-  //     ...album,
-  //     isChecked: !!selectedAlbums[album.id]
-  //   }
-  // }),[selectedAlbums, data])
 
+  // QUERY LOGIC - FETCHES DATA //
+  // Virtualization logic - react-query
+  const FETCH_SIZE = 30 // batch size
+  const {
+    data: albumData,
+    fetchNextPage,
+    isFetching,
+    isLoading,
+    hasNextPage
+  } = useInfiniteQuery<BatchResponse>({
+    queryKey: [
+      'albumData',
+      // sorting, //refetch when sorting changes
+    ],
+    queryFn: async ({ pageParam = 0 }) => {
+      const offset = (pageParam as number) * FETCH_SIZE
+      const cursor = pageParam as number
+      const fetchedData = await getAlbumsInBatch(offset, FETCH_SIZE, cursor, sorting)
+      return fetchedData
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, _pages): number | null => {
+      if (!lastPage || !lastPage.data.length) return null
+      const { nextCursor } = lastPage.meta
+      return Number(nextCursor) 
+    },
+    refetchOnWindowFocus: false,
+    placeholderData: keepPreviousData,
+  })
+
+  // TODO this is not pretty.
+  const albumDataWithCheckbox = useMemo(
+    () => albumData?.pages.flatMap(page => page?.data.map(album => ({
+      ...album,
+      isChecked: !!selectedAlbums[album.id]
+    }) as AlbumItemTableData)), [albumData?.pages, selectedAlbums]
+  ) || []
+
+  // List of all track ids
   const allTrackIds = useMemo(() => {
-    return data.reduce((tracks, album) => {
+    return albumDataWithCheckbox.reduce((tracks, album) => {
       const trackIds = album.trackList.map(track => track.id)
       return tracks.concat(trackIds)
     },[] as string[])
-  },[data])
+  }, [])
+
+  const totalDBRowCount = albumData?.pages.at(0)?.meta.totalCount
+  const totalFetched = albumData?.pages.at(0)?.meta.totalFetched
+
+
+  // HANDLERS //
+  //called on scroll and possibly on mount to fetch more data as the user scrolls and reaches bottom of table
+  const fetchMoreOnBottomReached = React.useCallback(
+    (containerRefElement?: HTMLDivElement | null) => {
+      if (containerRefElement) {
+        const { scrollHeight, scrollTop, clientHeight } = containerRefElement
+        //once the user has scrolled within 500px of the bottom of the table, fetch more data if we can
+        if (
+          scrollHeight - scrollTop - clientHeight < 500
+          && !isFetching
+          && hasNextPage
+          // && totalFetched < totalDBRowCount
+        ) {
+          console.log('!CALL FETCH NEXT PAGE -> ');
+          // fetchNextPage()
+        }
+      }
+    },
+    [fetchNextPage, isFetching, totalFetched, totalDBRowCount]
+  )
 
   const handleSelectAll = useCallback((checkboxValue?: boolean) => {
     const addAll = !!checkboxValue
@@ -105,6 +155,8 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   },[])
 
+  
+  // TABLE LOGIC //
   const columns = React.useMemo(
     () => [
       getCheckbox({ areAllAlbumsSelected, handleSelectAll, handleSelectCheckbox }),
@@ -116,81 +168,10 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
     ], [areAllAlbumsSelected, handleSelectAll, handleSelectCheckbox]
   )
 
-  // Virtualization logic - react-query
-  const fetchSize = 30 // batch size
-  const {
-    data: albumData,
-    fetchNextPage,
-    isFetching,
-    isLoading,
-    hasNextPage
-  } = useInfiniteQuery<BatchResponse>({
-    queryKey: [
-      'albumData',
-      // sorting, //refetch when sorting changes
-    ],
-    queryFn: async ({ pageParam = 0 }) => {
-      const offset = (pageParam as number) * fetchSize
-      const cursor = pageParam as number
-      const fetchedData = await getAlbumsInBatch(offset, fetchSize, cursor, sorting)
-      return fetchedData
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, _pages) => {
-      if (!lastPage || !lastPage.data.length) return null
-      const { nextCursor } = lastPage.meta
-      return nextCursor 
-    },
-    refetchOnWindowFocus: false,
-    placeholderData: keepPreviousData,
-  })
-
-  // TODO this is not pretty.
-  const albumDataWithCheckbox = useMemo(
-    () => albumData?.pages.flatMap(page => page?.data.map(album => ({
-      ...album,
-      isChecked: !!selectedAlbums[album.id]
-    }))), [albumData?.pages, selectedAlbums]
-  )
-
-  console.log('!albumData -> ', albumData);
-  console.log('!albumDataWithCheckbox -> ', albumDataWithCheckbox);
-  const totalDBRowCount = albumData?.pages.at(0)?.totalCount
-  const totalFetched = albumData?.pages.at(0)?.totalFetched
-
-
-  console.log('!component log,  -> ', { isFetching, hasNextPage });
-  // //called on scroll and possibly on mount to fetch more data as the user scrolls and reaches bottom of table
-  // const fetchMoreOnBottomReached = React.useCallback(
-  //   (containerRefElement?: HTMLDivElement | null) => {
-  //     console.log('!callback log,  -> ', { isFetching, hasNextPage });
-  //     if (containerRefElement) {
-  //       const { scrollHeight, scrollTop, clientHeight } = containerRefElement
-  //       //once the user has scrolled within 500px of the bottom of the table, fetch more data if we can
-  //       if (
-  //         scrollHeight - scrollTop - clientHeight < 500
-  //         && !isFetching
-  //         && hasNextPage
-  //         // && totalFetched < totalDBRowCount
-  //       ) {
-  //         console.log('!CALL FETCH NEXT PAGE -> ');
-  //         fetchNextPage()
-  //       }
-  //     }
-  //   },
-  //   [fetchNextPage, isFetching, totalFetched, totalDBRowCount]
-  // )
-
-  // TODO use a btn to control this
-  //a check on mount and after a fetch to see if the table is already scrolled to the bottom and immediately needs to fetch more data
-  // React.useEffect(() => {
-  //   fetchMoreOnBottomReached(tableAlbumsRef.current)
-  //   // fetchMoreOnBottomReached(tableContainerRef.current)
-  // }, [fetchMoreOnBottomReached])
-
+  // TABLE LOGIC //
   const table = useReactTable({
     columns,
-    data: albumDataWithCheckbox || [],
+    data: albumDataWithCheckbox,
     // debugTable: true,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(), //client-side sorting
@@ -198,13 +179,12 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
     state: { sorting },
   })
 
+  // VIRTUALIZER LOGIC //
   const { rows } = table.getRowModel()
-
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     estimateSize: () => 96, //estimate row height for accurate scrollbar dragging
     getScrollElement: () => tableAlbumsRef.current,
-    // getScrollElement: () => tableContainerRef.current,
     //measure dynamic row height, except in firefox because it measures table border height incorrectly
     measureElement:
       typeof window !== 'undefined' &&
@@ -212,6 +192,7 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
         ? element => element?.getBoundingClientRect().height
         : undefined,
     overscan: 5,
+    gap: 16,
   })
 
 
@@ -235,25 +216,32 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
     };
   }, [tracklistNumTracks]);
 
+  /**
+   * a check on mount and after a fetch to see if the table is already scrolled to the bottom and immediately needs to fetch more data
+   */
+  // useEffect(() => {
+  //   fetchMoreOnBottomReached(tableAlbumsRef.current)
+  //   // fetchMoreOnBottomReached(tableContainerRef.current)
+  // }, [fetchMoreOnBottomReached])
+
 
   if (isLoading) {
     return <>Loading...</>
   }
 
   return (
-    <div
-      ref={tableContainerRef}
-    // onScroll={e => fetchMoreOnBottomReached(e.currentTarget)}
-    // style={{
-    //   overflow: 'auto', //our scrollable table container
-    //   // position: 'relative', //needed for sticky header
-    //   height: '600px', //should be a fixed height
-    // }}
-    >
+    <>
       <table
         id='table_albums'
         className={styles.table_albums}
         ref={tableAlbumsRef}
+        // <<<< || VIRTUALIZER PROPERTIES || >>>> //
+        style={{
+          //our scrollable table container
+          overflow: 'auto', 
+          // They say we must have a fixed height - seems to work without
+          // height: '600px', 
+        }}
       >
         <thead>
           {table.getHeaderGroups().map(headerGroup => (
@@ -296,10 +284,12 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
           ))}
         </thead>
         <tbody
+          // <<<< || VIRTUALIZER PROPERTIES || >>>> //
           style={{
-            display: 'grid',
-            height: `${rowVirtualizer.getTotalSize()}px`, //tells scrollbar how big the table is
-            position: 'relative', //needed for absolute positioning of rows
+            //tells scrollbar how big the table is
+            height: `${rowVirtualizer.getTotalSize()}px`, 
+            //needed for absolute positioning of rows
+            position: 'relative', 
           }}
         >
           {
@@ -315,7 +305,7 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
                     setTracklist={setTracklist}
                     tracklistVisible={tracklistVisible}
                     tracklist={tracklist}
-        // setIsAllSelected={setIsAllSelected}
+                     // setIsAllSelected={setIsAllSelected}
                     virtualRow={virtualRow}
                     rowVirtualizer={rowVirtualizer}
                   />
@@ -324,8 +314,7 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
           }
         </tbody>
       </table>
-      <button onClick={() => fetchNextPage()}>NextFetch</button>
-    </div>
+    </>
   )
 }
 
@@ -377,57 +366,25 @@ const AlbumRowMemoized = React.memo(({
       e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' })
     }
   }
-
-  return (
-    <div
-      data-index={virtualRow.index} //needed for dynamic row height measurement
-      ref={node => rowVirtualizer.measureElement(node)} //measure dynamic row height
-      style={{
-        display: 'flex',
-        flexDirection: 'row',
-        position: 'absolute',
-        transform: `translateY(${virtualRow.start}px)`, //this should always be a `style` as it changes on scroll
-        width: '100%',
-      }}
-    >
-      <AlbumCell  
-        row={row}
-        // handleOnClick={handleOnClick}
-        handleOpenTrackList={handleOpenTrackList}
-        // handleCheckAlbum={handleCheckAlbum}
-        isSelected={isSelected}
-        virtualRow={virtualRow}
-        rowVirtualizer={rowVirtualizer}
-      />
-      <AlbumTrackListCell 
-        row={row}
-        tracklistVisible={tracklistVisible}
-        albumId={albumId}
-        tracklist={tracklist}
-      />
-    </div>
-  )
-})
-
-type AlbumCellProps = {
-  row: Row<AlbumItemTableData>,
-  handleOpenTrackList: (e: React.MouseEvent<HTMLTableCellElement, MouseEvent>) => void,
-  isSelected: boolean,
-  virtualRow: VirtualItem,
-  rowVirtualizer: Virtualizer<HTMLTableElement, Element>
-}
-const AlbumCell = ({ 
-  row,
-  handleOpenTrackList,
-  isSelected,
-  // virtualRow,
-  // rowVirtualizer
-}: AlbumCellProps) => {
-  // TODO also should be true if any track of the album is selected
+    // TODO also should be true if any track of the album is selected
   const isAddedToPlaylist = row.original.isChecked
   return (
-    <tr 
+
+    <tr
       key={row.id} 
+      // <<<< || VIRTUALIZER PROPERTIES || >>>> //
+      //needed for dynamic row height measurement
+      data-index={virtualRow.index} 
+      //measure dynamic row height
+      ref={node => rowVirtualizer.measureElement(node)} 
+      // Transform should always be a `style` as it changes on scroll
+      style={{
+        display: 'contents',
+        position: 'absolute',
+        transform: `translateY(${virtualRow.start}px)`,
+        backgroundColor: 'white', 
+      }}
+      // TODO figure out how to reapply these styles
       className={`
         ${styles.albumRows}
         ${isSelected ? styles.albumRowsSelected : ''}
@@ -435,68 +392,95 @@ const AlbumCell = ({
         `
       }
     >
-      {row.getVisibleCells().map(cell => {
-        return (
-          <td
-            key={cell.id}
-            onClick={
-              !cell.id.includes('checkbox')
-                ? handleOpenTrackList
-                : (e: React.MouseEvent<HTMLTableCellElement, MouseEvent>) => { e.stopPropagation() }
-            }
-            style={{
-              display: 'flex',
-              width: cell.column.getSize(),
-            }}
-          >
-            {flexRender(
-              cell.column.columnDef.cell,
-              cell.getContext()
-            )}
-          </td>
-        )
-      })}
+        <AlbumCells  
+          row={row}
+          handleOpenTrackList={handleOpenTrackList}
+        isSelected={isSelected}
+        virtualRow={virtualRow}
+        rowVirtualizer={rowVirtualizer}
+      />
+        <AlbumTrackListRow 
+        row={row}
+        tracklistVisible={tracklistVisible}
+        albumId={albumId}
+        tracklist={tracklist}
+      />
     </tr>
+  )
+})
+
+type AlbumCellsProps = {
+  row: Row<AlbumItemTableData>,
+  handleOpenTrackList: (e: React.MouseEvent<HTMLTableCellElement, MouseEvent>) => void,
+  isSelected: boolean,
+  virtualRow: VirtualItem,
+  rowVirtualizer: Virtualizer<HTMLTableElement, Element>
+}
+const AlbumCells = ({ 
+  row,
+  handleOpenTrackList,
+}: AlbumCellsProps) => {
+  return (
+
+      <>
+      {row.getVisibleCells().map((cell, i) => {
+          return (
+            <td
+              key={cell.id}
+              onClick={
+                !cell.id.includes('checkbox')
+                  ? handleOpenTrackList
+                  : (e: React.MouseEvent<HTMLTableCellElement, MouseEvent>) => { e.stopPropagation() }
+              }
+            >
+              {flexRender(
+                cell.column.columnDef.cell,
+                cell.getContext()
+              )}
+            </td>
+          )
+        })}
+      </>
   )
 }
 
-type AlbumTrackListCellProps = {
+type AlbumTrackListRowProps = {
   albumId: string,
   row: Row<AlbumItemTableData>,
   tracklist: TrackListData[] | null,
   tracklistVisible: { albumId: string | null },
 }
-const AlbumTrackListCell = React.memo(({
+const AlbumTrackListRow = React.memo(({
   albumId,
   row,
   tracklist,
   tracklistVisible,
-}: AlbumTrackListCellProps) => {
+}: AlbumTrackListRowProps) => {
   return (
-    <tr
-        className={`
-          ${styles.tableRowWidth}
-        `}
+    <div
+      className={`
+        ${styles.tableRowWidth}
+      `}
+    >
+      <td
+        colSpan={row.getVisibleCells().length}
       >
-        <td
-          colSpan={row.getVisibleCells().length}
+        <div
+          className={`
+            ${styles.albumTrackList}
+            ${tracklistVisible.albumId === albumId ? styles.albumTrackListOpen : ''}
+          `}
         >
-          <div
-            className={`
-              ${styles.albumTrackList}
-              ${tracklistVisible.albumId === albumId ? styles.albumTrackListOpen : ''}
-            `}
-          >
-            {tracklist && 
-              <TrackTable 
-                data={tracklist} 
-                key={row.original.id} 
-                // deselect the album selection if selected
-                albumId={albumId}
-              />
-            }
-          </div>
-        </td>
-      </tr>
+          {tracklist &&
+            <TrackTable
+              data={tracklist}
+              key={row.original.id}
+              // deselect the album selection if selected
+              albumId={albumId}
+            />
+          }
+        </div>
+      </td>
+    </div>
   )
 })

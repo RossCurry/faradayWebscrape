@@ -1,4 +1,4 @@
-import { ColumnSort, SortingState } from "@tanstack/react-table"
+import { SortingState } from "@tanstack/react-table"
 import {  SpotifyPlaylist, SpotifySearchResult, SpotifyUserProfile } from "./types/spotify.types"
 
 const localConnectEndpoint = 'http://localhost:3000/api/spotify/connect'
@@ -88,15 +88,12 @@ export async function getAvailableAlbums(){
 
 export type BatchResponse = Awaited<ReturnType<typeof getAlbumsInBatch>>
 export async function getAlbumsInBatch(offset: number, batchSize: number, cursor: number, sorting: SortingState){
-  console.log('!getAlbumsInBatch -> ', {offset, batchSize});
   
   const getAlbumsPath = '/api/faraday/albums/batch'
   const url = new URL(baseUrlDev + getAlbumsPath)
   url.searchParams.set('limit', batchSize.toString())
   url.searchParams.set('offset', offset.toString())
 
-  
-  console.log('!getAlbumsInBatch URL -> ', url.toString());
   const response = await fetch(url.toString())
   if (response.ok){
     const jsonRes: { 
@@ -118,6 +115,7 @@ export async function getAlbumsInBatch(offset: number, batchSize: number, cursor
 
     const { data, totalCount } = jsonRes;
     const totalFetched = offset + batchSize
+    // TODO improvement: get url from BE
     const nextCursor = cursor + 1
     
     return {
@@ -129,6 +127,10 @@ export async function getAlbumsInBatch(offset: number, batchSize: number, cursor
         prevCursor: Math.max(nextCursor - 1, 0),
       }
     }
+  }
+  return {
+    data: [],
+    meta: {}
   }
 }
 
