@@ -88,3 +88,28 @@ td {}
 .table_albums .albumTrackList.albumTrackListOpen {
   max-height: calc(var(--trackListNumTracks) * var(--trackListRowHeight)); /* Allow it to expand */
 }
+
+
+.trackTableContainer {
+  height: 0px;
+  overflow-y: scroll;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: var(--z-3);
+  /* background-color: var(--bg-dark-1); */
+  background-color: rgba(135, 96, 96, 0.543);
+  opacity: 0;
+  transition: 
+    transform 1s ease-in-out, 
+    opacity 1s ease-in-out,
+    height 1s ease-in-out;
+}
+/* .trackTableContainer.isClosed{
+  transform: translateY(0);
+} */
+.trackTableContainer.isOpen{
+  transform: translateY(0);
+  opacity: 1;
+}

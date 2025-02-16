@@ -24,6 +24,11 @@ type AppState = {
     areAllAlbumsSelected: boolean
     scrollAction: 'fetch' | null
     scrollElement: HTMLElement | null
+    openAlbumInfo: {
+      trackList: TrackListData[] | null,
+      albumId: string | null
+    }
+    tableContainerHeight: number
   },
   player: {
     audioUrl: string | null,
@@ -49,6 +54,11 @@ const initialAppState = {
     areAllAlbumsSelected: false,
     scrollAction: null,
     scrollElement: null,
+    openAlbumInfo: {
+      trackList: null,
+      albumId: null
+    },
+    tableContainerHeight: 0
   },
   player: {
     audioUrl: null,
@@ -76,6 +86,8 @@ type ActionTypes =
 | { type: 'setAllAlbumsSelected', areSelected: boolean }
 | { type: 'scrollAction', scrollAction: 'fetch' | null }
 | { type: 'setScrollElement', scrollElement: HTMLElement | null }
+| { type: 'setOpenAlbumInfo', openAlbumInfo: AppState['rsb']['openAlbumInfo'] }
+| { type: 'setTableContainerHeight', tableContainerHeight: AppState['rsb']['tableContainerHeight'] }
 // Main album collection
 | { type: 'setAlbumCollection', albums: SpotifySearchResult[] | null }
 // Player
@@ -213,6 +225,7 @@ function stateReducer(state: AppState, action: ActionTypes) {
         rsb: { ...state.rsb, areAllAlbumsSelected: areSelected } 
       }; 
     }
+    // TODO might need to remove these
     case 'scrollAction': {
       const { scrollAction } = action;
       return { 
@@ -226,6 +239,21 @@ function stateReducer(state: AppState, action: ActionTypes) {
         ...state,
         rsb: { ...state.rsb, scrollElement } 
       }; 
+    }
+    case 'setOpenAlbumInfo': {
+      const { openAlbumInfo } = action;
+      console.log('!REDUCER openAlbumInfo -> ', openAlbumInfo);
+      return { 
+        ...state,
+        rsb: { ...state.rsb, openAlbumInfo }
+      };
+    }
+    case 'setTableContainerHeight': {
+      const { tableContainerHeight } = action;
+      return { 
+        ...state,
+        rsb: { ...state.rsb, tableContainerHeight }
+      };
     }
     // Album Reducers
     case 'setAlbumCollection': {
