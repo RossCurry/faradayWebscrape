@@ -24,6 +24,9 @@ import { SpotifySearchResult } from '../../../../types/spotify.types'
 import { useAppDispatch, useAppState } from '../../../../state/AppStateHooks'
 import TrackTable, { TrackListData } from '../Tracks/TrackTable'
 import styles from './AlbumTableContainer.module.css'
+import IconButton from '../../../Shared/IconButton/IconButton'
+import { ArrowBackIcon } from '../../../../icons'
+import { msToTime } from '../../../../utils/msToTime'
 
 export type CheckedAlbumDict = {
   [K in SpotifySearchResult['id']]: boolean
@@ -35,14 +38,12 @@ export type AlbumItemTableData = SpotifySearchResult & { isChecked: boolean }
 
 export default function AlbumTableContainer({ data }: { data: SpotifySearchResult[] }) {
   
-  const dispatch = useAppDispatch()
-  const { selectedAlbums, openAlbumInfo } = useAppState().rsb
+  const { selectedAlbums, openAlbumInfo, showTrackTableOverlay } = useAppState().rsb
+  const { trackList, albumId } = openAlbumInfo
 
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const [parentElementHeight, setParentElementHeight] = useState<number|null>(null)
-
-  const { trackList, albumId } = openAlbumInfo
-  const showTrackTable = !!albumId && trackList?.length
+  const canShowTrackTable = !!albumId && !!trackList?.length
 
   const dataWithCheckbox = useMemo(() => data.map(album => {
     return {
@@ -52,13 +53,10 @@ export default function AlbumTableContainer({ data }: { data: SpotifySearchResul
   }), [selectedAlbums, data])
 
 
-
-
   useEffect(() => {
     if(tableContainerRef.current){
       const div = tableContainerRef.current
       const parentElement = div.parentElement
-      console.log('!parentElement -> ', parentElement);
       const parentElHeight = parentElement?.getBoundingClientRect().height
       if (parentElHeight) {
         console.log('!useEffect parentElHeight -> ', parentElHeight);
@@ -88,25 +86,17 @@ export default function AlbumTableContainer({ data }: { data: SpotifySearchResul
         height: `${parentElementHeight}px`,
       }}
     >
-      {!showTrackTable && <VirtualizedTable data={dataWithCheckbox} scrollableContainerRef={tableContainerRef} />}
-      <section
-        id='trackTableContainer'
-        className={`
-          ${styles.trackTableContainer}
-          ${showTrackTable ? styles.isOpen : styles.isClosed}
-        `}
-        style={{
-          height: `${parentElementHeight}px`,
-        }}
-      >
-        {showTrackTable && 
-          <TrackTable
-            data={trackList}
-            // deselect the album selection if selected
-            albumId={albumId}
-          />
-        }
-      </section>
+      {!showTrackTableOverlay && 
+        <VirtualizedTable 
+          data={dataWithCheckbox} 
+          scrollableContainerRef={tableContainerRef} 
+        />
+      }
+      {canShowTrackTable && 
+        <TrackTableOverlay
+          parentElementHeight={parentElementHeight || 0}
+        />
+      }
     </div>
     </>
   )
@@ -184,25 +174,6 @@ function VirtualizedTable({ data, scrollableContainerRef }: { data: AlbumItemTab
     getSortedRowModel: getSortedRowModel(), //client-side sorting
   })
 
-  /**
-   * Css variable useEffect. 
-   * Sets num of tracks which sets height of tracklist
-   * calc(var(--trackListNumTracks) * var(--trackListRowHeight))
-   */
-  useEffect(() => {
-    let refCopy: HTMLTableElement | undefined;
-    if (tableAlbumsRef.current) {
-      // Copy for cleanup
-      refCopy = tableAlbumsRef.current
-      // Set a CSS variable when the component mounts
-      tableAlbumsRef.current.style.setProperty('--trackListNumTracks', `${tracklistNumTracks}`);
-
-    }
-    // Cleanup function to reset the variable if needed
-    return () => {
-      refCopy?.style.removeProperty('--trackListNumTracks');
-    };
-  }, [tracklistNumTracks]);
   
   return (
     <table
@@ -368,12 +339,14 @@ function TableBodyRow({
   // TrackTable Logic
   const [tracklistVisible, setTrackListVisible] = useState<{ albumId: string | null }>({ albumId: null })
   const [tracklist, setTracklist] = useState<TrackListData[] | null>(null)
-
+  
   const dispatch = useAppDispatch()
   const albumId = row.original.id
   const isSelected = tracklistVisible.albumId === albumId;
   
+  // TODO clean up the logic here
   const handleOpenTrackList = (e: React.MouseEvent<HTMLTableCellElement, MouseEvent>) => {
+    console.log('!handleOpenTrackList -> ', { albumId, isSelected });
     const isCheckbox = 'id' in e.target && typeof e.target.id === 'string' && e.target.id.startsWith('album-checkbox-id')
     e.stopPropagation()
     if (isCheckbox) return
@@ -388,8 +361,10 @@ function TableBodyRow({
       type: 'setOpenAlbumInfo', openAlbumInfo: {
         albumId: isSelected ? null : albumId,
         trackList: mappedTracklist,
+        albumInfo: isSelected ? null : row.original
       }
     })
+    dispatch({ type: 'setShowTrackTableOverlay', showTrackTableOverlay: true })
 
     // TODO setTrackList in the state
     // Sets the height for the dropdown
@@ -430,12 +405,6 @@ function TableBodyRow({
           )
         })}
       </tr>
-      {/* <AlbumTrackListRow
-        tracklist={tracklist}
-        albumId={albumId}
-        tracklistVisible={tracklistVisible}
-        row={row}
-      /> */}
     </>
   )
 }
@@ -459,45 +428,74 @@ function TableCell({ cell, handleOpenTrackList }: { cell: Cell<AlbumItemTableDat
   )
 }
 
-type AlbumTrackListRowProps = {
-  albumId: string,
-  row: Row<AlbumItemTableData>,
-  tracklist: TrackListData[] | null,
-  tracklistVisible: { albumId: string | null },
-}
-const AlbumTrackListRow = React.memo(({
-  albumId,
-  // row,
-  tracklist,
-  tracklistVisible,
-}: AlbumTrackListRowProps) => {
 
+function TrackTableOverlay({ 
+  parentElementHeight, 
+}: { 
+  parentElementHeight: number, 
+}) {
+  const { showTrackTableOverlay, openAlbumInfo } = useAppState().rsb
+  const { albumInfo, trackList, albumId } = openAlbumInfo
+  const dispatch = useAppDispatch()
+  const imageUrl = trackList?.at(0)?.imageUrl
+  const { hours, minutes, seconds } = useMemo(() => {
+    const totalDurationMs = trackList?.reduce((duration, info) => info.duration_ms + duration, 0)
+    return msToTime(totalDurationMs || 0)
+  }, [trackList])
+  const durationString = `${hours > 0 ? `${hours}h` : ''} ${minutes}m ${seconds}s`
+  const handleCloseOverlay = () => {
+    dispatch({ 
+      type: 'setShowTrackTableOverlay', 
+      showTrackTableOverlay: false 
+    })
+  }
+  const renderTrackList = !!albumId && !!trackList && trackList?.length > 0
   return (
-    <tr
-      // style={{display: 'contents'}}
-      className={styles.albumTrackList}
-    >
-      <td
-        colSpan={6}
-        // colSpan={row.getVisibleCells().length}
+    <section
+    id='trackTableContainerAlbumView'
+    className={`
+      ${styles.trackTableContainer}
+      ${showTrackTableOverlay ? styles.isOpen : styles.isClosed}
+      `}
+      style={{
+        height: `${parentElementHeight}px`,
+      }}
       >
+      <header
+        className={styles.trackTableHeader}
+      >
+        <IconButton
+          handleOnClick={handleCloseOverlay}
+          Icon={ArrowBackIcon}
+          text={''}
+          className={styles.closeOverlayButton}
+        />
         <div
-          className={`
-            ${styles.albumTrackList}
-            ${tracklistVisible.albumId === albumId ? styles.albumTrackListOpen : ''}
-          `}
+          className={styles.trackTableHeaderImg}
+          style={{
+              backgroundImage: `url(${imageUrl})`
+            }}
+        />
+        <div
+          className={styles.trackTableHeaderAlbumInfo}
         >
-          {tracklist &&
-            <TrackTable
-              data={tracklist}
-            // key={row.original.id}
-            key={albumId}
-              // deselect the album selection if selected
-              albumId={albumId}
-            />
-          }
+          <h2>{albumInfo?.name}</h2>
+          <h3>{albumInfo?.artists.join(', ')}</h3>
         </div>
-      </td>
-    </tr>
+        <div
+          className={styles.trackTableHeaderAlbumStats}
+        >
+          <p>{trackList?.length} track{trackList?.length === 1 ? '' : 's'}</p>
+          <p>{durationString}</p>
+        </div>
+      </header>
+      {renderTrackList && 
+        <TrackTable
+          data={trackList}
+          // deselect the album selection if selected
+          albumId={albumId}
+        />
+      }
+    </section>
   )
-})
+}
