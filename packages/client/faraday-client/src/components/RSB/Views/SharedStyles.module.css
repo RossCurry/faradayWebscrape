@@ -1,9 +1,22 @@
 .albumCollection {
   background-color: var(--bg-dark-1);
   min-height: 100%;
-  display: flex;
-  flex-direction: column;
+  /* display: flex;
+  flex-direction: column; */
   /* overflow: scroll */
+}
+
+.viewContainerLayout{
+  /* sub grid */
+  display: grid;
+  grid-template-areas:
+    "header"
+    "table"
+    "footer"
+  ;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr auto;
+  height: 100%;
 }
 
 .viewHeaderShared > *,
@@ -14,16 +27,20 @@
 
 /* Shared with headerPlaylistView */
 .viewHeaderShared{
+  grid-area: header;
   padding: .5em 1em;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   gap: .5em;
   border-bottom: 1px solid #252525;
-  position: sticky;
-  top: 0; /* Stick to the top of the container */
-  z-index: 100;
   background-color: var(--bg-dark-2);
+}
+
+.viewTableContainer{
+  grid-area: table;
+  /* Keeps width in check */
+  overflow: auto;
 }
 
 .viewHeaderShared p {

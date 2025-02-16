@@ -12,7 +12,7 @@ export const HeaderPlaylistView = () => {
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
   
   return (
-    <div className={sharedStyles.viewHeaderShared}>
+    <header className={sharedStyles.viewHeaderShared}>
         <ResetPlaylistButton />
       <TracksCollectionStats />
       <fieldset>
@@ -22,7 +22,7 @@ export const HeaderPlaylistView = () => {
         setOpenDialog={setIsDialogOpen}
         isDialogOpen={isDialogOpen}
       />
-    </div>
+    </header>
   )
 }
 

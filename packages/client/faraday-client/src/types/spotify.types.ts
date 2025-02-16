@@ -653,7 +653,7 @@ export type SearchResponse =
       id: string,
       name: string,
       preview_url: string,
-      track_number: 1,
+      track_number: number,
       type: string,
       uri: string,
     }[]

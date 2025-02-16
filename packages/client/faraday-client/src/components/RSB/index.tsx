@@ -22,7 +22,7 @@ export default function RightSidebar() {
       >
         <Views />
       </main>
-      <Footer />
+      {/* <Footer /> */}
     </div>
   )
 }

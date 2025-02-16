@@ -2,8 +2,9 @@
   grid-area: right-sidebar;
   overflow-y: scroll;
   position: relative;
-  height: 100%;
   /* sub grid */
+  /*
+  height: 100%;
   display: grid;
   grid-template-areas:
     "view"
@@ -12,15 +13,37 @@
   grid-template-columns: 1fr;
   grid-template-rows: 2fr auto;
   height: 100%;
-  overflow: hidden; /* Prevent overall scrolling */
+  */
+  /* Prevent overall scrolling */
+  overflow: hidden;
 
   border-radius: var(--r-2);
   background-color: var(--bg-dark-2);
 }
 
+
 .viewContainer {
-  grid-area: view;
+  /* VERY IMPORTANT to FILL Grid section */
+  height: 100%;
+  /* grid-area: view; */
+  /*
   min-height: 100%;
-  overflow: hidden;  /* we dont want scroll here but in the Table component */
+  overflow: hidden;  
+  */
+  /* we dont want scroll here but in the Table component */
   /* overflow-y: auto;  /* Make only the main content scrollable */
-}
+  /* sub grid */
+  /*
+  display: grid;
+  grid-template-areas:
+    "header"
+    "table"
+    "footer"
+  ;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 2fr 1fr;
+  height: 100%;
+  overflow: hidden; 
+  */
+  /* Prevent overall scrolling */
+} 
