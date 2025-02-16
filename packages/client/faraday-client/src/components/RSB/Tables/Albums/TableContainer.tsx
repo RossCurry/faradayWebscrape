@@ -72,7 +72,6 @@ export default function AlbumTableContainer({ data }: { data: SpotifySearchResul
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [parentElementHeight])
 
-  // if (!parentElementHeight) return null
   
   return (
     <>
@@ -89,16 +88,15 @@ export default function AlbumTableContainer({ data }: { data: SpotifySearchResul
         height: `${parentElementHeight}px`,
       }}
     >
-      <VirtualizedTable data={dataWithCheckbox} scrollableContainerRef={tableContainerRef} />
-    </div>
-      {/* <section 
+      {!showTrackTable && <VirtualizedTable data={dataWithCheckbox} scrollableContainerRef={tableContainerRef} />}
+      <section
+        id='trackTableContainer'
         className={`
           ${styles.trackTableContainer}
-          ${true ? styles.isOpen : styles.isClosed}
+          ${showTrackTable ? styles.isOpen : styles.isClosed}
         `}
-        style={{ 
-          maxHeight: showTrackTable ? `${parentElementHeight}px` : 0,
-          minHeight: showTrackTable ? `${parentElementHeight}px` : 0
+        style={{
+          height: `${parentElementHeight}px`,
         }}
       >
         {showTrackTable && 
@@ -108,7 +106,8 @@ export default function AlbumTableContainer({ data }: { data: SpotifySearchResul
             albumId={albumId}
           />
         }
-      </section> */}
+      </section>
+    </div>
     </>
   )
 }
