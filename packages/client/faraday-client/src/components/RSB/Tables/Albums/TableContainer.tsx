@@ -12,6 +12,8 @@ import {
 } from '@tanstack/react-table'
 // Virtualization
 import { useVirtualizer, VirtualItem, Virtualizer } from '@tanstack/react-virtual'
+// Infinite Scroll Query
+import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query'
 import {
   image,
   albumAndArtist,
@@ -27,6 +29,7 @@ import styles from './AlbumTableContainer.module.css'
 import IconButton from '../../../Shared/IconButton/IconButton'
 import { ArrowBackIcon } from '../../../../icons'
 import { msToTime } from '../../../../utils/msToTime'
+import { BatchResponse, getAlbumsInBatch } from '../../../../services'
 
 export type CheckedAlbumDict = {
   [K in SpotifySearchResult['id']]: boolean
@@ -45,12 +48,69 @@ export default function AlbumTableContainer({ data }: { data: SpotifySearchResul
   const [parentElementHeight, setParentElementHeight] = useState<number|null>(null)
   const canShowTrackTable = !!albumId && !!trackList?.length
 
-  const dataWithCheckbox = useMemo(() => data.map(album => {
-    return {
+  // const dataWithCheckbox = useMemo(() => data.map(album => {
+  //   return {
+  //     ...album,
+  //     isChecked: !!selectedAlbums[album.id]
+  //   }
+  // }), [selectedAlbums, data])
+
+  // QUERY LOGIC - FETCHES DATA //
+  // Virtualization logic - react-query
+  const FETCH_SIZE = 30 // batch size
+  const {
+    data: albumData,
+    fetchNextPage,
+    isFetching,
+    isLoading,
+    hasNextPage
+  } = useInfiniteQuery<BatchResponse>({
+    queryKey: [
+      'albumData',
+      // sorting, //refetch when sorting changes
+    ],
+    queryFn: async ({ pageParam = 0 }) => {
+      const offset = (pageParam as number) * FETCH_SIZE
+      const cursor = pageParam as number
+      const fetchedData = await getAlbumsInBatch(offset, FETCH_SIZE, cursor)
+      return fetchedData
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, _pages): number | null => {
+      if (!lastPage || !lastPage.data.length) return null
+      const { nextCursor } = lastPage.meta
+      return Number(nextCursor) 
+    },
+    refetchOnWindowFocus: false,
+    placeholderData: keepPreviousData,
+  })
+  
+  // TODO this is not pretty.
+  const albumDataWithCheckbox = useMemo(
+    () => albumData?.pages.flatMap(page => page?.data.map(album => ({
       ...album,
       isChecked: !!selectedAlbums[album.id]
-    }
-  }), [selectedAlbums, data])
+    }) as AlbumItemTableData)), [albumData?.pages, selectedAlbums]
+  ) || []
+
+// HANDLERS //
+//called on scroll and possibly on mount to fetch more data as the user scrolls and reaches bottom of table
+const fetchMoreOnBottomReached = React.useCallback((scrollEvent: React.UIEvent<HTMLDivElement, UIEvent>) => {
+  const { scrollHeight, scrollTop, clientHeight } = scrollEvent.currentTarget
+  const isCloseToEndOfViewport = scrollHeight - scrollTop - clientHeight < 500
+  const totalDBRowCount = albumData?.pages.at(0)?.meta.totalCount
+  const totalFetched = albumData?.pages.at(0)?.meta.totalFetched
+  if (
+    !isFetching && 
+    hasNextPage && 
+    !!totalFetched && 
+    totalDBRowCount &&  
+    totalFetched < totalDBRowCount &&
+    isCloseToEndOfViewport
+  ){
+    fetchNextPage()
+  }
+}, [fetchNextPage, isFetching, hasNextPage, albumData?.pages])
 
 
   useEffect(() => {
@@ -85,10 +145,12 @@ export default function AlbumTableContainer({ data }: { data: SpotifySearchResul
         // We must have a fixed height
         height: `${parentElementHeight}px`,
       }}
+      // <<<< || QUERY INFINITE SCROLL || >>>> //
+      onScroll={fetchMoreOnBottomReached}
     >
       {!showTrackTableOverlay && 
         <VirtualizedTable 
-          data={dataWithCheckbox} 
+          data={albumDataWithCheckbox} 
           scrollableContainerRef={tableContainerRef} 
         />
       }
