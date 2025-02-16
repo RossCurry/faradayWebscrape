@@ -8,6 +8,7 @@ import { CheckedAlbumDict, CheckedTrackDict } from '../components/RSB/Tables/Alb
 import { CONSTANTS, Views } from './constants';
 import { SpotifySearchResult, SpotifyUserProfile } from '../types/spotify.types';
 import { TrackListData } from '../components/RSB/Tables/Tracks/TrackTable';
+import { AlbumItemTableData } from '../components/RSB/Tables/Albums/TableContainer';
 
 type AppState = {
   albumCollection: SpotifySearchResult[] | null,
@@ -24,9 +25,11 @@ type AppState = {
     areAllAlbumsSelected: boolean
     scrollAction: 'fetch' | null
     scrollElement: HTMLElement | null
+    showTrackTableOverlay: boolean
     openAlbumInfo: {
       trackList: TrackListData[] | null,
       albumId: string | null
+      albumInfo: AlbumItemTableData | null
     }
     tableContainerHeight: number
   },
@@ -54,9 +57,11 @@ const initialAppState = {
     areAllAlbumsSelected: false,
     scrollAction: null,
     scrollElement: null,
+    showTrackTableOverlay: false,
     openAlbumInfo: {
       trackList: null,
-      albumId: null
+      albumId: null,
+      albumInfo: null
     },
     tableContainerHeight: 0
   },
@@ -88,6 +93,7 @@ type ActionTypes =
 | { type: 'setScrollElement', scrollElement: HTMLElement | null }
 | { type: 'setOpenAlbumInfo', openAlbumInfo: AppState['rsb']['openAlbumInfo'] }
 | { type: 'setTableContainerHeight', tableContainerHeight: AppState['rsb']['tableContainerHeight'] }
+| { type: 'setShowTrackTableOverlay', showTrackTableOverlay: AppState['rsb']['showTrackTableOverlay'] }
 // Main album collection
 | { type: 'setAlbumCollection', albums: SpotifySearchResult[] | null }
 // Player
@@ -253,6 +259,13 @@ function stateReducer(state: AppState, action: ActionTypes) {
       return { 
         ...state,
         rsb: { ...state.rsb, tableContainerHeight }
+      };
+    }
+    case 'setShowTrackTableOverlay': {
+      const { showTrackTableOverlay } = action;
+      return { 
+        ...state,
+        rsb: { ...state.rsb, showTrackTableOverlay }
       };
     }
     // Album Reducers
