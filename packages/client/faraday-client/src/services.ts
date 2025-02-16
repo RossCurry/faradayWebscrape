@@ -81,7 +81,7 @@ export async function getAvailableAlbums(){
 }
 
 export type BatchResponse = Awaited<ReturnType<typeof getAlbumsInBatch>>
-export async function getAlbumsInBatch(offset: number, batchSize: number, cursor: number, sorting: SortingState){
+export async function getAlbumsInBatch(offset: number, batchSize: number, cursor: number, sorting?: SortingState){
   
   const getAlbumsPath = '/api/faraday/albums/batch'
   const url = new URL(baseUrlDev + getAlbumsPath)
@@ -95,7 +95,7 @@ export async function getAlbumsInBatch(offset: number, batchSize: number, cursor
       totalCount: number 
     } = await response.json()
     
-    if (sorting.length) {
+    if (sorting?.length) {
       // TODO implement sorting another request
       // const sort = sorting[0] as ColumnSort
       // const { id, desc } = sort as { id: keyof SpotifySearchResult; desc: boolean }
