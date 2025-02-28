@@ -6,6 +6,7 @@ import { AppContext, AppState } from "../../router.js";
 // env variables
 import dotenv from 'dotenv';
 import { parseAuthHeaderFromContext } from '#middlewares/utils/parseAuthHeader.js';
+import { getErrorResponse } from '#utils/utils.js';
 dotenv.config();
 
 const userRouter = new Router<AppState, AppContext>()
@@ -20,11 +21,9 @@ userRouter.get("/api/user/verify",
       const userInfo = ctx.services.token.getUserInfo();
       console.log('!userInfo -> ', userInfo);
       if (!userInfo) throw new Error('No userInfo found from token service')
-      const JWT_SECRET = process.env.JWT_SECRET;
-      if (!JWT_SECRET) throw new Error('No ENV vars found for secret')
-      console.log('!JWT_SECRET -> ', JWT_SECRET);
+
       // Create JWT token
-      const token = jwt.sign(userInfo, JWT_SECRET, { expiresIn: '4h' });
+      const token = ctx.services.token.createJwtToken(userInfo);
       console.log('!token -> ', token);
       ctx.body = {
         token,
@@ -39,16 +38,13 @@ userRouter.get("/api/user/verify",
 )
 
 userRouter.get("/api/user",
-  // mw.spotify.getCurrentUserFromDB, // get user info
   async (ctx: AppContext) => {
     try {
       const token = parseAuthHeaderFromContext(ctx)
       if (!token) throw new Error('No JWT token found in request')
-      const JWT_SECRET = process.env.JWT_SECRET;
-      if (!JWT_SECRET) throw new Error('No ENV vars found for secret')
-      console.log('!JWT_SECRET -> ', JWT_SECRET);
-      // Create JWT token
-      const verifiedToken = jwt.verify(token, JWT_SECRET);
+
+        // Verify JWT request  token
+      const verifiedToken = ctx.services.token.verifyJwtToken(token);
       if (typeof verifiedToken === 'string') throw new Error('Typeof verified token does not match')
       console.log('!verifiedToken -> ', verifiedToken);
       // TODO update when we use mongo userinfo with _id
@@ -59,6 +55,9 @@ userRouter.get("/api/user",
       ctx.status = 200
     } catch (error) {
       console.error('!error verify JWT -> ', error);
+      if (error instanceof Error){
+        ctx.body = { error: getErrorResponse(error)}
+      }
       ctx.status = 500
     }
   }

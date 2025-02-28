@@ -32,6 +32,7 @@ type AppState = {
       albumInfo: AlbumItemTableData | null
     }
     tableContainerHeight: number
+    selectedAlbumRowRef: React.RefObject<HTMLTableElement>
   },
   player: {
     audioUrl: string | null,
@@ -63,7 +64,8 @@ const initialAppState = {
       albumId: null,
       albumInfo: null
     },
-    tableContainerHeight: 0
+    tableContainerHeight: 0,
+    selectedAlbumRowRef: null
   },
   player: {
     audioUrl: null,
@@ -94,6 +96,7 @@ type ActionTypes =
 | { type: 'setOpenAlbumInfo', openAlbumInfo: AppState['rsb']['openAlbumInfo'] }
 | { type: 'setTableContainerHeight', tableContainerHeight: AppState['rsb']['tableContainerHeight'] }
 | { type: 'setShowTrackTableOverlay', showTrackTableOverlay: AppState['rsb']['showTrackTableOverlay'] }
+| { type: 'setSelectedAlbumRowRef', selectedAlbumRowRef: AppState['rsb']['selectedAlbumRowRef'] }
 // Main album collection
 | { type: 'setAlbumCollection', albums: SpotifySearchResult[] | null }
 // Player
@@ -266,6 +269,13 @@ function stateReducer(state: AppState, action: ActionTypes) {
       return { 
         ...state,
         rsb: { ...state.rsb, showTrackTableOverlay }
+      };
+    }
+    case 'setSelectedAlbumRowRef': {
+      const { selectedAlbumRowRef } = action;
+      return { 
+        ...state,
+        rsb: { ...state.rsb, selectedAlbumRowRef }
       };
     }
     // Album Reducers

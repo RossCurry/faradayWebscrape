@@ -469,7 +469,9 @@ class MongoDb {
     if (!this.db) throw new Error('No DB found')
     const userCollection = this.db.collection('users')
     if (!userCollection) throw new Error('No userCollection found')
-    const user = await userCollection.findOne({ uri: uri })
+    // Remove accesstoken info
+    const projection = { endpoint: 0 }
+    const user = await userCollection.findOne({ uri: uri }, { projection })
     console.log('!getUserInfoById user -> ', user);
     return user
   }
