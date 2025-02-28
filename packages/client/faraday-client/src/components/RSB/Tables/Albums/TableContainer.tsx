@@ -170,7 +170,9 @@ function VirtualizedTable({ data, scrollableContainerRef }: { data: AlbumItemTab
   const { areAllAlbumsSelected } = useAppState().rsb
 
   const tableAlbumsRef = useRef<HTMLTableElement>(null)
+  const selectedAlbumRowRef = useRef<HTMLTableElement>(null)
   const [tracklistNumTracks, setTracklistNumTracks] = useState<number>(0)
+  
 
   // List of all track ids
   const allTrackIds = useMemo(() => {
@@ -236,6 +238,11 @@ function VirtualizedTable({ data, scrollableContainerRef }: { data: AlbumItemTab
     getSortedRowModel: getSortedRowModel(), //client-side sorting
   })
 
+  // We can use this refs .current in the context when we select a row.
+  useEffect(() => {
+    appDispatch({ type: 'setSelectedAlbumRowRef', selectedAlbumRowRef })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   
   return (
     <table
@@ -398,6 +405,7 @@ function TableBodyRow({
     virtualRow: VirtualItem 
     setTracklistNumTracks: React.Dispatch<React.SetStateAction<number>>,
 }) {
+  const { selectedAlbumRowRef } = useAppState().rsb
   // TrackTable Logic
   const [tracklistVisible, setTrackListVisible] = useState<{ albumId: string | null }>({ albumId: null })
   const [tracklist, setTracklist] = useState<TrackListData[] | null>(null)
@@ -423,20 +431,21 @@ function TableBodyRow({
       type: 'setOpenAlbumInfo', openAlbumInfo: {
         albumId: isSelected ? null : albumId,
         trackList: mappedTracklist,
-        albumInfo: isSelected ? null : row.original
+        albumInfo: isSelected ? null : row.original,
       }
     })
     dispatch({ type: 'setShowTrackTableOverlay', showTrackTableOverlay: true })
 
     // TODO setTrackList in the state
-    // Sets the height for the dropdown
-    setTracklistNumTracks(row.original.totalTracks)
+    // // Sets the height for the dropdown
+    // setTracklistNumTracks(row.original.totalTracks)
     // Toggle
     setTrackListVisible({ albumId: isSelected ? null : albumId })
-    // Scroll into view
-    if (!isSelected) {
-      e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' })
-    }
+    // // Scroll into view
+    // if (!isSelected) {
+    //   e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' })
+    // }
+    selectedAlbumRowRef.current = e.target
   }
 
    // TODO also should be true if any track of the album is selected

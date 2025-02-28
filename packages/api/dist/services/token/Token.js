@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+import jwt from 'jsonwebtoken';
+dotenv.config();
 export default class Token {
     accessToken;
     expiresIn;
@@ -43,5 +46,20 @@ export default class Token {
             refresh_token: this.refresh_token,
             scope: this.scope,
         };
+    }
+    createJwtToken(userInfo) {
+        const JWT_SECRET = process.env.JWT_SECRET;
+        if (!JWT_SECRET)
+            throw new Error('No ENV vars found for secret');
+        const spotifyTokenExpiration = '1h';
+        const token = jwt.sign(userInfo, JWT_SECRET, { expiresIn: spotifyTokenExpiration });
+        return token;
+    }
+    verifyJwtToken(token) {
+        const JWT_SECRET = process.env.JWT_SECRET;
+        if (!JWT_SECRET)
+            throw new Error('No ENV vars found for secret');
+        const verifiedToken = jwt.verify(token, JWT_SECRET);
+        return verifiedToken;
     }
 }

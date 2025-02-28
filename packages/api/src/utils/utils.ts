@@ -22,3 +22,14 @@ export function getBatches<T extends any>(array: T[], batchNum: number) {
   return batches
 }
 
+type ErrorResponse = { [K in keyof Error]: unknown }
+export function getErrorResponse(error: Error){
+  const errorRepsonse = Object.assign({}, error) as ErrorResponse
+  const properties = Object.getOwnPropertyNames(error); 
+
+  for (const key of properties) {
+    errorRepsonse[key as keyof Error] = error[key as keyof Error];
+  }
+
+  return errorRepsonse;
+}

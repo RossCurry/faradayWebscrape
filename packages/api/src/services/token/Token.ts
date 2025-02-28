@@ -1,4 +1,7 @@
+import dotenv from 'dotenv';
+import jwt from 'jsonwebtoken';
 import { SpotifyUserProfile } from "../../controllers/spotify/spotify.types.js"
+dotenv.config();
 
 export type AuthToken = {
   access_token: string | null,
@@ -55,5 +58,22 @@ export default class Token {
       refresh_token: this.refresh_token,
       scope: this.scope,
     }
+  }
+  createJwtToken(userInfo: SpotifyUserProfile){
+    const JWT_SECRET = process.env.JWT_SECRET;
+    if (!JWT_SECRET) throw new Error('No ENV vars found for secret')
+    const spotifyTokenExpiration = '1h'
+    const token = jwt.sign(
+      userInfo, 
+      JWT_SECRET, 
+      { expiresIn: spotifyTokenExpiration }
+    );
+    return token
+  }
+  verifyJwtToken(token: string){
+    const JWT_SECRET = process.env.JWT_SECRET;
+    if (!JWT_SECRET) throw new Error('No ENV vars found for secret')
+    const verifiedToken = jwt.verify(token, JWT_SECRET);
+    return verifiedToken;
   }
 }

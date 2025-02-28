@@ -17,10 +17,7 @@ export default async function getCurrentUserFromMongo(ctx: AppContext, next: App
     }
     if (!token) throw new Error('No JWT token found in request')
     
-    const JWT_SECRET = process.env.JWT_SECRET;
-    if (!JWT_SECRET) throw new Error('No ENV vars found for secret')
-    
-    const verifiedToken = jwt.verify(token, JWT_SECRET);
+    const verifiedToken = ctx.services.token.verifyJwtToken(token);
     if (typeof verifiedToken === 'string') throw new Error('Typeof verified token does not match')
     console.log('!verifiedToken -> ', verifiedToken);
     const user = await ctx.services.mongo.getUserInfoById(verifiedToken.uri)

@@ -22,3 +22,11 @@ export function getBatches(array, batchNum) {
     recurse(array);
     return batches;
 }
+export function getErrorResponse(error) {
+    const errorRepsonse = Object.assign({}, error);
+    const properties = Object.getOwnPropertyNames(error);
+    for (const key of properties) {
+        errorRepsonse[key] = error[key];
+    }
+    return errorRepsonse;
+}
