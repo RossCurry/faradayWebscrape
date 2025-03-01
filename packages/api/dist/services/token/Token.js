@@ -47,6 +47,10 @@ export default class Token {
             scope: this.scope,
         };
     }
+    decodeJwtToken(token) {
+        const decoded = jwt.decode(token, { complete: true });
+        return decoded;
+    }
     createJwtToken(userInfo) {
         const JWT_SECRET = process.env.JWT_SECRET;
         if (!JWT_SECRET)
