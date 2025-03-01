@@ -22,7 +22,7 @@ import { JwtPayload } from 'jsonwebtoken'
 export interface AppState extends Application.DefaultState {
   accessToken?: string | null,
   verifiedToken?: JwtPayload | string | null,
-  updatedToken?: JwtPayload | string | null,
+  updatedJwtToken?: string | null,
   playlist?: SpotifyPlaylist,
   playlistInfo?: Record<string, any>,
   data: {

@@ -1,5 +1,6 @@
 import { SortingState } from "@tanstack/react-table"
 import {  SpotifyPlaylist, SpotifySearchResult, SpotifyUserProfile } from "./types/spotify.types"
+import { getTokenFromAuthorizationHeader } from "./utils/decodeJwt"
 
 const localConnectEndpoint = 'http://localhost:3000/api/spotify/connect'
 // TODO change endpoint to suit purpose
@@ -144,20 +145,32 @@ export async function getUserInfoWithToken(token: string) {
   const tokenPath = `/api/user`
   const url = new URL(baseUrlDev + tokenPath)
 
-  console.log('!getUserInfoWithToken -> ', !!token);
-  const response = await fetch(url.toString(),{
-    headers: {
-      Authorization: `Bearer ${token}`
+  try {
+    console.log('!getUserInfoWithToken -> ', !!token);
+    const body = await fetch(url.toString(),{
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+    
+    console.log('!body -> ', body);
+    if (body.ok) {
+      console.log('!headers -> ', { ...body.headers });
+      const updatedJwt = body.headers.get('X-Updated-Jwt');
+      const authHeader = body.headers.get('Authorization');
+      const authHeader2 = body.headers.get('authorization');
+      console.log('!updatedJwt, authHeader -> ', updatedJwt, authHeader, authHeader2);
+      // Handling token expiration on the BE
+      const response: { userInfo: SpotifyUserProfile | null } = await body.json()
+      if (authHeader){
+        const token = getTokenFromAuthorizationHeader(authHeader)
+        console.log('!setting JWT token -> ', token);
+        window.localStorage.setItem('jwt', token)
+      }
+      return response.userInfo || null
     }
-  })
-
-  if (response.ok) {
-    // Handling token expiration on the BE
-    const jsonRes: { userInfo: SpotifyUserProfile | null, token: string } = await response.json()
-    if (jsonRes.token) {
-      window.localStorage.setItem('jwt', jsonRes.token)
-    }
-    return jsonRes.userInfo || null
+  } catch (error) {
+    console.error('Some error getting the user data', error)
   }
 
   return null

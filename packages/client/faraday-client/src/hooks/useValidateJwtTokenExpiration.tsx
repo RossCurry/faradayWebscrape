@@ -13,3 +13,9 @@ export default function useValidateJwtTokenExpiration() {
     }
   })
 }
+
+// Not really a hook
+export function useIsJwtTokenExpired() {
+  const token = window.localStorage.getItem('jwt')
+  return token ? getIsJwtExpired(token) : true;
+}

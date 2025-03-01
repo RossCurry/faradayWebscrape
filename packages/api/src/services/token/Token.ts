@@ -59,6 +59,10 @@ export default class Token {
       scope: this.scope,
     }
   }
+  decodeJwtToken(token: string){
+    const decoded = jwt.decode(token, { complete: true });
+    return decoded;
+  }
   createJwtToken(userInfo: SpotifyUserProfile){
     const JWT_SECRET = process.env.JWT_SECRET;
     if (!JWT_SECRET) throw new Error('No ENV vars found for secret')
