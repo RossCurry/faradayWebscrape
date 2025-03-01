@@ -11,6 +11,7 @@ export type AuthToken = {
   scope?: string
 }
 
+// TODO re-use this class to deal with JWT token and use state for current user and mongo for user data retrival
 export default class Token {
   accessToken: string | null
   expiresIn: number | null
@@ -69,7 +70,9 @@ export default class Token {
 
     // The previous token user info will have expiration info
     const { iat, exp, ...user } = userInfo as any;
-    const spotifyTokenExpiration = '20s'
+    
+    // Actual spotify token last an hour
+    const spotifyTokenExpiration = '55m'
     
     const token = jwt.sign(
       user, 

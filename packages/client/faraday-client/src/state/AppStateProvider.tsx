@@ -32,7 +32,7 @@ type AppState = {
       albumInfo: AlbumItemTableData | null
     }
     tableContainerHeight: number
-    selectedAlbumRowRef: React.RefObject<HTMLTableElement>
+    selectedAlbumRowRef: React.RefObject<HTMLTableElement> | null
   },
   player: {
     audioUrl: string | null,

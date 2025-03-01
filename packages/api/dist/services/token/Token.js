@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 dotenv.config();
+// TODO re-use this class to deal with JWT token and use state for current user and mongo for user data retrival
 export default class Token {
     accessToken;
     expiresIn;
@@ -57,7 +58,8 @@ export default class Token {
             throw new Error('No ENV vars found for secret');
         // The previous token user info will have expiration info
         const { iat, exp, ...user } = userInfo;
-        const spotifyTokenExpiration = '20s';
+        // Actual spotify token last an hour
+        const spotifyTokenExpiration = '55m';
         const token = jwt.sign(user, JWT_SECRET, { expiresIn: spotifyTokenExpiration });
         console.log('!createJwtToken -> created');
         return token;

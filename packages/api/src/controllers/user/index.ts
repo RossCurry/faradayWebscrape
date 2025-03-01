@@ -1,18 +1,17 @@
-import Application, { Next } from 'koa';
 import Router from 'koa-router';
 import mw from '#middlewares/index.js'
-import jwt, { Jwt, JwtPayload } from 'jsonwebtoken';
 import { AppContext, AppState } from "../../router.js";
 // env variables
 import dotenv from 'dotenv';
-import { parseAuthHeaderFromContext, updateJwtTokenInHeader } from '#middlewares/utils/parseAuthHeader.js';
-import { getErrorResponse } from '#utils/utils.js';
-import { SpotifyUserProfile } from '#controllers/spotify/spotify.types.js';
+import { updateJwtTokenInHeader } from '#middlewares/utils/parseAuthHeader.js';
 dotenv.config();
 
 const userRouter = new Router<AppState, AppContext>()
 
 
+/**
+ * We use this route the first time we login to Spotify API
+ */
 userRouter.get("/api/user/verify",
   mw.auth.getPCKECredentialsToken, // use code from url
   mw.spotify.getCurrentUserFromSpotify, // get user info
@@ -20,18 +19,17 @@ userRouter.get("/api/user/verify",
     try {
       // TODO use mongo info and send _id
       const userInfo = ctx.services.token.getUserInfo();
-      console.log('!userInfo -> ', userInfo);
       if (!userInfo) throw new Error('No userInfo found from token service')
 
       // Create JWT token
       const token = ctx.services.token.createJwtToken(userInfo);
+      // Update the response Headers
       updateJwtTokenInHeader(ctx, token)
 
       ctx.body = { userInfo }
       ctx.status = 200
     } catch (error) {
-      console.error('!error signin JWT and return userInfo-> ', error);
-      ctx.status = 500
+      ctx.throw([500, error])
     }
   }
 )
