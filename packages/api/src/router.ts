@@ -15,10 +15,14 @@ import faradayRouter from '#controllers/faraday/index.js'
 import spotifyRouter from '#controllers/spotify/index.js'
 import userRouter from '#controllers/user/index.js'
 import { SpotifySearchProjection } from '#middlewares/spotify/getAlbumInfo.js'
+import SpotifyApi from '#services/spotify/index.js'
+import { JwtPayload } from 'jsonwebtoken'
 
 
 export interface AppState extends Application.DefaultState {
   accessToken?: string | null,
+  verifiedToken?: JwtPayload | string | null,
+  updatedToken?: JwtPayload | string | null,
   playlist?: SpotifyPlaylist,
   playlistInfo?: Record<string, any>,
   data: {
@@ -41,27 +45,31 @@ export interface AppContext extends Application.ExtendableContext {
     codeVerifier: CodeVerifier;
     mongo: MongoDB;
     token: Token;
+    spotify: SpotifyApi,
   }
 } 
 
 type AppParamContext = Application.ParameterizedContext<AppState>
 // type App = Application<AppState, AppContext>
 
+// initialize services
 const services = {
   codeVerifier: new CodeVerifier(),
   mongo: new MongoDB(),
-  token: new Token()
+  token: new Token(),
+  spotify: new SpotifyApi(),
 }
 
 const router = new Router<AppState, AppContext>()
 
 
-// initialize services
+// Add services to the Context
 router.use(
   (async (ctx, next) => {
     console.log('!initialize services -> ');
     ctx.state.data = {}
     ctx.services = services
+    console.log('!initialized services -> ', Object.keys(ctx.services));
    await next()
   })
 )

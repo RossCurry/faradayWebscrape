@@ -62,18 +62,45 @@ export default class Token {
   createJwtToken(userInfo: SpotifyUserProfile){
     const JWT_SECRET = process.env.JWT_SECRET;
     if (!JWT_SECRET) throw new Error('No ENV vars found for secret')
-    const spotifyTokenExpiration = '1h'
+
+    // The previous token user info will have expiration info
+    const { iat, exp, ...user } = userInfo as any;
+    const spotifyTokenExpiration = '20s'
+    
     const token = jwt.sign(
-      userInfo, 
+      user, 
       JWT_SECRET, 
       { expiresIn: spotifyTokenExpiration }
     );
+    console.log('!createJwtToken -> created');
     return token
   }
   verifyJwtToken(token: string){
     const JWT_SECRET = process.env.JWT_SECRET;
     if (!JWT_SECRET) throw new Error('No ENV vars found for secret')
-    const verifiedToken = jwt.verify(token, JWT_SECRET);
-    return verifiedToken;
+    try {
+      const verifiedToken = jwt.verify(token, JWT_SECRET);
+      return verifiedToken;
+    } catch (error) {
+      console.error('!verifiedToken error -> ', error);
+      throw error
+    }
+  }
+  isJwtTokenExpired(token: string){
+    const JWT_SECRET = process.env.JWT_SECRET;
+    if (!JWT_SECRET) throw new Error('No ENV vars found for secret')
+    try {
+      const verifiedToken = jwt.verify(token, JWT_SECRET);
+      return verifiedToken;
+    } catch (error) {
+      if (error instanceof Error){
+        const expiredName = 'TokenExpiredError'
+        const expiredMessage = 'jwt expired'
+        const isExpired = error.name === expiredName || error.message === expiredMessage;
+        console.error('!isJwtTokenExpired isExpired -> ', isExpired);
+        if (isExpired) return isExpired;
+      }
+      throw error
+    }
   }
 }

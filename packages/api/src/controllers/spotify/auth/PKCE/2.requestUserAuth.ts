@@ -1,13 +1,12 @@
 // const redirectUrl = 'http://localhost:3000/callback'
-
+import dotenv from 'dotenv'
 import { REDIRECTS } from "../authRedirects.constants.js";
-
-// TODO remove this
-const client_id = 'e58f73ecd6fb4a228d3142621adfd1ab'
-const tokenEndpoint = "https://accounts.spotify.com/api/token";
+dotenv.config()
 
 export async function getTokenPCKE(code: string, codeChallenge: string) {
-  // const code_verifier = localStorage.getItem('code_verifier');
+  const tokenEndpoint = "https://accounts.spotify.com/api/token";
+  const client_id = process.env.CLIENT_ID
+  if (!client_id) throw new Error('Missing env variable: CLIENT_ID');
 
   const response = await fetch(tokenEndpoint, {
     method: 'POST',

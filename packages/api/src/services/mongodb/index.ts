@@ -275,7 +275,6 @@ class MongoDb {
     }
   }
 
-  
   async getFaradayData(){
     console.log('!getFaradayData -> ');
     const albumCollection = this.db?.collection('albums')
@@ -328,7 +327,8 @@ class MongoDb {
   
   async setUserInfo(userInfo: SpotifyUserProfile, tokenInfo: Omit<AuthToken, 'token_type'>){
     console.log('!setUserInfo -> ', userInfo);
-    if('error' in userInfo) throw new Error(`No userInfo set: Error in userInfo. userInfo: ${userInfo}`)
+    if('error' in userInfo) throw new Error('No userInfo set: Error in userInfo.', { cause: userInfo })
+    if('error' in tokenInfo) throw new Error('No tokenInfo set: Error in tokenInfo', { cause: tokenInfo })
     
     const usersCollection = this.db?.collection('users')
     if (!usersCollection) throw new Error('No users collecion found')
@@ -337,36 +337,56 @@ class MongoDb {
   
     // Update token info
     if (user) {
-
-      const modifiedFields = Object.keys(userInfo).reduce((newFields, field) => {
-        const newValue = (userInfo as any)[field]
-        const currentValue = user[field]
-
-        if (JSON.stringify(newValue) !== JSON.stringify(currentValue)){
-          newFields[field] = (userInfo as any)[field]
-        }
-
-        return newFields
-      }, {} as any)
-
-      console.log(`setUserInfo Updating user endpoint info: ${tokenInfo}`)
-      const insertedDocs = await usersCollection.updateOne(
-        { _id: user._id},
-        { $set: {
-          ...modifiedFields,
-          endpoint: {
-            ...tokenInfo,
-            setAt: new Date(),
-          },
-          updatedDate: new Date()
-        }}
-      )
-      return insertedDocs
+      return this.#updateUserInfo(user, userInfo, tokenInfo)
     }
     
     // Insert new user
+    return this.#setNewUserInfo(userInfo, tokenInfo)
+  }
+
+  async #updateUserInfo(user: mongoDB.WithId<mongoDB.BSON.Document>, userInfo: SpotifyUserProfile, tokenInfo: Omit<AuthToken, 'token_type'>){
+    console.log('!updateUserInfo -> ', userInfo);
+    const usersCollection = this.db?.collection('users')
+    if (!usersCollection) throw new Error('No users collecion found')
+    
+    const modifiedFields = Object.keys(userInfo).reduce((newFields, field) => {
+      const newValue = (userInfo as any)[field]
+      const currentValue = user[field]
+
+      // Quick n dirty nested check
+      const sameValue = JSON.stringify(newValue) !== JSON.stringify(currentValue)
+
+      // No change - move on to next key
+      if (sameValue) return newFields;
+
+      // Update new value
+      return { 
+        ...newFields,
+        [field]: userInfo[field as keyof SpotifyUserProfile]
+      }
+    }, {} as { [K in keyof SpotifyUserProfile]: SpotifyUserProfile[keyof SpotifyUserProfile] })
+
+    console.log(`setUserInfo Updating user endpoint info:`, tokenInfo)
+    const insertedDoc = await usersCollection.updateOne(
+      { _id: user._id},
+      { $set: {
+        ...modifiedFields,
+        endpoint: {
+          ...tokenInfo,
+          setAt: new Date(),
+        },
+        updatedDate: new Date()
+      }}
+    )
+    return insertedDoc
+  }
+
+  async #setNewUserInfo(userInfo: SpotifyUserProfile, tokenInfo: Omit<AuthToken, 'token_type'>){
+    const usersCollection = this.db?.collection('users')
+    if (!usersCollection) throw new Error('No users collecion found')
+    // Insert new user
     console.log(`setUserInfo Inserting new user: ${userInfo}`)
-    const insertedDocs = await usersCollection.insertOne({ 
+    const insertedDoc = await usersCollection.insertOne({ 
       ...userInfo, 
       endpoint: {
         ...tokenInfo,
@@ -375,8 +395,7 @@ class MongoDb {
       createdDate: new Date(),
       playlists: []
     })
-   
-    return insertedDocs
+    return insertedDoc
   }
 
   async setUsersPlaylist(userUri: SpotifyUserProfile["uri"], spotifyPlaylist: SpotifyPlaylist){
@@ -474,6 +493,19 @@ class MongoDb {
     const user = await userCollection.findOne({ uri: uri }, { projection })
     console.log('!getUserInfoById user -> ', user);
     return user
+  }
+  
+  async getUsersRefreshToken(userInfo: SpotifyUserProfile){
+    if (!this.db) throw new Error('No DB found')
+    const userCollection = this.db.collection('users')
+    if (!userCollection) throw new Error('No userCollection found')
+    // Get accesstoken info
+    const projection = { endpoint: 1 }
+    const userEndpointInfo = await userCollection.findOne(
+      { uri: userInfo.uri }, { projection }
+    ) as  { _id: ObjectId, endpoint: AuthToken } | null
+    console.log('!getUsersRefreshToken userEndpointInfo -> ', userEndpointInfo);
+    return userEndpointInfo?.endpoint?.refresh_token
   }
 }
 
