@@ -153,21 +153,17 @@ export async function getUserInfoWithToken(token: string) {
       }
     })
     
-    console.log('!body -> ', body);
     if (body.ok) {
-      console.log('!headers -> ', { ...body.headers });
-      const updatedJwt = body.headers.get('X-Updated-Jwt');
+      // token will be refreshed on BE
       const authHeader = body.headers.get('Authorization');
-      const authHeader2 = body.headers.get('authorization');
-      console.log('!updatedJwt, authHeader -> ', updatedJwt, authHeader, authHeader2);
-      // Handling token expiration on the BE
       const response: { userInfo: SpotifyUserProfile | null } = await body.json()
+      
       if (authHeader){
         const token = getTokenFromAuthorizationHeader(authHeader)
-        console.log('!setting JWT token -> ', token);
         window.localStorage.setItem('jwt', token)
       }
-      return response.userInfo || null
+
+      return response.userInfo
     }
   } catch (error) {
     console.error('Some error getting the user data', error)

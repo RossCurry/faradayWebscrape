@@ -1,4 +1,4 @@
-import mongoDB, { Db, ObjectId } from 'mongodb'
+import mongoDB, { Db, ObjectId, WithId } from 'mongodb'
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -495,7 +495,7 @@ class MongoDb {
     return user
   }
   
-  async getUsersRefreshToken(userInfo: SpotifyUserProfile){
+  async getUsersRefreshToken(userInfo: SpotifyUserProfile | WithId<SpotifyUserProfile>){
     if (!this.db) throw new Error('No DB found')
     const userCollection = this.db.collection('users')
     if (!userCollection) throw new Error('No userCollection found')
@@ -506,6 +506,19 @@ class MongoDb {
     ) as  { _id: ObjectId, endpoint: AuthToken } | null
     console.log('!getUsersRefreshToken userEndpointInfo -> ', userEndpointInfo);
     return userEndpointInfo?.endpoint?.refresh_token
+  }
+
+  async getUsersAccessToken(userInfo: SpotifyUserProfile | WithId<SpotifyUserProfile>){
+    if (!this.db) throw new Error('No DB found')
+    const userCollection = this.db.collection('users')
+    if (!userCollection) throw new Error('No userCollection found')
+    // Get accesstoken info
+    const projection = { endpoint: 1 }
+    const userEndpointInfo = await userCollection.findOne(
+      { uri: userInfo.uri }, { projection }
+    ) as  { _id: ObjectId, endpoint: AuthToken } | null
+    console.log('!getUsersAccessToken userEndpointInfo -> ', userEndpointInfo);
+    return userEndpointInfo?.endpoint?.access_token || null
   }
 }
 

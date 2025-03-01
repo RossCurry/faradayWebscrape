@@ -19,7 +19,6 @@ export function getIsJwtExpired(token: string) {
 }
 
 export function getTokenFromAuthorizationHeader(authHeader: string){
-  console.log('!getTokenFromAuthorizationHeader -> ', authHeader);
   const token = authHeader.split(' ').at(1)
   if (!token || typeof token !== 'string') throw new Error('User token doesnt exist or is incorrect type')
   return token;

@@ -7,7 +7,7 @@ import CodeVerifier from '#services/codeVerifier/CodeVerifier.js'
 import Token from '#services/token/Token.js'
 
 // types
-import type { SpotifyAlbumTracksResponse, SpotifyCoverImageResponse, SpotifyPlaylist, SpotifySearchResult } from '#controllers/spotify/spotify.types.js'
+import type { SpotifyAlbumTracksResponse, SpotifyCoverImageResponse, SpotifyPlaylist, SpotifySearchResult, SpotifyUserProfile } from '#controllers/spotify/spotify.types.js'
 import type { FaradayItemData, ScrapedData } from '#controllers/faraday/getItemData.js'
 
 // routers
@@ -17,14 +17,16 @@ import userRouter from '#controllers/user/index.js'
 import { SpotifySearchProjection } from '#middlewares/spotify/getAlbumInfo.js'
 import SpotifyApi from '#services/spotify/index.js'
 import { JwtPayload } from 'jsonwebtoken'
+import { ObjectId, WithId } from 'mongodb'
 
 
 export interface AppState extends Application.DefaultState {
   accessToken?: string | null,
-  verifiedToken?: JwtPayload | string | null,
-  updatedJwtToken?: string | null,
+  verifiedToken?: JwtPayload,
+  updatedJwtToken?: string,
   playlist?: SpotifyPlaylist,
   playlistInfo?: Record<string, any>,
+  currentUser?: WithId<SpotifyUserProfile>,
   data: {
     spotifyTrackInfo?: Array<{tracks: SpotifyAlbumTracksResponse, album: SpotifySearchResult}>,
     spotifyAlbumInfo?: SpotifySearchResult[],
