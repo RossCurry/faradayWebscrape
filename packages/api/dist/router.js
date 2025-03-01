@@ -7,18 +7,22 @@ import Token from '#services/token/Token.js';
 import faradayRouter from '#controllers/faraday/index.js';
 import spotifyRouter from '#controllers/spotify/index.js';
 import userRouter from '#controllers/user/index.js';
+import SpotifyApi from '#services/spotify/index.js';
 // type App = Application<AppState, AppContext>
+// initialize services
 const services = {
     codeVerifier: new CodeVerifier(),
     mongo: new MongoDB(),
-    token: new Token()
+    token: new Token(),
+    spotify: new SpotifyApi(),
 };
 const router = new Router();
-// initialize services
+// Add services to the Context
 router.use((async (ctx, next) => {
     console.log('!initialize services -> ');
     ctx.state.data = {};
     ctx.services = services;
+    console.log('!initialized services -> ', Object.keys(ctx.services));
     await next();
 }));
 // TODO investigate more if this is best way to extend routes.

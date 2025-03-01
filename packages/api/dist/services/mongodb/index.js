@@ -295,35 +295,57 @@ class MongoDb {
     async setUserInfo(userInfo, tokenInfo) {
         console.log('!setUserInfo -> ', userInfo);
         if ('error' in userInfo)
-            throw new Error(`No userInfo set: Error in userInfo. userInfo: ${userInfo}`);
+            throw new Error('No userInfo set: Error in userInfo.', { cause: userInfo });
+        if ('error' in tokenInfo)
+            throw new Error('No tokenInfo set: Error in tokenInfo', { cause: tokenInfo });
         const usersCollection = this.db?.collection('users');
         if (!usersCollection)
             throw new Error('No users collecion found');
         const [user] = await usersCollection.find({ id: userInfo.id, href: userInfo.href }).toArray();
         // Update token info
         if (user) {
-            const modifiedFields = Object.keys(userInfo).reduce((newFields, field) => {
-                const newValue = userInfo[field];
-                const currentValue = user[field];
-                if (JSON.stringify(newValue) !== JSON.stringify(currentValue)) {
-                    newFields[field] = userInfo[field];
-                }
-                return newFields;
-            }, {});
-            console.log(`setUserInfo Updating user endpoint info: ${tokenInfo}`);
-            const insertedDocs = await usersCollection.updateOne({ _id: user._id }, { $set: {
-                    ...modifiedFields,
-                    endpoint: {
-                        ...tokenInfo,
-                        setAt: new Date(),
-                    },
-                    updatedDate: new Date()
-                } });
-            return insertedDocs;
+            return this.#updateUserInfo(user, userInfo, tokenInfo);
         }
         // Insert new user
+        return this.#setNewUserInfo(userInfo, tokenInfo);
+    }
+    async #updateUserInfo(user, userInfo, tokenInfo) {
+        console.log('!updateUserInfo -> ', userInfo);
+        const usersCollection = this.db?.collection('users');
+        if (!usersCollection)
+            throw new Error('No users collecion found');
+        const modifiedFields = Object.keys(userInfo).reduce((newFields, field) => {
+            const newValue = userInfo[field];
+            const currentValue = user[field];
+            // Quick n dirty nested check
+            const sameValue = JSON.stringify(newValue) !== JSON.stringify(currentValue);
+            // No change - move on to next key
+            if (sameValue)
+                return newFields;
+            // Update new value
+            return {
+                ...newFields,
+                [field]: userInfo[field]
+            };
+        }, {});
+        console.log(`setUserInfo Updating user endpoint info:`, tokenInfo);
+        const insertedDoc = await usersCollection.updateOne({ _id: user._id }, { $set: {
+                ...modifiedFields,
+                endpoint: {
+                    ...tokenInfo,
+                    setAt: new Date(),
+                },
+                updatedDate: new Date()
+            } });
+        return insertedDoc;
+    }
+    async #setNewUserInfo(userInfo, tokenInfo) {
+        const usersCollection = this.db?.collection('users');
+        if (!usersCollection)
+            throw new Error('No users collecion found');
+        // Insert new user
         console.log(`setUserInfo Inserting new user: ${userInfo}`);
-        const insertedDocs = await usersCollection.insertOne({
+        const insertedDoc = await usersCollection.insertOne({
             ...userInfo,
             endpoint: {
                 ...tokenInfo,
@@ -332,7 +354,7 @@ class MongoDb {
             createdDate: new Date(),
             playlists: []
         });
-        return insertedDocs;
+        return insertedDoc;
     }
     async setUsersPlaylist(userUri, spotifyPlaylist) {
         console.log('setUsersPlaylist', userUri, spotifyPlaylist);
@@ -430,6 +452,18 @@ class MongoDb {
         const user = await userCollection.findOne({ uri: uri }, { projection });
         console.log('!getUserInfoById user -> ', user);
         return user;
+    }
+    async getUsersRefreshToken(userInfo) {
+        if (!this.db)
+            throw new Error('No DB found');
+        const userCollection = this.db.collection('users');
+        if (!userCollection)
+            throw new Error('No userCollection found');
+        // Get accesstoken info
+        const projection = { endpoint: 1 };
+        const userEndpointInfo = await userCollection.findOne({ uri: userInfo.uri }, { projection });
+        console.log('!getUsersRefreshToken userEndpointInfo -> ', userEndpointInfo);
+        return userEndpointInfo?.endpoint?.refresh_token;
     }
 }
 export default MongoDb;
