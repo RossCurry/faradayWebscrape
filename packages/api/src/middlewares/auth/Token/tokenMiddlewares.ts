@@ -52,10 +52,11 @@ export const verifiedTokenMiddleware = async (ctx: AppContext, next: Next) => {
   let verifiedToken: JwtPayload | string | undefined;
   try {
     verifiedToken = ctx.services.token.verifyJwtToken(token as string); 
-    console.log('!verifiedToken -> ', verifiedToken);
   } catch (error) {
     ctx.throw([401, error])
   }
+
+  if (typeof verifiedToken === 'string') throw new Error('Verified token is incorrect type. Not JwtPayload')
   
   // Pass verified token to the state
   ctx.state.verifiedToken = verifiedToken;

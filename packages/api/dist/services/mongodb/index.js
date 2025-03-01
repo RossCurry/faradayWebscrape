@@ -465,5 +465,17 @@ class MongoDb {
         console.log('!getUsersRefreshToken userEndpointInfo -> ', userEndpointInfo);
         return userEndpointInfo?.endpoint?.refresh_token;
     }
+    async getUsersAccessToken(userInfo) {
+        if (!this.db)
+            throw new Error('No DB found');
+        const userCollection = this.db.collection('users');
+        if (!userCollection)
+            throw new Error('No userCollection found');
+        // Get accesstoken info
+        const projection = { endpoint: 1 };
+        const userEndpointInfo = await userCollection.findOne({ uri: userInfo.uri }, { projection });
+        console.log('!getUsersAccessToken userEndpointInfo -> ', userEndpointInfo);
+        return userEndpointInfo?.endpoint?.access_token || null;
+    }
 }
 export default MongoDb;

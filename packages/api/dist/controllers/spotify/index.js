@@ -47,7 +47,7 @@ mw.spotify.playlists.PopulatePlaylist);
 /**
  * Create a playlist getting user from db
  */
-spotifyRouter.post("/api/spotify/playlist/create", mw.spotify.getCurrentUserFromMongo, // get user info from mongo
+spotifyRouter.post("/api/spotify/playlist/create", mw.auth.refreshTokenMiddleware, mw.auth.verifiedTokenMiddleware, mw.spotify.getCurrentUserFromMongo, // get user info from mongo
 mw.spotify.playlists.CreatePlaylist, // user info needed for playlist creation
 mw.spotify.playlists.PopulatePlaylist);
 /**
