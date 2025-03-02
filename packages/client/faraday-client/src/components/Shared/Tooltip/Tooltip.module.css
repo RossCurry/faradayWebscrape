@@ -14,7 +14,7 @@
   right: anchor(left);
   top: anchor(center);
 
-  min-width: 50px;
+  min-width: max-content;
   height: fit-content;
   border-radius: 8px;
   opacity: 0;
@@ -23,6 +23,17 @@
   margin-top: 0px;
   margin-right: 0px;
   padding: 0.5em;
+}
+
+/* Position Options */
+.popover.popoverLeft {
+  right: anchor(left);
+  top: anchor(center);
+}
+
+.popover.popoverRight {
+  top: anchor(center);
+  left: calc(anchor(right) + 110%);
 }
 
 .popover p {
