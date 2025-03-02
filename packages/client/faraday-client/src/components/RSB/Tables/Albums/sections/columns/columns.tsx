@@ -3,7 +3,7 @@ import styles from './columns.module.css'
 import { SpotifySearchResult } from "../../../../../../types/spotify.types"
 import { AlbumItemTableData } from "../../Versions/virtualizedTableBasicWorking/AlbumTableWithVirtualization_Working"
 import React from "react"
-import { AddIcon, LibraryAddIcon, RemoveIcon } from "../../../../../../icons"
+import { AddIcon, LibraryAddIcon, LibraryRemoveIcon, RemoveIcon } from "../../../../../../icons"
 import Tooltip from "../../../../../Shared/Tooltip/Tooltip"
 import { TrackListData } from "../../../Tracks/TrackTable"
 
@@ -204,8 +204,9 @@ export const getCheckbox = ({
       return (
         <label htmlFor={checkBoxId} className={styles.rowDataCentered}>
           <Tooltip 
-            Component={<LibraryAddIcon />}
-            tooltipText="Select All"
+            Component={areAllAlbumsSelected ? <LibraryRemoveIcon /> : <LibraryAddIcon />}
+            tooltipText={areAllAlbumsSelected ? "Remove All" : "Select All"}
+            position="right"
           />
           <input
             id={checkBoxId}

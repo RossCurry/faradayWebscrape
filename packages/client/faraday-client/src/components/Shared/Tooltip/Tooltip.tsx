@@ -6,8 +6,9 @@ type TooltipProps = {
   tooltipText: string,
   componentStyle?: React.CSSProperties,
   hideTooltip?: boolean
+  position?: 'right' | 'left' 
 }
-export default function Tooltip({ Component, tooltipText, componentStyle = {}, hideTooltip }: TooltipProps) {
+export default function Tooltip({ Component, tooltipText, componentStyle = {}, hideTooltip, position = 'left'}: TooltipProps) {
   const popoverId = `popover-id-${React.useId()}`
   const anchorNameId = `--anchor-id-${React.useId()}`
 
@@ -19,7 +20,15 @@ export default function Tooltip({ Component, tooltipText, componentStyle = {}, h
     >
       {Component}
       {hideTooltip ? null :
-      <div className={styles.popover} id={popoverId} role='tooltip' popover={'auto'}>
+      <div 
+        className={`
+          ${styles.popover}
+          ${position === 'right' ? styles.popoverRight : styles.popoverLeft}
+        `} 
+        id={popoverId} 
+        role='tooltip' 
+        popover={'auto'}
+      >
         <p>{tooltipText}</p>
       </div>
       }
