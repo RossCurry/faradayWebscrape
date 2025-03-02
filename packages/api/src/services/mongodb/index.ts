@@ -167,6 +167,7 @@ class MongoDb {
     const albumCollection = this.db?.collection('albums')
     const notFoundMatch = {
       ...match,
+      spotify: { $exists: true },
       $or: [{notFound: false}, {notFound: {$exists: false}}],
       // TODO remove
       'faraday.isSoldOut': !!filter?.isSoldOut

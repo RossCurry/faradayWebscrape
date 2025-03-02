@@ -113,23 +113,35 @@ const fetchMoreOnBottomReached = React.useCallback((scrollEvent: React.UIEvent<H
 }, [fetchNextPage, isFetching, hasNextPage, albumData?.pages])
 
 
+  // Get parent Height on mount
   useEffect(() => {
     if(tableContainerRef.current){
       const div = tableContainerRef.current
       const parentElement = div.parentElement
       const parentElHeight = parentElement?.getBoundingClientRect().height
       if (parentElHeight) {
-        console.log('!useEffect parentElHeight -> ', parentElHeight);
         setParentElementHeight(parentElHeight)
-        // dispatch({
-        //   type: 'setTableContainerHeight',
-        //   tableContainerHeight: parentElHeight
-        // })
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [parentElementHeight])
 
+  // ResizeObserver
+  useEffect(() => {
+    const tableRef = tableContainerRef.current
+    const resizeObserver = new ResizeObserver((entries) => {
+      const [entry] = entries;
+      const parentElement = entry.target.parentElement;
+      const newParentElHeight = parentElement?.getBoundingClientRect().height;
+      if (newParentElHeight) setParentElementHeight(newParentElHeight);
+    });
+
+    if (tableRef) resizeObserver.observe(tableRef);
+    
+    return () => {
+      if (tableRef) resizeObserver.unobserve(tableRef);
+    };
+  })
   
   return (
     <>
@@ -284,18 +296,12 @@ function TableHeader({ table }: { table: Table<AlbumItemTableData> }) {
           style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}
         >
           {headerGroup.headers.map(header => {
-            const headerSizes = {
-              'header.getSize': header.getSize(), 
-              'header.column.getSize': header.column.getSize(), 
-            }
-            console.log('!headerSizes -> ', headerSizes);
             return (
               <th 
                 key={header.id} 
                 colSpan={header.colSpan} 
                 style={{
                   display: 'flex',
-                  // width: header.getSize(),
                   width: `${header.getSize()}px`,
                 }}
                 className={styles.albumTableHeader}
@@ -427,8 +433,8 @@ function TableBodyRow({
   const isSelected = tracklistVisible.albumId === albumId;
   
   // TODO clean up the logic here
-  const handleOpenTrackList = (e: React.MouseEvent<HTMLTableCellElement, MouseEvent>) => {
-    console.log('!handleOpenTrackList -> ', { albumId, isSelected });
+  const handleOpenTrackList = (e: React.MouseEvent<HTMLTableCellElement | HTMLTableRowElement, MouseEvent>) => {
+    console.log('!handleOpenTrackList -> ', { albumId, isSelected, target: e.target });
     const isCheckbox = 'id' in e.target && typeof e.target.id === 'string' && e.target.id.startsWith('album-checkbox-id')
     e.stopPropagation()
     if (isCheckbox) return
@@ -457,12 +463,12 @@ function TableBodyRow({
     // if (!isSelected) {
     //   e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' })
     // }
-    selectedAlbumRowRef.current = e.target
+    // TODO why did I habe this?
+    // selectedAlbumRowRef.current = e.target
   }
 
    // TODO also should be true if any track of the album is selected
    const isAddedToPlaylist = row.original.isChecked
-   console.log('!row.getVisibleCells().length -> ', row.getVisibleCells().length);
   return (
     <>
       <tr
@@ -476,7 +482,6 @@ function TableBodyRow({
           transform: `translateY(${virtualRow.start}px)`, //this should always be a `style` as it changes on scroll
           width: '100%',
           justifyContent: 'space-between',
-          // backgroundColor: '#324658'
         }}
         className={`
           ${styles.albumRows}
@@ -484,6 +489,7 @@ function TableBodyRow({
           ${isAddedToPlaylist ? styles.albumRowsAddedToPlaylist : ''}
           `
         }
+        onClick={handleOpenTrackList}
       >
         {row.getVisibleCells().map(cell => {
           return (
@@ -496,8 +502,6 @@ function TableBodyRow({
 }
 
 function TableCell({ cell, handleOpenTrackList }: { cell: Cell<AlbumItemTableData, unknown>, handleOpenTrackList: (e: React.MouseEvent<HTMLTableCellElement, MouseEvent>) => void }) {
-  const colWidth =  cell.column.getSize()
-  console.log('!colWidth -> ', cell.column.id,  colWidth);
   return (
     <td
       key={cell.id}
@@ -506,11 +510,11 @@ function TableCell({ cell, handleOpenTrackList }: { cell: Cell<AlbumItemTableDat
         width: cell.column.getSize(),
         justifyContent: 'center'
       }}
-      onClick={
-        !cell.id.includes('checkbox')
-          ? handleOpenTrackList
-          : (e: React.MouseEvent<HTMLTableCellElement, MouseEvent>) => { e.stopPropagation() }
-      }
+      // onClick={
+      //   !cell.id.includes('checkbox')
+      //     ? handleOpenTrackList
+      //     : (e: React.MouseEvent<HTMLTableCellElement, MouseEvent>) => { e.stopPropagation() }
+      // }
     >
       {flexRender(cell.column.columnDef.cell, cell.getContext())}
     </td>
