@@ -210,23 +210,20 @@ function VirtualizedTable({ data, scrollableContainerRef }: { data: AlbumItemTab
     // eslint-disable-next-line react-hooks/exhaustive-deps
     },[allTrackIds, areAllAlbumsSelected])
   
-  const handleSelectCheckbox = useCallback((e: React.ChangeEvent<HTMLInputElement>, trackList: TrackListData[]) => {
-      // TODO not working triggering the onClick for open track rows
-      e.preventDefault()
-      e.stopPropagation()
-      const { target } = e;
-      const { value: albumId, checked } = (target as HTMLInputElement)
+  const handleSelectCheckbox = useCallback((trackList: TrackListData[], isChecked: boolean, albumId: string) => {
       // controls input components for rows
-      if (checked) {
+      if (isChecked) {
         appDispatch({ type: 'addSelectedAlbum', albumId })
         appDispatch({ type: 'addTracksToCustomPlaylist', trackIds: trackList.map(t => t.id) })
       } else {
         appDispatch({ type: 'deleteSelectedAlbum', albumId })
         appDispatch({ type: 'deleteTracksFromCustomPlaylist', trackIds: trackList.map(t => t.id) })
       }
+      
       // handle deselect bulk selection
-      if (!checked) appDispatch({ type: 'setAllAlbumsSelected', areSelected: false })
-      // We dont want appDispatch to be in the dependency array
+      if (!isChecked) appDispatch({ type: 'setAllAlbumsSelected', areSelected: false })
+      
+        // We dont want appDispatch to be in the dependency array
       // eslint-disable-next-line react-hooks/exhaustive-deps
     },[])
 
