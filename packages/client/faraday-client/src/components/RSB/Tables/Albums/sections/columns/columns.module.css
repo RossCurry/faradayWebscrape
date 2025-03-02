@@ -13,6 +13,13 @@
 .rowDataArtist {
   padding-left: 1em;
 }
+.rowDataAlbum {
+  display: flex;
+  flex-direction: column;
+  gap: var(--g-2);
+  width: 100%;
+  padding: 1em;
+}
 
 .rowDataAlbum p {
   margin: 0;
@@ -31,6 +38,11 @@
 }
 .unavailable {
   background-color: rgb(208, 44, 38);
+}
+
+.rowDataCentered {
+  display: flex;
+  align-items: center;
 }
 
 input[type="checkbox"].rowDataCheckbox{

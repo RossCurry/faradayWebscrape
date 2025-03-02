@@ -34,16 +34,17 @@ export async function connectToSpoti(){
   }
 }
 
-// TODO create playlist using selected options
 const DESCRIPTION = 'Faraday Collection of what is available on Spotify'
 export async function createPlaylist(playlistTitle: string, playlistTracks: SpotifySearchResult["trackList"]) {
   const createPath = '/api/spotify/playlist/create';
   const token = window.localStorage.getItem('jwt') || ''
+  
   const url = new URL(baseUrlDev + createPath)
   url.searchParams.set('playlistTitle', playlistTitle)
   url.searchParams.set('description', DESCRIPTION)
-  console.log('!FE createPlaylist -> ', playlistTracks);
+  
   const trackUris = playlistTracks.map(track => track.uri)
+  
   try {
     const response = await fetch(url.toString(), {
       method: 'POST',
@@ -58,14 +59,14 @@ export async function createPlaylist(playlistTitle: string, playlistTracks: Spot
       credentials: 'include',
     })
     const jsonRes: { playlist: SpotifyPlaylist } | { error: string} = await response.json()
-    console.log('!CONFIRM PLAYLIST jsonRes -> ', jsonRes );
-    console.log('!CONFIRM PLAYLIST response.ok -> ', response.ok);
+    
     if (response.ok) {
       if ('playlist' in jsonRes) return jsonRes.playlist
       return false
     } else {
       return false
     }
+
   } catch (error) {
     console.error('!Failed fetch to create playlist -> ', error);
   }
@@ -134,7 +135,6 @@ export async function getTrackList(albumId: string) {
   const response = await fetch(baseUrlDev + getTracksPath)
   if (response.ok) {
     const jsonRes = await response.json()
-    console.log('!jsonRes -> ', jsonRes);
     const { tracklist } = jsonRes;
     return tracklist.items
   }
@@ -146,24 +146,23 @@ export async function getUserInfoWithToken(token: string) {
   const url = new URL(baseUrlDev + tokenPath)
 
   try {
-    console.log('!getUserInfoWithToken -> ', !!token);
-    const body = await fetch(url.toString(),{
+    const response = await fetch(url.toString(),{
       headers: {
         Authorization: `Bearer ${token}`
       }
     })
     
-    if (body.ok) {
+    if (response.ok) {
       // token will be refreshed on BE
-      const authHeader = body.headers.get('Authorization');
-      const response: { userInfo: SpotifyUserProfile | null } = await body.json()
+      const authHeader = response.headers.get('Authorization');
+      const jsonResponse: { userInfo: SpotifyUserProfile | null } = await response.json()
       
       if (authHeader){
         const token = getTokenFromAuthorizationHeader(authHeader)
         window.localStorage.setItem('jwt', token)
       }
 
-      return response.userInfo
+      return jsonResponse.userInfo
     }
   } catch (error) {
     console.error('Some error getting the user data', error)
@@ -174,10 +173,8 @@ export async function getUserInfoWithToken(token: string) {
 
 
 export async function getUserInfoWithCode(code: string) {
-  console.log('!getUserInfo -> ', !!code);
   const verifyPath = `/api/user/verify`
   const url = new URL(baseUrlDev + verifyPath)
-  console.log('!url.toString() -> ', url.toString());
   url.searchParams.set('code', code)
 
   const response = await fetch(url.toString())

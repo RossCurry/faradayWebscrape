@@ -11,7 +11,7 @@ import { TrackListData } from "../../../Tracks/TrackTable"
 export const image: AccessorColumnDef<AlbumItemTableData, { url: SpotifySearchResult["image"]["url"], isSoldOut: SpotifySearchResult["isSoldOut"] }> = {
   accessorFn: ({ isSoldOut, image }) => {
     return {
-      url: image.url,
+      url: image?.url,
       isSoldOut
     }
   },
@@ -32,7 +32,11 @@ export const image: AccessorColumnDef<AlbumItemTableData, { url: SpotifySearchRe
     )
   },
   header: () => null,
-  enableSorting: false
+  enableSorting: false,
+  // column size options
+  // enableResizing: true // default
+  size: 150
+
 }
 
 export const albumAndArtist: AccessorColumnDef<AlbumItemTableData, SpotifySearchResult> = {
@@ -40,7 +44,7 @@ export const albumAndArtist: AccessorColumnDef<AlbumItemTableData, SpotifySearch
   id: 'albumInfo',
   cell: info => {
     const { name, artists } = info.getValue() as SpotifySearchResult
-    const artist = artists.join(', ')
+    const artist = artists?.join(', ')
     const album = name
     return (
       <div className={styles.rowDataAlbum}>
@@ -52,6 +56,9 @@ export const albumAndArtist: AccessorColumnDef<AlbumItemTableData, SpotifySearch
   header: () => <span>Title</span>,
   sortUndefined: 'last', //force undefined values to the end
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
+  size: 300,
+  minSize: 200,
+  maxSize: 500,
 }
 
 export const album: AccessorColumnDef<AlbumItemTableData, SpotifySearchResult["name"]> = {
@@ -66,7 +73,7 @@ export const album: AccessorColumnDef<AlbumItemTableData, SpotifySearchResult["n
 export const artists: AccessorColumnDef<AlbumItemTableData, SpotifySearchResult["artists"]> = {
   accessorFn: row => row.artists,
   id: 'artists',
-  cell: info => <span className={styles.rowDataArtist}>{info.getValue().join(', ')}</span>,
+  cell: info => <span className={styles.rowDataArtist}>{info.getValue()?.join(', ')}</span>,
   header: () => <span>Artist</span>,
   sortUndefined: 'last', //force undefined values to the end
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
@@ -91,7 +98,7 @@ export const availablity: AccessorColumnDef<AlbumItemTableData, SpotifySearchRes
 export const category: AccessorColumnDef<AlbumItemTableData, SpotifySearchResult["category"]> = {
   accessorFn: row => row.category,
   id: 'category',
-  cell: info => info.getValue() || '',
+  cell: info => <span className={styles.rowDataCentered}>{info.getValue() || ''}</span>,
   header: () => <span>Category</span>,
   sortUndefined: 'last', //force undefined values to the end
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
@@ -106,7 +113,7 @@ export const price: AccessorColumnDef<AlbumItemTableData, SpotifySearchResult["p
     const i = value.indexOf(':')
     const price = onSale ? value.substring(i + 1, i + 6) : value
     return (
-      <div>{price}</div>
+      <div className={styles.rowDataCentered}>{price}</div>
     )
   },
   header: () => <span>Price</span>,
@@ -130,7 +137,7 @@ export const releaseDate: AccessorColumnDef<AlbumItemTableData, SpotifySearchRes
     const date = info.getValue()
     const asYear = date ? new Date(date).getFullYear().toString() : ''
     return (
-      <div>{asYear}</div>
+      <div className={styles.rowDataCentered}>{asYear}</div>
     )
   },
   header: () => <span>Release</span>,
@@ -145,6 +152,7 @@ export const genre: AccessorColumnDef<AlbumItemTableData, SpotifySearchResult["g
   header: () => <span>Genre</span>,
   sortUndefined: 'last', //force undefined values to the end
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
+  size: 200
 }
 
 export const getCheckbox = ({
@@ -162,7 +170,7 @@ export const getCheckbox = ({
     cell: function CheckboxCell(info) {
       const inputRef = React.useRef<HTMLInputElement>(null)
       const { albumId, isChecked, trackList } = info.getValue()
-      const inputId = `album-checkbox-id-${albumId.toString()}`
+      const inputId = `album-checkbox-id-${albumId?.toString()}`
       const handleOnClick = (e: React.MouseEvent<HTMLDivElement | HTMLInputElement | SVGAElement>) => {
         return
         e.stopPropagation()
@@ -199,12 +207,11 @@ export const getCheckbox = ({
     header: function Header(){
       const checkBoxId = `album-checkbox-select-all-id-${React.useId()}`
       return (
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}>
+        <label htmlFor={checkBoxId} className={styles.rowDataCentered}>
+          <Tooltip 
+            Component={<LibraryAddIcon />}
+            tooltipText="Select All"
+          />
           <input
             id={checkBoxId}
             className={styles.rowDataCheckbox}
@@ -214,16 +221,11 @@ export const getCheckbox = ({
             onChange={(e) => handleSelectAll(e.target.checked)}
             style={{display: 'none'}}
           />
-          <label htmlFor={checkBoxId}>
-            <Tooltip 
-              Component={<LibraryAddIcon />}
-              tooltipText="Select All"
-            />
           </label>
-        </div>
       )
     },
-    enableSorting: false
+    enableSorting: false,
+    size: 60
   }
   return checkbox
 }
