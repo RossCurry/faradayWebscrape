@@ -162,7 +162,7 @@ export const getCheckbox = ({
 }: {
   areAllAlbumsSelected: boolean,
   handleSelectAll: (checked?: boolean) => void,
-    handleSelectCheckbox: (e: React.ChangeEvent<HTMLInputElement>, trackList: TrackListData[]) => void,
+  handleSelectCheckbox: (trackList: TrackListData[], isChecked: boolean, albumId: string) => void,
 }) => {
   const checkbox: AccessorColumnDef<AlbumItemTableData, { albumId: SpotifySearchResult['id'], isChecked: boolean, trackList: TrackListData[] }> = {
     accessorFn: row => ({ albumId: row.id, isChecked: row.isChecked, trackList: row.trackList }),
@@ -171,34 +171,29 @@ export const getCheckbox = ({
       const inputRef = React.useRef<HTMLInputElement>(null)
       const { albumId, isChecked, trackList } = info.getValue()
       const inputId = `album-checkbox-id-${albumId?.toString()}`
+
       const handleOnClick = (e: React.MouseEvent<HTMLDivElement | HTMLInputElement | SVGAElement>) => {
-        return
         e.stopPropagation()
-        e.preventDefault()
-        console.log('!handleOnClick -> ', e.target);
-        console.log('!e.target instanceof HTMLInputElement || e.target instanceof SVGAElement -> ', e.target instanceof HTMLInputElement || e.target instanceof SVGAElement);
-        // inputRef.current?.click()
-        if (e.target instanceof HTMLInputElement || e.target instanceof SVGAElement) {
-          inputRef.current?.click()
-        }
+        handleSelectCheckbox(trackList, !isChecked, albumId)
       }
+      
       return (
         <div className={styles.rowDataCheckboxWrapper} onClick={handleOnClick}>
-          <input
-            className={styles.rowDataCheckbox}
-            type="checkbox" 
-            value={albumId} 
-            checked={isChecked}
-            onChange={(e) => handleSelectCheckbox(e, trackList)}
-            id={inputId}
-            style={{display: 'none'}}
-            ref={inputRef}
-          />
           <label htmlFor={inputId} className={styles.rowDataCheckboxLabel}>
             {isChecked 
               ? <RemoveIcon />
               : <AddIcon  /> 
             }
+            <input
+              className={styles.rowDataCheckbox}
+              type="checkbox" 
+              value={albumId} 
+              checked={isChecked}
+              onChange={(e) => handleSelectCheckbox(trackList, e.target.checked, albumId)}
+              id={inputId}
+              style={{display: 'none'}}
+              ref={inputRef}
+            />
           </label>
         </div>
       )
