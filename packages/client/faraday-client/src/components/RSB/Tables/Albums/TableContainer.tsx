@@ -236,8 +236,10 @@ function VirtualizedTable({ data, scrollableContainerRef }: { data: AlbumItemTab
     data,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(), //client-side sorting
+    enableColumnResizing: true, // Allow user resizing (optional)
   })
 
+  // TODO not sure we need this
   // We can use this refs .current in the context when we select a row.
   useEffect(() => {
     appDispatch({ type: 'setSelectedAlbumRowRef', selectedAlbumRowRef })
@@ -269,22 +271,32 @@ function TableHeader({ table }: { table: Table<AlbumItemTableData> }) {
         display: 'grid',
         position: 'sticky',
         top: 0,
+        left: 0,
+        padding: 0,
         zIndex: 1,
+        // backgroundColor: '#324658'
       }}
+      className={styles.tableHeader}
     >
       {table.getHeaderGroups().map(headerGroup => (
         <tr 
           key={headerGroup.id} 
-          style={{ display: 'flex', width: '100%' }}
+          style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}
         >
           {headerGroup.headers.map(header => {
+            const headerSizes = {
+              'header.getSize': header.getSize(), 
+              'header.column.getSize': header.column.getSize(), 
+            }
+            console.log('!headerSizes -> ', headerSizes);
             return (
               <th 
                 key={header.id} 
                 colSpan={header.colSpan} 
                 style={{
                   display: 'flex',
-                  width: header.getSize(),
+                  // width: header.getSize(),
+                  width: `${header.getSize()}px`,
                 }}
                 className={styles.albumTableHeader}
               >
@@ -450,6 +462,7 @@ function TableBodyRow({
 
    // TODO also should be true if any track of the album is selected
    const isAddedToPlaylist = row.original.isChecked
+   console.log('!row.getVisibleCells().length -> ', row.getVisibleCells().length);
   return (
     <>
       <tr
@@ -462,6 +475,8 @@ function TableBodyRow({
           position: 'absolute',
           transform: `translateY(${virtualRow.start}px)`, //this should always be a `style` as it changes on scroll
           width: '100%',
+          justifyContent: 'space-between',
+          // backgroundColor: '#324658'
         }}
         className={`
           ${styles.albumRows}
@@ -481,12 +496,15 @@ function TableBodyRow({
 }
 
 function TableCell({ cell, handleOpenTrackList }: { cell: Cell<AlbumItemTableData, unknown>, handleOpenTrackList: (e: React.MouseEvent<HTMLTableCellElement, MouseEvent>) => void }) {
+  const colWidth =  cell.column.getSize()
+  console.log('!colWidth -> ', cell.column.id,  colWidth);
   return (
     <td
       key={cell.id}
       style={{
         display: 'flex',
         width: cell.column.getSize(),
+        justifyContent: 'center'
       }}
       onClick={
         !cell.id.includes('checkbox')
