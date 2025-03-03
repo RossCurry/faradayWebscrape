@@ -3,7 +3,7 @@ import styles from './IconButton.module.css'
 
 
 type IconButtonProps = {
-  handleOnClick: () => void,
+  handleOnClick: (e?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void,
   isSelected?: boolean,
   Icon: React.FC,
   text: string,

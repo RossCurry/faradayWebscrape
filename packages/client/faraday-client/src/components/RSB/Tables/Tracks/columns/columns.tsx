@@ -1,6 +1,11 @@
 import { AccessorColumnDef } from "@tanstack/react-table"
 import styles from './columns.module.css'
 import { TrackListColumnData } from "../TrackTable"
+import Tooltip from "../../../../Shared/Tooltip/Tooltip"
+import IconButton from "../../../../Shared/IconButton/IconButton"
+import { PlayIconFilled } from "../../../../../icons"
+import React from "react"
+import { useAppDispatch, useAppState } from "../../../../../state/AppStateHooks"
 
 
 export const image: AccessorColumnDef<TrackListColumnData, { url: TrackListColumnData["imageUrl"] }> = {
@@ -148,3 +153,48 @@ export const getCheckbox = ({
   return checkBox
 }
 
+export const playButton: AccessorColumnDef<TrackListColumnData, TrackListColumnData> = {
+  accessorFn: (data) => data || null,
+  id: 'play',
+  cell: function PlayButtonTracklist(info){
+    const dispatch = useAppDispatch();
+    const { audioUrl } = useAppState().player
+    const id = React.useId()
+    const track = info.getValue()
+    const preview_url = track?.preview_url
+    // TODO add isPlaying state from Player controls
+    const isPlaying = audioUrl === preview_url;
+    const isDisabled = !preview_url;
+
+    return (
+      <span className={styles.rowDataCentered} key={`tracklist-playbutton-${id}`}>
+        <Tooltip 
+          Component={
+            <IconButton 
+              Icon={PlayIconFilled}
+              handleOnClick={(e) => { 
+                e?.stopPropagation()
+                dispatch({ type: 'setAudioUrl', track })
+              }}
+              text=""
+              className={`
+                ${styles.playButton}
+                ${preview_url ? '' : styles.isDisabled}
+                ${isPlaying ? styles.isPlaying : ''}
+              `}
+              disabled={isDisabled}
+            />
+          }
+          tooltipText={'No preview available'}
+          // TODO need to have a different approach to the tracklist. not overlay
+          hideTooltip={true}
+        />
+      </span>
+    )
+  },
+  header: () => null,
+  enableSorting: false,
+  // column size options
+  // enableResizing: true // default
+  size: 60
+}

@@ -3,9 +3,11 @@ import styles from './columns.module.css'
 import { SpotifySearchResult } from "../../../../../../types/spotify.types"
 import { AlbumItemTableData } from "../../Versions/virtualizedTableBasicWorking/AlbumTableWithVirtualization_Working"
 import React from "react"
-import { AddIcon, LibraryAddIcon, LibraryRemoveIcon, RemoveIcon } from "../../../../../../icons"
+import { AddIcon, LibraryAddIcon, LibraryRemoveIcon, PlayIcon, PlayIconFilled, RemoveIcon } from "../../../../../../icons"
 import Tooltip from "../../../../../Shared/Tooltip/Tooltip"
 import { TrackListData } from "../../../Tracks/TrackTable"
+import IconButton from "../../../../../Shared/IconButton/IconButton"
+import { useAppDispatch } from "../../../../../../state/AppStateHooks"
 
 
 export const image: AccessorColumnDef<AlbumItemTableData, { url: SpotifySearchResult["image"]["url"], isSoldOut: SpotifySearchResult["isSoldOut"] }> = {
@@ -37,6 +39,49 @@ export const image: AccessorColumnDef<AlbumItemTableData, { url: SpotifySearchRe
   // enableResizing: true // default
   size: 150
 
+}
+
+export const playButton: AccessorColumnDef<AlbumItemTableData, AlbumItemTableData> = {
+  accessorFn: (data) => data,
+  id: 'play',
+  cell: function AlbumPlayButton(info){
+    const dispatch = useAppDispatch()
+    const keyId = `album-playbutton-${React.useId()}`
+    const data = info.getValue()
+    const { trackList } = data
+    const [firstTrack] = Array.isArray(trackList) ?  trackList : [];
+    const preview_url = firstTrack?.preview_url
+    const isDisabled = !preview_url;
+
+    return (
+      <span className={styles.rowDataCentered} key={keyId}>
+        <Tooltip 
+          Component={
+            <IconButton 
+              Icon={PlayIconFilled}
+              handleOnClick={(e) => { 
+                e?.stopPropagation()
+                dispatch({ type: 'setAudioUrl', track: { ...firstTrack, imageUrl: data.image.url } })
+              }}
+              text=""
+              className={`
+                ${styles.playButton}
+                ${preview_url ? '' : styles.isDisabled}
+              `}
+              disabled={isDisabled}
+            />
+          }
+          tooltipText={'No preview available'}
+          hideTooltip={!isDisabled}
+        />
+      </span>
+    )
+  },
+  header: () => null,
+  enableSorting: false,
+  // column size options
+  // enableResizing: true // default
+  size: 60
 }
 
 export const albumAndArtist: AccessorColumnDef<AlbumItemTableData, SpotifySearchResult> = {

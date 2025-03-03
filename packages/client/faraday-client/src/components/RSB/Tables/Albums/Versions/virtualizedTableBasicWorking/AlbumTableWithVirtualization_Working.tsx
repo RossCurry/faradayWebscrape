@@ -60,7 +60,7 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
   )
 
   // TABLE LOGIC //
-  const table = useReactTable({
+  const table = useReactTable<SpotifySearchResult>({
     columns,
     data: dataWithCheckbox,
     // debugTable: true,
