@@ -13,7 +13,8 @@ import {
   songAndArtist,
   duration,
   trackNumber,
-  getCheckbox
+  getCheckbox,
+  playButton
 } from './columns/columns'
 import { SpotifySearchResult } from '../../../../types/spotify.types'
 import { useAppDispatch, useAppState } from '../../../../state/AppStateHooks'
@@ -54,6 +55,7 @@ export default function TrackTable({
     () => [
       getCheckbox({ handleCheckbox }),
       image,
+      playButton,
       trackNumber,
       songAndArtist,
       duration,
@@ -84,9 +86,9 @@ export default function TrackTable({
     }
 
     // TODO need a more robust fix for this
-    if (track.preview_url){
-      dispatch({ type: 'setAudioUrl', track })
-    }
+    // if (track.preview_url){
+    //   dispatch({ type: 'setAudioUrl', track })
+    // }
   }
 
   const table = useReactTable({

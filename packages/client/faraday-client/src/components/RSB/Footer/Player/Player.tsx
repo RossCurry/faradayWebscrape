@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react'
 import styles from '../Footer.module.css'
-import { useAppState } from '../../../../state/AppStateHooks';
+import { useAppDispatch, useAppState } from '../../../../state/AppStateHooks';
 import { faradayLogo } from '../../../../logos/FaradayLogo';
 import IconButton from '../../../Shared/IconButton/IconButton';
 import { PauseIcon, PlayIcon, SkipPrevious, VolumeOff, VolumeOn } from '../../../../icons';
 
 export default function Player() {
+  const dispatch = useAppDispatch()
   const { audioUrl, track } = useAppState().player
   const audioRef = useRef<HTMLAudioElement>(null);
   const [controls, setControls] = useState({

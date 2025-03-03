@@ -20,7 +20,8 @@ import {
   category,
   price,
   releaseDate,
-  getCheckbox
+  getCheckbox,
+  playButton
 } from './sections/columns/columns'
 import { SpotifySearchResult } from '../../../../types/spotify.types'
 import { useAppDispatch, useAppState } from '../../../../state/AppStateHooks'
@@ -227,6 +228,7 @@ function VirtualizedTable({ data, scrollableContainerRef }: { data: AlbumItemTab
     () => [
       getCheckbox({ areAllAlbumsSelected, handleSelectAll, handleSelectCheckbox }),
       image,
+      playButton,
       albumAndArtist,
       category,
       releaseDate,

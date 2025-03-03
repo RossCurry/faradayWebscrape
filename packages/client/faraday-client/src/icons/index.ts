@@ -13,6 +13,7 @@ export { default as ErrorIcon } from './ErrorIcon';
 export { default as AddIcon } from './AddIcon';
 export { default as RemoveIcon } from './RemoveIcon';
 export { default as PlayIcon } from './PlayIcon';
+export { default as PlayIconFilled } from './PlayIconFilled';
 export { default as PauseIcon } from './PauseIcon';
 export { default as SkipPrevious } from './SkipPrevious';
 export { default as VolumeOff } from './VolumeOff';

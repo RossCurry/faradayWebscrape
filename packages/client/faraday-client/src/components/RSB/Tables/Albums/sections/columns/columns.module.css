@@ -91,3 +91,25 @@ input[type="checkbox"].rowDataCheckbox{
   top: 0;
   right: 0;
 }
+
+.playButton {
+  background-color: inherit;
+  height: 40px;
+  aspect-ratio: 1/1;
+  border-radius: 50% ;
+  transition: 
+    background-color 200ms ease-in-out
+    ;
+}
+
+.playButton.isDisabled {
+  opacity: 0.5;
+}
+
+.playButton:not(.isDisabled):hover  {
+  background-color: var(--bg-dark-1);
+}
+.playButton:not(.isDisabled):focus svg,
+.playButton:not(.isDisabled):hover svg {
+  fill: var(--yellow-4)
+}
