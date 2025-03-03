@@ -9,6 +9,7 @@ import { CONSTANTS, Views } from './constants';
 import { SpotifySearchResult, SpotifyUserProfile } from '../types/spotify.types';
 import { TrackListData } from '../components/RSB/Tables/Tracks/TrackTable';
 import { AlbumItemTableData } from '../components/RSB/Tables/Albums/TableContainer';
+import { getLocalStoragePlaylist, getLocalStorageSelectedAlbums, updateLocalStoragePlaylist, updateLocalStorageSelectedAlbums } from '../utils/localStoragePlaylist';
 
 type AppState = {
   albumCollection: SpotifySearchResult[] | null,
@@ -46,7 +47,7 @@ const playlistPlaceholderTitle = `Faraday ${new Date().toLocaleString('en-US', {
 const initialAppState = {
   albumCollection: [],
   playlist: {
-    custom: {},
+    custom: getLocalStoragePlaylist() || {},
     selectedPlaylistId: null,
     tracksCollection: null,
     title: playlistPlaceholderTitle,
@@ -54,7 +55,7 @@ const initialAppState = {
   },
   rsb: {
     view: CONSTANTS.views.albums,
-    selectedAlbums: {},
+    selectedAlbums: getLocalStorageSelectedAlbums() || {},
     areAllAlbumsSelected: false,
     scrollAction: null,
     scrollElement: null,
@@ -116,6 +117,10 @@ function stateReducer(state: AppState, action: ActionTypes) {
         ...state.playlist.custom,
         [action.trackId]: true,
       }
+  
+      // Quick and dirty local storage solution
+      updateLocalStoragePlaylist(updatedList)
+
       return { 
         ...state, 
         playlist: { ...state.playlist, custom: updatedList } 
@@ -124,6 +129,10 @@ function stateReducer(state: AppState, action: ActionTypes) {
     case 'deleteTrackFromCustomPlaylist': {
       const playlist = { ...state.playlist.custom };
       delete playlist[action.trackId];
+
+      // Quick and dirty local storage solution
+      updateLocalStoragePlaylist(playlist)
+
       return { 
         ...state, 
         playlist: { ...state.playlist, custom: playlist } 
@@ -134,6 +143,10 @@ function stateReducer(state: AppState, action: ActionTypes) {
       action.trackIds.forEach( trackId => {
         playlist[trackId] = true;
       })
+
+      // Quick and dirty local storage solution
+      updateLocalStoragePlaylist(playlist)
+
       return { 
         ...state, 
         playlist: { ...state.playlist, custom: playlist } 
@@ -144,12 +157,21 @@ function stateReducer(state: AppState, action: ActionTypes) {
       action.trackIds.forEach( trackId => {
         delete playlist[trackId];
       })
+
+      // Quick and dirty local storage solution
+      updateLocalStoragePlaylist(playlist)
+
       return { 
         ...state, 
         playlist: { ...state.playlist, custom: playlist } 
       };
     }
     case 'resetCustomPlaylist': {
+
+      // Quick and dirty local storage solution
+      updateLocalStoragePlaylist(null)
+      updateLocalStorageSelectedAlbums(null)
+
       return { 
         ...state, 
         playlist: { 
@@ -194,11 +216,16 @@ function stateReducer(state: AppState, action: ActionTypes) {
       const selectedAlbumsCount = Object.keys(state.rsb.selectedAlbums).length + 1
       const fullCollectionCount = state.albumCollection?.length || 0
       const setAllAlbumsSelected = (selectedAlbumsCount === fullCollectionCount)
+      const updatedAlbums = { ...state.rsb.selectedAlbums, [action.albumId]: true }
+
+      // Quick and dirty localStorage
+      updateLocalStorageSelectedAlbums(updatedAlbums)
+
       return { 
         ...state,
         rsb: { 
           ...state.rsb, 
-          selectedAlbums: { ...state.rsb.selectedAlbums, [action.albumId]: true },
+          selectedAlbums: updatedAlbums,
           areAllAlbumsSelected: setAllAlbumsSelected
         } 
       };
@@ -206,6 +233,10 @@ function stateReducer(state: AppState, action: ActionTypes) {
     case 'deleteSelectedAlbum': {
       const copy = { ...state.rsb.selectedAlbums }
       delete copy[action.albumId]
+
+      // Quick and dirty localStorage
+      updateLocalStorageSelectedAlbums(copy)
+
       return { 
         ...state,
         rsb: { ...state.rsb, selectedAlbums: copy }
@@ -216,12 +247,19 @@ function stateReducer(state: AppState, action: ActionTypes) {
         selection[album.id] = true;
         return selection
       }, {} as Record<SpotifySearchResult['id'], boolean>)
+
+      // Quick and dirty localStorage
+      updateLocalStorageSelectedAlbums(allSelected)
+
       return { 
         ...state,
         rsb: { ...state.rsb, selectedAlbums: allSelected } 
       };
     }
     case 'deselectAllAlbums': {
+      // Quick and dirty localStorage
+      updateLocalStorageSelectedAlbums(null)
+
       return { 
         ...state,
         rsb: { ...state.rsb, selectedAlbums: {} } 
