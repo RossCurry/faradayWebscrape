@@ -40,14 +40,26 @@ export function PlaylistView() {
     <section id='playlistView' className={sharedStyles.albumCollection}>
       {!showPlaylist && <PlaylistEmptyContainer />}
       {showPlaylist &&
-        <>
-        <HeaderPlaylistView />
+        <div className={styles.playlistViewContainer}>
+        <span 
+          style={{ 
+            gridArea: 'header', 
+            position: 'sticky', 
+            top: 0, 
+            left: 0,
+            zIndex: 'var(--z-3)'
+          }}
+        >
+          <HeaderPlaylistView />
+        </span>
         
-        <TrackTable
-          data={tracks}
-          key={'playlist-table'}
-        />
-        </>
+        <span style={{ gridArea: 'playlist'}}>
+          <TrackTable
+            data={tracks}
+            key={'playlist-table'}
+          />
+        </span>
+        </div>
       }
 
     </section>

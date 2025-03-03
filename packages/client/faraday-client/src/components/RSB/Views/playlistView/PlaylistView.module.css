@@ -1,7 +1,17 @@
+
+.playlistViewContainer { 
+  display: grid;
+  grid-template-areas: 
+    "header"
+    "playlist"
+  ;
+}
+
 .playlistEmptyContainer {
   flex: 1;
   background-color:var(--bg-dark-1);
-  min-height: 60dvh;
+  /* Setting height here breaks the table scroll */
+  /* min-height: 60dvh; */
   display: grid;
   place-items: center;
 }
