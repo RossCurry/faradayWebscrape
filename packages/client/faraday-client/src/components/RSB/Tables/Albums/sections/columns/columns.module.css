@@ -109,6 +109,8 @@ input[type="checkbox"].rowDataCheckbox{
 .playButton:not(.isDisabled):hover  {
   background-color: var(--bg-dark-1);
 }
+
+.playButton.isPlaying svg,
 .playButton:not(.isDisabled):focus svg,
 .playButton:not(.isDisabled):hover svg {
   fill: var(--yellow-4)

@@ -3,7 +3,7 @@ import styles from './columns.module.css'
 import { TrackListColumnData } from "../TrackTable"
 import Tooltip from "../../../../Shared/Tooltip/Tooltip"
 import IconButton from "../../../../Shared/IconButton/IconButton"
-import { PlayIconFilled } from "../../../../../icons"
+import { LibraryAddIcon, LibraryRemoveIcon, PlayIconFilled } from "../../../../../icons"
 import React from "react"
 import { useAppDispatch, useAppState } from "../../../../../state/AppStateHooks"
 
@@ -130,8 +130,12 @@ export const player: AccessorColumnDef<TrackListColumnData, TrackListColumnData[
 
 export const getCheckbox = ({
   handleCheckbox,
+  handleSelectAllTracks, 
+  areAllTracksSelected
 }: {
   handleCheckbox: (e: React.ChangeEvent<HTMLInputElement>) => void
+  handleSelectAllTracks: (checked: boolean) => void,
+  areAllTracksSelected: boolean
 }) => {
   const checkBox: AccessorColumnDef<TrackListColumnData, { trackId: TrackListColumnData['id'], isChecked: boolean }> = {
     accessorFn: row => ({ trackId: row.id, isChecked: row.isChecked }),
@@ -148,7 +152,30 @@ export const getCheckbox = ({
         />
       )
     },
-    header: () => null,
+    // header: () => null,
+    header: function Header(){
+      const checkBoxId = `album-checkbox-select-all-id-${React.useId()}`
+
+      return (
+        <label htmlFor={checkBoxId} className={styles.rowDataCentered}>
+          <Tooltip 
+            Component={areAllTracksSelected ? <LibraryRemoveIcon /> : <LibraryAddIcon />}
+            tooltipText={areAllTracksSelected ? "Remove All" : "Select All"}
+            position="right"
+          />
+          <input
+            id={checkBoxId}
+            className={styles.rowDataCheckbox}
+            type="checkbox" 
+            value={'all'} 
+            checked={areAllTracksSelected}
+            onChange={() => handleSelectAllTracks(!areAllTracksSelected)}
+            style={{display: 'none'}}
+          />
+          </label>
+      )
+    },
+    enableSorting: false
   }
   return checkBox
 }
