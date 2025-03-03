@@ -37,28 +37,20 @@ function PlaylistTitle() {
     }
   }
 
-  console.log('!textAreaHasFocus -> ', textAreaHasFocus);
-  const handleFocus = () => {
-    console.log('!handlefocus -> ');
-    setTextAreaHasFocus(true)
-  }
-  const handleBlur = () => {
-    console.log('!handleBlur -> ');
-    setTextAreaHasFocus(false)
-  }
 
   useEffect(() => {
-    let ref: React.RefObject<HTMLTextAreaElement>['current'] | null = null;
-
+    const controller = new AbortController()
     if (textAreaRef.current) {
-      ref = textAreaRef.current
-      textAreaRef.current?.addEventListener('focus', handleFocus)
-      textAreaRef.current?.addEventListener('blur', handleBlur)
+      textAreaRef.current?.addEventListener('focus', () => {
+        setTextAreaHasFocus(true)
+      }, { signal: controller.signal })
+      textAreaRef.current?.addEventListener('blur', () => {
+        setTextAreaHasFocus(false)
+      },  { signal: controller.signal })
     }
+
     return () => {
-      ref?.removeEventListener('focus', handleFocus)
-      ref?.removeEventListener('blur', handleBlur)
-      ref = null;
+      controller.abort()
     }
   }, [textAreaRef, textAreaHasFocus])
 
