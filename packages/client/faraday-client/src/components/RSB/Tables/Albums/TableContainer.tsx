@@ -40,7 +40,6 @@ export type CheckedTrackDict = {
 export type AlbumItemTableData = SpotifySearchResult & { isChecked: boolean }
 
 export default function AlbumTableContainer({ data }: { data: SpotifySearchResult[] }) {
-  
   const { selectedAlbums, openAlbumInfo, showTrackTableOverlay } = useAppState().rsb
   const { trackList, albumId } = openAlbumInfo
 
@@ -48,12 +47,6 @@ export default function AlbumTableContainer({ data }: { data: SpotifySearchResul
   const [parentElementHeight, setParentElementHeight] = useState<number|null>(null)
   const canShowTrackTable = !!albumId && !!trackList?.length
 
-  // const dataWithCheckbox = useMemo(() => data.map(album => {
-  //   return {
-  //     ...album,
-  //     isChecked: !!selectedAlbums[album.id]
-  //   }
-  // }), [selectedAlbums, data])
 
   // QUERY LOGIC - FETCHES DATA //
   // Virtualization logic - react-query
@@ -93,10 +86,12 @@ export default function AlbumTableContainer({ data }: { data: SpotifySearchResul
     }) as AlbumItemTableData)), [albumData?.pages, selectedAlbums]
   ) || []
 
-// HANDLERS //
-//called on scroll and possibly on mount to fetch more data as the user scrolls and reaches bottom of table
-const fetchMoreOnBottomReached = React.useCallback((scrollEvent: React.UIEvent<HTMLDivElement, UIEvent>) => {
+  // HANDLERS //
+  //called on scroll and possibly on mount to fetch more data as the user scrolls and reaches bottom of table
+  const fetchMoreOnBottomReached = React.useCallback((scrollEvent: React.UIEvent<HTMLDivElement, UIEvent>) => {
   const { scrollHeight, scrollTop, clientHeight } = scrollEvent.currentTarget
+
+  // Virtualizer Logic
   const isCloseToEndOfViewport = scrollHeight - scrollTop - clientHeight < 500
   const totalDBRowCount = albumData?.pages.at(0)?.meta.totalCount
   const totalFetched = albumData?.pages.at(0)?.meta.totalFetched
@@ -111,7 +106,6 @@ const fetchMoreOnBottomReached = React.useCallback((scrollEvent: React.UIEvent<H
     fetchNextPage()
   }
 }, [fetchNextPage, isFetching, hasNextPage, albumData?.pages])
-
 
   // Get parent Height on mount
   useEffect(() => {
@@ -156,6 +150,7 @@ const fetchMoreOnBottomReached = React.useCallback((scrollEvent: React.UIEvent<H
         position: 'relative',
         // We must have a fixed height
         height: `${parentElementHeight}px`,
+        
       }}
       // <<<< || QUERY INFINITE SCROLL || >>>> //
       onScroll={fetchMoreOnBottomReached}
@@ -248,12 +243,6 @@ function VirtualizedTable({ data, scrollableContainerRef }: { data: AlbumItemTab
     enableColumnResizing: true, // Allow user resizing (optional)
   })
 
-  // TODO not sure we need this
-  // We can use this refs .current in the context when we select a row.
-  useEffect(() => {
-    appDispatch({ type: 'setSelectedAlbumRowRef', selectedAlbumRowRef })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
   
   return (
     <table
@@ -266,7 +255,6 @@ function VirtualizedTable({ data, scrollableContainerRef }: { data: AlbumItemTab
     <TableBody 
       table={table} 
       scrollableContainerRef={scrollableContainerRef}
-      tracklistNumTracks={tracklistNumTracks}
       setTracklistNumTracks={setTracklistNumTracks}
     />
   </table>
@@ -347,15 +335,12 @@ function TableHeader({ table }: { table: Table<AlbumItemTableData> }) {
 function TableBody ({ 
   table, 
   scrollableContainerRef,
-  tracklistNumTracks,
-  setTracklistNumTracks,
 }: { 
   table: Table<AlbumItemTableData>, 
   scrollableContainerRef: React.RefObject<HTMLDivElement> 
-  tracklistNumTracks: number
   setTracklistNumTracks: React.Dispatch<React.SetStateAction<number>>
 }){
-
+  const { scrollToTop } = useAppState().rsb
 
   // VIRTUALIZER LOGIC //
   // Important: Keep the row virtualizer in the lowest component possible to avoid unnecessary re-renders.
@@ -371,7 +356,16 @@ function TableBody ({
         ? element => element?.getBoundingClientRect().height
         : undefined,
     overscan: 5,
+    // gap: 24,
+
   })
+
+  // ScrollTo Last selected row
+  useEffect(() => {
+    console.log('Call scroll useEffect ROW')
+    rowVirtualizer.scrollToIndex(scrollToTop + 1 , { behavior: 'auto', align: 'center' })
+  }, [])
+
   return (
     <tbody
       // <<<< || VIRTUALIZER PROPERTIES || >>>> //
@@ -393,7 +387,6 @@ function TableBody ({
                 row={row} 
                 rowVirtualizer={rowVirtualizer} 
                 virtualRow={virtualRow}
-                setTracklistNumTracks={setTracklistNumTracks}
               />
             )
           })
@@ -413,12 +406,10 @@ function TableBodyRow({
   row, 
   rowVirtualizer, 
   virtualRow,
-  setTracklistNumTracks,
 }: { 
   row: Row<AlbumItemTableData>, 
   rowVirtualizer: Virtualizer<HTMLDivElement, Element>, 
-    virtualRow: VirtualItem 
-    setTracklistNumTracks: React.Dispatch<React.SetStateAction<number>>,
+  virtualRow: VirtualItem 
 }) {
   const { selectedAlbumRowRef } = useAppState().rsb
   // TrackTable Logic
@@ -431,7 +422,6 @@ function TableBodyRow({
   
   // TODO clean up the logic here
   const handleOpenTrackList = (e: React.MouseEvent<HTMLTableCellElement | HTMLTableRowElement, MouseEvent>) => {
-    console.log('!handleOpenTrackList -> ', { albumId, isSelected, target: e.target });
     const isCheckbox = 'id' in e.target && typeof e.target.id === 'string' && e.target.id.startsWith('album-checkbox-id')
     e.stopPropagation()
     if (isCheckbox) return
@@ -450,12 +440,16 @@ function TableBodyRow({
       }
     })
     dispatch({ type: 'setShowTrackTableOverlay', showTrackTableOverlay: true })
-
+    setTrackListVisible({ albumId: isSelected ? null : albumId })
+    
+    // Record ScrollTop
+    console.log('!row.index -> ', row.index);
+    dispatch({ type: 'setScrollToTop', scrollToTop: row.index })
+    // TODO MEASURE THE SCROLL HEIGHT HERE
     // TODO setTrackList in the state
     // // Sets the height for the dropdown
     // setTracklistNumTracks(row.original.totalTracks)
     // Toggle
-    setTrackListVisible({ albumId: isSelected ? null : albumId })
     // // Scroll into view
     // if (!isSelected) {
     //   e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' })
@@ -490,7 +484,7 @@ function TableBodyRow({
       >
         {row.getVisibleCells().map(cell => {
           return (
-            <TableCell cell={cell} key={cell.id} handleOpenTrackList={handleOpenTrackList} />
+            <TableCell cell={cell} key={cell.id} />
           )
         })}
       </tr>
@@ -498,7 +492,7 @@ function TableBodyRow({
   )
 }
 
-function TableCell({ cell, handleOpenTrackList }: { cell: Cell<AlbumItemTableData, unknown>, handleOpenTrackList: (e: React.MouseEvent<HTMLTableCellElement, MouseEvent>) => void }) {
+function TableCell({ cell }: { cell: Cell<AlbumItemTableData, unknown> }) {
   return (
     <td
       key={cell.id}
@@ -507,11 +501,6 @@ function TableCell({ cell, handleOpenTrackList }: { cell: Cell<AlbumItemTableDat
         width: cell.column.getSize(),
         justifyContent: 'center'
       }}
-      // onClick={
-      //   !cell.id.includes('checkbox')
-      //     ? handleOpenTrackList
-      //     : (e: React.MouseEvent<HTMLTableCellElement, MouseEvent>) => { e.stopPropagation() }
-      // }
     >
       {flexRender(cell.column.columnDef.cell, cell.getContext())}
     </td>

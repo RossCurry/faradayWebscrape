@@ -23,3 +23,9 @@
 .IconButton span h4 {
   /* background-color: blue; */
 }
+
+.IconButton.noText span {
+  gap: 0;
+  margin: 0 auto;
+  width: 24px;
+}

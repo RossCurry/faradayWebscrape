@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react'
 import styles from '../Footer.module.css'
 import { useAppState } from '../../../../state/AppStateHooks';
 import { faradayLogo } from '../../../../logos/FaradayLogo';
+import IconButton from '../../../Shared/IconButton/IconButton';
+import { PauseIcon, PlayIcon, SkipPrevious, VolumeOff, VolumeOn } from '../../../../icons';
 
 export default function Player() {
   const { audioUrl, track } = useAppState().player
@@ -21,7 +23,8 @@ export default function Player() {
     if (!audioRef.current) return
     audioRef.current?.play();
     setControls({ ...controls, isPlaying: true, isPaused: false })
-    console.log('!controls -> ', controls);
+    console.log('!isPlaying -> ', controls.isPlaying);
+    console.log('!isPaused -> ', controls.isPaused);
   }
 
   // Pauses the audio
@@ -129,7 +132,6 @@ export default function Player() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [audioUrl]); 
 
-  console.log('!controls.isPlaying && !controls.isPaused -> ', controls.isPlaying, controls.isPaused);
   return (
     <div className={styles.player}>
     
@@ -152,20 +154,29 @@ export default function Player() {
         <p>{track?.artists.map(a=>a.name).join(', ')}</p>
       </div>
       {/* REPRODUCIR CONTROLS */}
-      {/* PlayPause */}
       <fieldset>
-        <button onClick={handleStop}>{'I<'}</button>
-        <button onClick={handlePlayPause}>{
-          controls.isPlaying && !controls.isPaused 
-            ? 
-            '||' 
-            : '>'
-          }
-        </button>
+        {/* StopBack */}
+        <IconButton 
+          Icon={SkipPrevious}
+          handleOnClick={handleStop}
+          text=''
+          />
+        {/* PlayPause */}
+        <IconButton 
+          Icon={controls.isPlaying && !controls.isPaused ? PauseIcon : PlayIcon}
+          handleOnClick={handlePlayPause}
+          text=''
+        />
         {/* PROGESS BAR */}
         <ProgressBar getCurrentTime={getCurrentTime} totalTime={controls.clipDuration}/>
         {/* VOLUME CONTROLS - at least MUTE */}
-        <button onClick={handleSetMuted} className={`${styles.playerButtonMute} ${controls.isMuted ? styles.isMuted : ''}`}>M</button>
+        <IconButton 
+          Icon={controls.isMuted ? VolumeOff : VolumeOn}
+          handleOnClick={handleSetMuted}
+          text=''
+          // className={`${styles.playerButtonMute} ${controls.isMuted ? styles.isMuted : ''}`}
+          className={`${styles.playerButtonMute}`}
+        />
       </fieldset>
       {/* <button onClick={() => handleSetVolume(0.5)}>Set Volume (e.g., 0.5)</button> */}
       {/* <button onClick={() => handleSetPlaybackRate(1.5)}>Set Playback Rate (e.g., 1.5x)</button> */}

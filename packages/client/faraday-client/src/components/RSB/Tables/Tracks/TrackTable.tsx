@@ -40,17 +40,15 @@ export default function TrackTable({
     }
   }),[data, customPlaylist])
 
-  const handleCheckbox = useCallback(() => (e: React.ChangeEvent<HTMLInputElement>) => {
-      const { value: trackId, checked } = e.target as HTMLInputElement
-      if (checked){
-        dispatch({ type: 'addTrackToCustomPlaylist', trackId: trackId })
-      } else {
-        dispatch({ type: 'deleteTrackFromCustomPlaylist', trackId: trackId })
-      }
-    // Don't put dispatch in the dependency array
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []
-  )
+  // I had this in useCallback but it wasnt being fired
+  const handleCheckbox = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value: trackId, checked } = e.target as HTMLInputElement
+    if (checked){
+      dispatch({ type: 'addTrackToCustomPlaylist', trackId: trackId })
+    } else {
+      dispatch({ type: 'deleteTrackFromCustomPlaylist', trackId: trackId })
+    }
+  }
 
   const columns = React.useMemo(
     () => [
@@ -59,7 +57,7 @@ export default function TrackTable({
       trackNumber,
       songAndArtist,
       duration,
-    ], [handleCheckbox]
+    ], []
   )
 
   const handleOnClick = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, track: TrackListData) => {

@@ -26,8 +26,6 @@ function App({ redirected }: { redirected?: true }) {
   
   useEffect(() => {
     async function updateUserInfo(){
-      console.log('!CALL updateUserInfo -> ');
-      
       const code = searchParams.get('code')
       if (!code) return;
       const userInfo = await getUserInfoWithCode(code)

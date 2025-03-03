@@ -26,6 +26,7 @@ type AppState = {
     areAllAlbumsSelected: boolean
     scrollAction: 'fetch' | null
     scrollElement: HTMLElement | null
+    scrollToTop: number
     showTrackTableOverlay: boolean
     openAlbumInfo: {
       trackList: TrackListData[] | null,
@@ -59,6 +60,7 @@ const initialAppState = {
     areAllAlbumsSelected: false,
     scrollAction: null,
     scrollElement: null,
+    scrollToTop: 0,
     showTrackTableOverlay: false,
     openAlbumInfo: {
       trackList: null,
@@ -98,6 +100,7 @@ type ActionTypes =
 | { type: 'setTableContainerHeight', tableContainerHeight: AppState['rsb']['tableContainerHeight'] }
 | { type: 'setShowTrackTableOverlay', showTrackTableOverlay: AppState['rsb']['showTrackTableOverlay'] }
 | { type: 'setSelectedAlbumRowRef', selectedAlbumRowRef: AppState['rsb']['selectedAlbumRowRef'] }
+| { type: 'setScrollToTop', scrollToTop: AppState['rsb']['scrollToTop'] }
 // Main album collection
 | { type: 'setAlbumCollection', albums: SpotifySearchResult[] | null }
 // Player
@@ -117,7 +120,7 @@ function stateReducer(state: AppState, action: ActionTypes) {
         ...state.playlist.custom,
         [action.trackId]: true,
       }
-  
+
       // Quick and dirty local storage solution
       updateLocalStoragePlaylist(updatedList)
 
@@ -289,7 +292,7 @@ function stateReducer(state: AppState, action: ActionTypes) {
     }
     case 'setOpenAlbumInfo': {
       const { openAlbumInfo } = action;
-      console.log('!REDUCER openAlbumInfo -> ', openAlbumInfo);
+      console.log('!REDUCER setOpenAlbumInfo -> ', openAlbumInfo);
       return { 
         ...state,
         rsb: { ...state.rsb, openAlbumInfo }
@@ -314,6 +317,13 @@ function stateReducer(state: AppState, action: ActionTypes) {
       return { 
         ...state,
         rsb: { ...state.rsb, selectedAlbumRowRef }
+      };
+    }
+    case 'setScrollToTop': {
+      const { scrollToTop } = action;
+      return { 
+        ...state,
+        rsb: { ...state.rsb, scrollToTop }
       };
     }
     // Album Reducers
