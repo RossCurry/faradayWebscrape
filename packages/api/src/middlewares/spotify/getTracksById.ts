@@ -19,7 +19,7 @@ export default async function getTracksById(ctx: AppContext, next: Application.N
     const {trackIds} = ((ctx as any).request.body);
     if (!Array.isArray(trackIds) || !trackIds.every(id => typeof id === 'string')) throw new Error('trackIds given is not an array or string')
     console.log('!ctx.body -> ', ctx.body);
-    const tracks = await ctx.services.mongo.getSpotifyTracksById(trackIds)
+    const tracks = await ctx.services.mongo.spotify?.getSpotifyTracksById(trackIds)
     ctx.body = tracks
     ctx.status = 200
     await next()

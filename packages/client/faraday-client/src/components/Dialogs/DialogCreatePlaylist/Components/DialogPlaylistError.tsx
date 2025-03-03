@@ -1,5 +1,5 @@
 import { ErrorIcon } from '../../../../icons'
-import { connectToSpoti } from '../../../../services'
+import { connectToSpoti } from '../../../../services/services'
 import styles from './DialogComponent.module.css'
 
 export function DialogPlaylistError({ errorMessage }: { errorMessage?: string }) {

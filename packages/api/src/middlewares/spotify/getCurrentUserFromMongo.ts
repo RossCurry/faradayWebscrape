@@ -12,12 +12,10 @@ export default async function getCurrentUserFromMongo(ctx: AppContext, next: App
     const token = ctx.state.verifiedToken;
     if (!token) throw new Error('No JWT token found in request')
     
-    const user = await ctx.services.mongo.getUserInfoById(token.uri)
+    const user = await ctx.services.mongo.user?.getUserInfoById(token.uri)
     if (!user) throw new Error('No user found for in DB', { cause: token.uri })
     
     ctx.state.currentUser = user as WithId<SpotifyUserProfile>
-    // TODO assert user is SpotifyUserProfile
-    ctx.services.token.setUserInfo(user as unknown as SpotifyUserProfile)
     await next()
   } catch (error) {
     throw error

@@ -1,9 +1,7 @@
 import Application from 'koa';
 import Router from 'koa-router';
 import mw from '#middlewares/index.js'
-import router, { AppContext, AppState } from "../../router.js";
-import { redirectToSpotifyAuthorize } from './auth/PKCE/1.codeChallenge.js';
-import { user } from '../../constants.js';
+import { AppContext, AppState } from "../../router.js";
 import { getPlaylistImage } from '#middlewares/spotify/playlists/updateCoverImage.js';
 const spotifyRouter = new Router<AppState, AppContext>()
 
@@ -49,13 +47,22 @@ spotifyRouter.post('/api/spotify/playlist/updateCoverImage/:playlistId',
  * main request from UI to send code verification to spoti auth
  * & redirect FE to the spoti auth
  */
-spotifyRouter.get('/api/spotify/connect', async (ctx: AppContext, _next: Application.Next) => {
-  const { authUrl: spotifyAuthUrl, codeVerifier: notEncoded } = await redirectToSpotifyAuthorize()
-  // We need this for the authTokenRequest
-  ctx.services.codeVerifier.set(notEncoded)
-  ctx.set('Content-Type', 'application/json');
-  ctx.set('location', spotifyAuthUrl.toString());
-  ctx.status = 201 // created
+spotifyRouter.get('/api/spotify/connect', 
+  async (ctx: AppContext, _next: Application.Next) => {
+    console.log('!ctx. -> ', ctx.ip);
+    try {
+      const { 
+        authUrl: spotifyAuthUrl, 
+        codeVerifier: notEncoded 
+      } = await ctx.services.spotify.redirectToSpotifyAuthorize()
+      // We need this for the authTokenRequest
+      ctx.services.codeVerifier.set(notEncoded)
+      ctx.set('Content-Type', 'application/json');
+      ctx.set('location', spotifyAuthUrl.toString());
+      ctx.status = 201 // created
+    } catch (error) {
+      ctx.throw([500, error])
+    }
 })
 
 /**
@@ -94,12 +101,12 @@ spotifyRouter.get("/api/spotify/search",
  */
 spotifyRouter.get("/api/spotify/album/:id/tracks",
   async (ctx: AppContext & { params: Record<string, unknown> }, _next: Application.Next) => {
-    const { mongo } = ctx.services
-    if (!mongo) throw new Error('No mongo object found')
+    const { spotify } = ctx.services.mongo
+    if (!spotify) throw new Error('No mongo object found')
     try {
       const { id } = ctx.params
       console.log('!path -> ', id);
-      const spotifyData = await mongo.getSpotifyTracksListByAlbumId(id as string)
+      const spotifyData = await spotify.getSpotifyTracksListByAlbumId(id as string)
       ctx.status = 200
       ctx.body = { tracklist: spotifyData };
     } catch (error) {
@@ -118,12 +125,12 @@ spotifyRouter.get("/api/spotify/playlists",
   // update those images in db
   // return everything updated to the FE
   async (ctx: AppContext, next: Application.Next) => {
-    const { mongo } = ctx.services
-    if (!mongo) throw new Error('No mongo object found')
+    const { faraday } = ctx.services.mongo
+    if (!faraday) throw new Error('No mongo object found')
     try {
       const userId = ctx.services.token.getUserInfo()?.id
       if (!userId) throw Error('Cannot get playlist info. No userId given')
-      const playlistsData = await mongo.getFaradayPlaylistData(userId)
+      const playlistsData = await faraday.getFaradayPlaylistData(userId)
       console.log('!spotifyData length-> ', playlistsData?.length);
       ctx.state.data.userPlaylists = playlistsData
       await next()
@@ -146,7 +153,7 @@ spotifyRouter.get("/api/spotify/playlists",
       const playlistsToUpdate = await Promise.all(ctx.state.data.userPlaylists.map(async (playlist) => {
         const imageInfo = await getPlaylistImage(playlist.id, accessToken)
         // Set in DB for next time
-        const updated = await ctx.services.mongo.setCoverImage(userId, playlist.id, imageInfo)
+        const updated = await ctx.services.mongo.spotify?.playlists?.setCoverImage(userId, playlist.id, imageInfo)
         // Update in Memory for response
         playlist.images = imageInfo
         return playlist

@@ -26,7 +26,7 @@ import {
 import TrackTable, { TrackListData } from '../../../Tracks/TrackTable'
 import { SpotifySearchResult } from '../../../../../../types/spotify.types'
 import { useAppDispatch, useAppState } from '../../../../../../state/AppStateHooks'
-import { BatchResponse, getAlbumsInBatch } from '../../../../../../services'
+import { BatchResponse, getAlbumsInBatch } from '../../../../../../services/services'
 
 export type CheckedAlbumDict = {
   [K in SpotifySearchResult['id']]: boolean

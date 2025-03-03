@@ -11,21 +11,27 @@ const userRouter = new Router<AppState, AppContext>()
 
 /**
  * We use this route the first time we login to Spotify API
+ * Or when changing a user login
  */
 userRouter.get("/api/user/verify",
-  mw.auth.getPCKECredentialsToken, // use code from url
-  mw.spotify.getCurrentUserFromSpotify, // get user info
+  // use code from url
+  mw.auth.getPCKECredentialsToken, 
+  // get user info
+  mw.spotify.getCurrentUserFromSpotify, 
+  // Save the login info & return user info
   async (ctx: AppContext) => {
     try {
       // TODO use mongo info and send _id
-      const userInfo = ctx.services.token.getUserInfo();
+      const userInfo = ctx.state.currentUser
       if (!userInfo) throw new Error('No userInfo found from token service')
 
       // Create JWT token
       const token = ctx.services.token.createJwtToken(userInfo);
+
       // Update the response Headers
       updateJwtTokenInHeader(ctx, token)
 
+      ctx.set('location', 'http://localhost:5173')
       ctx.body = { userInfo }
       ctx.status = 200
     } catch (error) {
@@ -44,7 +50,7 @@ userRouter.get("/api/user",
       if (!verifiedToken) throw new Error('No Verified token')
 
       // TODO update when we use mongo userinfo with _id
-      const user = await ctx.services.mongo.getUserInfoById(verifiedToken.uri)
+      const user = await ctx.services.mongo.user?.getUserInfoById(verifiedToken.uri)
       ctx.body = {
         userInfo: user
       }

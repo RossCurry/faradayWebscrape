@@ -5,7 +5,9 @@ import { SpotifyAlbum } from "#controllers/spotify/spotify.types.js";
 
 export default async function getAlbumsAndSetProperties(ctx: AppContext, _next: Application.Next) {
   // TODO get properties to set from the params/query/body
-  const spotfiyAlbums = await ctx.services.mongo.getSpotifyData()
+  const spotfiyAlbums = await ctx.services.mongo.spotify?.getSpotifyData()
+  if (!spotfiyAlbums) throw new Error('No spotify albums found');
+
   let updatedCount = 0
   const errors = []
   // For each album get details
@@ -29,7 +31,7 @@ export default async function getAlbumsAndSetProperties(ctx: AppContext, _next: 
           genres,
           popularity
         } = jsonResponse as SpotifyAlbum
-        const updated = await ctx.services.mongo.updateSpotifyAlbumFields({
+        const updated = await ctx.services.mongo.spotify?.updateSpotifyAlbumFields({
           id,
           album_type,
           total_tracks,

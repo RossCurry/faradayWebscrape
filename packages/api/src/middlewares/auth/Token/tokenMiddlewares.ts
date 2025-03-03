@@ -1,6 +1,7 @@
 import { SpotifyUserProfile } from "#controllers/spotify/spotify.types.js";
 import { parseAuthHeaderFromContext, updateJwtTokenInHeader } from "#middlewares/utils/parseAuthHeader.js";
 import { AppContext } from "#router/";
+import { AuthToken, JwtPayloadUser } from "#services/token/Token.js";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { Next } from "koa";
 
@@ -16,20 +17,22 @@ export const refreshTokenMiddleware = async (ctx: AppContext, next: Next) => {
 
   // Check if token is expired or close to it
   const isExpired = ctx.services.token.isJwtTokenExpired(token); 
+  console.log('!refreshTokenMiddleware isExpired -> ', isExpired);
   if (isExpired) {
     try {
       const decoded = ctx.services.token.decodeJwtToken(token)
       if (!decoded || !('payload' in decoded) || typeof decoded.payload === 'string') throw new Error('Token error. unable to decode token')
 
-      const userInfo = decoded.payload as SpotifyUserProfile;
-      const refreshToken = await ctx.services.mongo.getUsersRefreshToken(userInfo);
+      const userInfo = decoded.payload as JwtPayloadUser;
+      const refreshToken = await ctx.services.mongo.user?.getUsersRefreshToken(userInfo);
       if (!refreshToken) throw new Error('No refresh token found for user: ', { cause: userInfo.display_name })
       
+      console.log('!refreshToken to use-> ', refreshToken);
       // Refresh token in Spotify
       const newAccessTokenInfo = await ctx.services.spotify.refreshToken(refreshToken); 
       
       // Update user endpointInfo in DB
-      await ctx.services.mongo.setUserInfo(userInfo, newAccessTokenInfo)
+      await ctx.services.mongo.user?.setUserInfo(userInfo, newAccessTokenInfo)
 
       // CreateNewJWT token
       const newJwtToken = ctx.services.token.createJwtToken(userInfo)
@@ -37,6 +40,14 @@ export const refreshTokenMiddleware = async (ctx: AppContext, next: Next) => {
       // Update ctx.state and response headers
       updateJwtTokenInHeader(ctx, newJwtToken)
     } catch (error) {
+      if (error instanceof Error && error.cause){
+        const { cause } = error
+        if (typeof cause === 'object' && 'error' in cause && cause.error === 'invalid_grant'){
+          ctx.status = 401
+          ctx.body =  { ...cause, action: 'removeJwtToken' }
+          return
+        } 
+      }
       ctx.throw([500, error])
     }
   } 

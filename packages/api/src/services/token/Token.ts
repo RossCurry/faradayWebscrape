@@ -11,6 +11,12 @@ export type AuthToken = {
   scope?: string
 }
 
+export type JwtPayloadUser = { 
+  id: SpotifyUserProfile['id'], 
+  display_name: SpotifyUserProfile['display_name'], 
+  uri: SpotifyUserProfile['uri'] 
+}
+
 // TODO re-use this class to deal with JWT token and use state for current user and mongo for user data retrival
 export default class Token {
   accessToken: string | null
@@ -62,9 +68,11 @@ export default class Token {
   }
   decodeJwtToken(token: string){
     const decoded = jwt.decode(token, { complete: true });
-    return decoded;
+    if (!decoded) throw new Error('Nothing decoded from JWT token')
+    const { iat, exp, ...rest } = decoded as Record<string, any>
+    return rest as JwtPayloadUser;
   }
-  createJwtToken(userInfo: SpotifyUserProfile){
+  createJwtToken(userInfo: JwtPayloadUser){
     const JWT_SECRET = process.env.JWT_SECRET;
     if (!JWT_SECRET) throw new Error('No ENV vars found for secret')
 
@@ -72,10 +80,12 @@ export default class Token {
     const { iat, exp, ...user } = userInfo as any;
     
     // Actual spotify token last an hour
-    const spotifyTokenExpiration = '55m'
-    
+    const spotifyTokenExpiration = '10s'
+
+    // reduce size of token
+    const { id, display_name, uri } = user as JwtPayloadUser;
     const token = jwt.sign(
-      user, 
+      { id, display_name, uri }, 
       JWT_SECRET, 
       { expiresIn: spotifyTokenExpiration }
     );
@@ -97,15 +107,15 @@ export default class Token {
     const JWT_SECRET = process.env.JWT_SECRET;
     if (!JWT_SECRET) throw new Error('No ENV vars found for secret')
     try {
-      const verifiedToken = jwt.verify(token, JWT_SECRET);
-      return verifiedToken;
+      jwt.verify(token, JWT_SECRET);
+      return false;
     } catch (error) {
       if (error instanceof Error){
         const expiredName = 'TokenExpiredError'
         const expiredMessage = 'jwt expired'
         const isExpired = error.name === expiredName || error.message === expiredMessage;
         console.error('!isJwtTokenExpired isExpired -> ', isExpired);
-        if (isExpired) return isExpired;
+        if (isExpired) return true;
       }
       throw error
     }

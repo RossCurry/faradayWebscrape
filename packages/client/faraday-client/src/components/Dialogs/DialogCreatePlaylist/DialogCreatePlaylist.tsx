@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import styles from './DialogCreatePlaylist.module.css'
 import { useAppState } from '../../../state/AppStateHooks'
-import { createPlaylist } from '../../../services'
+import { createPlaylist } from '../../../services/services'
 import { ArrowBackIcon } from '../../../icons'
 import IconButton from '../../Shared/IconButton/IconButton'
 import { DialogPlaylistSuccess } from './Components/DialogPlaylistSuccess'

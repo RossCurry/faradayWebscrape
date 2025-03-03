@@ -10,7 +10,7 @@ export type PKCE_RES = {
   scope: string
 }
 
-type PKCE_ERROR_RES = {
+export type PKCE_ERROR_RES = {
   error: string, // 'invalid_grant',
   error_description: string //'Invalid authorization code'
 }
@@ -19,21 +19,22 @@ export default async function getPCKECredentialsToken(ctx: AppContext, next: App
   const params = new URLSearchParams(ctx.querystring)
   const code = params.get('code')
   const codeChallenge = ctx.services.codeVerifier.get()
+  
   try {
     if (!code || !codeChallenge) throw new Error(`Missing code or codeChallenge from request: ${ctx.URL.toString()}`)
   } catch (error) {
-    ctx.status = 400
-    throw error
+    ctx.throw([400, error])
   }
+
   try {
-    const token: PKCE_RES | PKCE_ERROR_RES = await getTokenPCKE(code, codeChallenge)
-    console.log('!getTokenPCKE response -> ', token);
-    if ('error' in token) throw new Error(`Error getting token from Spotify API. Error: ${token.error} message: ${token.error_description}`)
-    ctx.services.token.set(token)
+    // Get user token info from spotify
+    const token: PKCE_RES = await ctx.services.spotify.getTokenPCKE(code, codeChallenge)
+
+    // Set access token info in request state
     ctx.state.accessToken = token.access_token
-    await next()
+    ctx.state.spotifyUserToken = token
   } catch (error) {
-    ctx.body = { code }
-    ctx.status = 500
+    ctx.throw([500, error])
   }
+  await next()
 }

@@ -1,13 +1,13 @@
 import { SortingState } from "@tanstack/react-table"
-import {  SpotifyPlaylist, SpotifySearchResult, SpotifyUserProfile } from "./types/spotify.types"
-import { getTokenFromAuthorizationHeader } from "./utils/decodeJwt"
+import {  SpotifyPlaylist, SpotifySearchResult, SpotifyUserProfile } from "../types/spotify.types"
+import { getTokenFromAuthorizationHeader } from "../utils/decodeJwt"
 
-const localConnectEndpoint = 'http://localhost:3000/api/spotify/connect'
 // TODO change endpoint to suit purpose
-
 export const baseUrlDev = 'http://localhost:3000'
 
+
 export async function connectToSpoti(){
+  const localConnectEndpoint = 'http://localhost:3000/api/spotify/connect'
   try {
     const response = await fetch(localConnectEndpoint, {
       method: 'GET',
@@ -148,22 +148,34 @@ export async function getUserInfoWithToken(token: string) {
   try {
     const response = await fetch(url.toString(),{
       headers: {
+        'Content-type': 'application/json',
         Authorization: `Bearer ${token}`
       }
     })
     
+
     if (response.ok) {
       // token will be refreshed on BE
       const authHeader = response.headers.get('Authorization');
-      const jsonResponse: { userInfo: SpotifyUserProfile | null } = await response.json()
-      
       if (authHeader){
         const token = getTokenFromAuthorizationHeader(authHeader)
         window.localStorage.setItem('jwt', token)
       }
-
+      
+      const jsonResponse: { userInfo: SpotifyUserProfile | null } = await response.json()
       return jsonResponse.userInfo
     }
+
+    // Some BE error
+    // TODO include FE notification
+    const errorResponse = await response.json()
+    if (typeof errorResponse === 'object' && 'error' in errorResponse && 'action' in errorResponse){
+      const { action } = errorResponse;
+      if (action === 'removeJwtToken'){
+        window.localStorage.removeItem('jwt')
+      }
+    }
+
   } catch (error) {
     console.error('Some error getting the user data', error)
   }
@@ -180,13 +192,16 @@ export async function getUserInfoWithCode(code: string) {
   const response = await fetch(url.toString())
 
   if (response.ok){
-    // Handling token expiration on the BE
-    const jsonRes: { userInfo: SpotifyUserProfile | null, token: string } = await response.json()
-    if (jsonRes.token) {
-      window.localStorage.setItem('jwt', jsonRes.token)
-      window.location.href = '/'
+    // token will be refreshed on BE
+    const authHeader = response.headers.get('Authorization');
+    const jsonResponse: { userInfo: SpotifyUserProfile | null } = await response.json()
+    
+    if (authHeader){
+      const token = getTokenFromAuthorizationHeader(authHeader)
+      window.localStorage.setItem('jwt', token)
     }
-    return jsonRes.userInfo || null 
+
+    return jsonResponse.userInfo || null 
   }
 
   return null
