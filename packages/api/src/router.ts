@@ -2,7 +2,7 @@ import Application from 'koa'
 import Router from "koa-router"
 
 // services
-import MongoDB from '#services/mongodb/index.js'
+import MongoDB from '#services/mongodb/Mongo.js'
 import CodeVerifier from '#services/codeVerifier/CodeVerifier.js'
 import Token from '#services/token/Token.js'
 
@@ -17,7 +17,8 @@ import userRouter from '#controllers/user/index.js'
 import { SpotifySearchProjection } from '#middlewares/spotify/getAlbumInfo.js'
 import SpotifyApi from '#services/spotify/index.js'
 import { JwtPayload } from 'jsonwebtoken'
-import { ObjectId, WithId } from 'mongodb'
+import { WithId } from 'mongodb'
+import { PKCE_RES } from '#middlewares/auth/PKCE/getPCKECredentialsToken.js'
 
 
 export interface AppState extends Application.DefaultState {
@@ -27,6 +28,7 @@ export interface AppState extends Application.DefaultState {
   playlist?: SpotifyPlaylist,
   playlistInfo?: Record<string, any>,
   currentUser?: WithId<SpotifyUserProfile>,
+  spotifyUserToken?:  PKCE_RES,
   data: {
     spotifyTrackInfo?: Array<{tracks: SpotifyAlbumTracksResponse, album: SpotifySearchResult}>,
     spotifyAlbumInfo?: SpotifySearchResult[],
@@ -54,27 +56,38 @@ export interface AppContext extends Application.ExtendableContext {
 type AppParamContext = Application.ParameterizedContext<AppState>
 // type App = Application<AppState, AppContext>
 
-// initialize services
-const services = {
-  codeVerifier: new CodeVerifier(),
-  mongo: new MongoDB(),
-  token: new Token(),
-  spotify: new SpotifyApi(),
+
+function createServices(){
+  // initialize services
+  const services = {
+    codeVerifier: new CodeVerifier(),
+    mongo: new MongoDB(),
+    token: new Token(),
+    spotify: new SpotifyApi(),
+  }
+  return services
 }
 
-const router = new Router<AppState, AppContext>()
+// Inject dependencies
+function createRouter({ services }: { services: AppContext['services'] }){
+  const router = new Router<AppState, AppContext>()
+  // Add services to the Context
+  router.use(
+    (async (ctx, next) => {
+      console.log('!Initialize data state & add Services -> ');
+      ctx.state.data = {}
+      ctx.services = services
+      console.log('!Services added -> ', Object.keys(ctx.services));
+     await next()
+    })
+  )
+  return router
+}
 
 
-// Add services to the Context
-router.use(
-  (async (ctx, next) => {
-    console.log('!initialize services -> ');
-    ctx.state.data = {}
-    ctx.services = services
-    console.log('!initialized services -> ', Object.keys(ctx.services));
-   await next()
-  })
-)
+const router = createRouter({ 
+  services: createServices()
+})
 
 // TODO investigate more if this is best way to extend routes.
 router.use(faradayRouter.routes(), faradayRouter.allowedMethods())

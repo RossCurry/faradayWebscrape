@@ -38,14 +38,14 @@ export default async function CreatePlaylist(ctx: AppContext, next: Application.
   if (!currentUser) throw new Error('No currentUser found in request')
 
   try {    
-    const accessToken = await ctx.services.mongo.getUsersAccessToken(currentUser);
-    const userId = currentUser.id
-  
+    const accessToken = await ctx.services.mongo.user?.getUsersAccessToken(currentUser);
+    if (!accessToken) throw new Error('No user access token found');
+
     const playlistParams = { 
       accessToken,
       description,
       playlistTitle,
-      userId,
+      userId: currentUser.id,
     }
 
     // Assert all params. 
@@ -54,7 +54,7 @@ export default async function CreatePlaylist(ctx: AppContext, next: Application.
     console.log('!spotifyPlaylist -> ', createdPlaylist);
     
     const userUri = currentUser.uri
-    await ctx.services.mongo.setUsersPlaylist(userUri, createdPlaylist)
+    await ctx.services.mongo.user?.setUsersPlaylist(userUri, createdPlaylist)
 
     // Add to request state
     ctx.state.playlist = createdPlaylist

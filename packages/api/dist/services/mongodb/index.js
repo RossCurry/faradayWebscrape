@@ -293,6 +293,10 @@ class MongoDb {
         const flattenedIds = playlistData?.flatMap(album => album.trackIds);
         return flattenedIds;
     }
+    /**
+     * Create or Update a User in the DB
+     * @returns UserInfo
+     */
     async setUserInfo(userInfo, tokenInfo) {
         console.log('!setUserInfo -> ', userInfo);
         if ('error' in userInfo)
@@ -316,6 +320,8 @@ class MongoDb {
         if (!usersCollection)
             throw new Error('No users collecion found');
         const modifiedFields = Object.keys(userInfo).reduce((newFields, field) => {
+            if (field === '_id')
+                return newFields;
             const newValue = userInfo[field];
             const currentValue = user[field];
             // Quick n dirty nested check
@@ -330,15 +336,17 @@ class MongoDb {
             };
         }, {});
         console.log(`setUserInfo Updating user endpoint info:`, tokenInfo);
-        const insertedDoc = await usersCollection.updateOne({ _id: user._id }, { $set: {
+        const updatedUser = await usersCollection.findOneAndUpdate({ _id: user._id }, { $set: {
                 ...modifiedFields,
                 endpoint: {
                     ...tokenInfo,
                     setAt: new Date(),
                 },
                 updatedDate: new Date()
-            } });
-        return insertedDoc;
+            } }, 
+        // Dont return this sensitive info
+        { projection: { endpoint: 0, playlists: 0 } });
+        return updatedUser;
     }
     async #setNewUserInfo(userInfo, tokenInfo) {
         const usersCollection = this.db?.collection('users');
@@ -355,7 +363,11 @@ class MongoDb {
             createdDate: new Date(),
             playlists: []
         });
-        return insertedDoc;
+        // Get newley inserted user
+        const insertedUser = await usersCollection.findOne({ _id: insertedDoc.insertedId }, 
+        // Dont return endpoint info
+        { projection: { endpoint: 0, playlists: 0 } });
+        return insertedUser;
     }
     async setUsersPlaylist(userUri, spotifyPlaylist) {
         console.log('setUsersPlaylist', userUri, spotifyPlaylist);
@@ -449,7 +461,7 @@ class MongoDb {
         if (!userCollection)
             throw new Error('No userCollection found');
         // Remove accesstoken info
-        const projection = { endpoint: 0 };
+        const projection = { endpoint: 0, playlists: 0 };
         const user = await userCollection.findOne({ uri: uri }, { projection });
         console.log('!getUserInfoById user -> ', user);
         return user;

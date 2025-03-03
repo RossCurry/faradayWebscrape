@@ -1,5 +1,7 @@
 import { REDIRECTS } from "#controllers/spotify/auth/authRedirects.constants.js";
-import { SpotifyPlaylist } from "#controllers/spotify/spotify.types.js";
+import { SpotifyPlaylist, SpotifyUserProfile } from "#controllers/spotify/spotify.types.js";
+import { PKCE_ERROR_RES, PKCE_RES } from "#middlewares/auth/PKCE/getPCKECredentialsToken.js";
+import { AuthToken } from "#services/token/Token.js";
 import { getBatches } from "#utils/utils.js";
 
 type SnapshotResponse = {
@@ -10,6 +12,41 @@ class SpotifyApi {
   
   constructor(){
     console.log('!SpotifyApi  constructor-> ')
+  }
+
+  async redirectToSpotifyAuthorize() {
+    const client_id = process.env.CLIENT_ID
+    if (!client_id) throw new Error('Missing env variable: CLIENT_ID');
+    
+    const authorizationEndpoint = "https://accounts.spotify.com/authorize";
+    const scope = 'user-read-private user-read-email playlist-read-private playlist-read-collaborative playlist-modify-private playlist-modify-public';
+    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const randomValues = crypto.getRandomValues(new Uint8Array(64));
+    const randomString = randomValues.reduce((acc, x) => acc + possible[x % possible.length], "");
+  
+    const code_verifier = randomString;
+    const data = new TextEncoder().encode(code_verifier);
+    const hashed = await crypto.subtle.digest('SHA-256', data);
+  
+    const code_challenge_base64 = btoa(String.fromCharCode(...new Uint8Array(hashed)))
+      .replace(/=/g, '')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_');
+  
+    // window.localStorage.setItem('code_verifier', code_verifier);
+  
+    const authUrl = new URL(authorizationEndpoint)
+    const params = {
+      response_type: 'code',
+      client_id: client_id,
+      scope: scope,
+      code_challenge_method: 'S256',
+      code_challenge: code_challenge_base64,
+      redirect_uri: REDIRECTS.redirect,
+    };
+  
+    authUrl.search = new URLSearchParams(params).toString();
+    return {authUrl, codeVerifier: code_verifier }; // Redirect the user to the authorization server for login
   }
 
   async getTokenPCKE(code: string, codeChallenge: string) {
@@ -31,7 +68,13 @@ class SpotifyApi {
       }),
     });
   
-    return await response.json();
+    const spotiResponse: PKCE_RES | PKCE_ERROR_RES = await response.json();
+
+    if ('error' in spotiResponse) {
+      throw new Error(`Error getting token from Spotify API. Error: ${spotiResponse.error} message: ${spotiResponse.error_description}`)
+    }
+
+    return spotiResponse
   }
 
   async refreshToken(refreshToken: string){
@@ -57,7 +100,7 @@ class SpotifyApi {
     
     const response = await body.json();
     if ('error' in response) throw new Error('Error from spotify API', { cause: response })
-    return response;
+    return response as AuthToken;
   }
 
   async createPlaylist({
@@ -159,6 +202,24 @@ class SpotifyApi {
 
 
   }
+
+  async getUserInfo(accessToken: string){
+    try {
+        const authString = `Bearer ${accessToken}`
+        const currentUserURL = 'https://api.spotify.com/v1/me'
+        const response = await fetch(currentUserURL, {
+          headers: {
+            Authorization: authString
+          }
+        })
+        const jsonResponse: SpotifyUserProfile = await response.json()
+        return jsonResponse
+      } catch (error) {
+        throw error
+      }
+  }
+
+  
 };
 
 export default SpotifyApi;

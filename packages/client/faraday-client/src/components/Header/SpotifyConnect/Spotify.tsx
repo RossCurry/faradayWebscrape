@@ -2,7 +2,7 @@ import React from 'react'
 import styles from './Spotify.module.css'
 import { InfoIcon } from '../../../icons/index';
 
-import { connectToSpoti } from '../../../services';
+import { connectToSpoti } from '../../../services/services';
 import { useAppState } from '../../../state/AppStateHooks';
 import Tooltip from '../../Shared/Tooltip/Tooltip';
 

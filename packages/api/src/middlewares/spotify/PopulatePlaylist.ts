@@ -11,7 +11,7 @@ export default async function PopulatePlaylist(ctx: AppContext) {
   const currentUser = ctx.state.currentUser;
   if (!currentUser) throw new Error('No currentUser found in request')
 
-  const accessToken = await ctx.services.mongo.getUsersAccessToken(currentUser)
+  const accessToken = await ctx.services.mongo.user?.getUsersAccessToken(currentUser)
   if (!accessToken) throw new Error('No accessToken')
     
   const playlist = ctx.state.playlist

@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { getAvailableAlbums } from '../services'
+import { getAvailableAlbums } from '../services/services'
 import { useAppDispatch, useAppState } from '../state/AppStateHooks'
 
 export default function useUpdateAlbums() {

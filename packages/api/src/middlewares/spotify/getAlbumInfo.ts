@@ -396,14 +396,18 @@ export default async function getAlbumInfoSpotify(ctx: AppContext, next: Applica
       console.log('!searchSingleAlbum result-> ', spotify);
       // If we dont find any result, set it as not found in the DB so as not to search for it again
       if (!spotify) {
-        await ctx.services.mongo.setFaradayIdAsNotFound(faraday.id);
+        await ctx.services.mongo.faraday?.setFaradayIdAsNotFound(faraday.id);
         continue
       };
+      const faradayData = await ctx.services.mongo.faraday?.getFaradayData();
+      if (!faradayData) throw new Error('No faradayData found');
       // set directly in the DB - hitting all sort of rate limits 😂
-      await ctx.services.mongo.setSpotifyData([{
-        faraday,
-        spotify
-      }])
+      await ctx.services.mongo.spotify?.setSpotifyData([{
+          faraday,
+          spotify
+        }], 
+        faradayData
+      )
       albumsInfo.push({
         faraday,
         spotify

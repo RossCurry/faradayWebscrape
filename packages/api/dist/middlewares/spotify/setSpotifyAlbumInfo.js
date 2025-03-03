@@ -11,7 +11,10 @@ export default async function setSpotifyAlbumInfo(ctx, next) {
         const { mongo } = ctx.services;
         if (!mongo)
             throw new Error('No mongo object found');
-        const inserted = await mongo.setSpotifyData(searchResults);
+        const faradayData = await mongo.faraday?.getFaradayData();
+        if (!faradayData)
+            throw new Error('No mongo object found');
+        const inserted = await mongo.spotify?.setSpotifyData(searchResults, faradayData);
         ctx.body = JSON.stringify(inserted);
         ctx.status = 200;
     }

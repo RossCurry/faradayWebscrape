@@ -1,5 +1,5 @@
 import { useMemo, useEffect } from "react";
-import { getTracksByIds } from "../../../../services";
+import { getTracksByIds } from "../../../../services/services";
 import { useAppState, useAppDispatch } from "../../../../state/AppStateHooks";
 import TrackTable from "../../Tables/Tracks/TrackTable";
 import styles from './PlaylistView.module.css'

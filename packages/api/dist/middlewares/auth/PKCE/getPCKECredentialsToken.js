@@ -1,4 +1,3 @@
-import { getTokenPCKE } from "#controllers/spotify/auth/PKCE/2.requestUserAuth.js";
 export default async function getPCKECredentialsToken(ctx, next) {
     const params = new URLSearchParams(ctx.querystring);
     const code = params.get('code');
@@ -8,20 +7,17 @@ export default async function getPCKECredentialsToken(ctx, next) {
             throw new Error(`Missing code or codeChallenge from request: ${ctx.URL.toString()}`);
     }
     catch (error) {
-        ctx.status = 400;
-        throw error;
+        ctx.throw([400, error]);
     }
     try {
-        const token = await getTokenPCKE(code, codeChallenge);
-        console.log('!getTokenPCKE response -> ', token);
-        if ('error' in token)
-            throw new Error(`Error getting token from Spotify API. Error: ${token.error} message: ${token.error_description}`);
-        ctx.services.token.set(token);
+        // Get user token info from spotify
+        const token = await ctx.services.spotify.getTokenPCKE(code, codeChallenge);
+        // Set access token info in request state
         ctx.state.accessToken = token.access_token;
-        await next();
+        ctx.state.spotifyUserToken = token;
     }
     catch (error) {
-        ctx.body = { code };
-        ctx.status = 500;
+        ctx.throw([500, error]);
     }
+    await next();
 }

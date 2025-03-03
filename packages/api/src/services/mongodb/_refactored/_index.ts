@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import { FaradayItemData } from '#controllers/faraday/getItemData.js'
-import { AppState } from '../../router.js'
+import { AppState } from '../../../router.js'
 import { SpotifyAlbum, SpotifyCoverImageResponse, SpotifyPlaylist, SpotifySearchResult, SpotifyUserProfile } from '#controllers/spotify/spotify.types.js'
 import { AuthToken } from '#services/token/Token.js';
 
@@ -326,7 +326,11 @@ class MongoDb {
     return flattenedIds
   }
   
-  async setUserInfo(userInfo: SpotifyUserProfile, tokenInfo: Omit<AuthToken, 'token_type'>){
+  /**
+   * Create or Update a User in the DB
+   * @returns UserInfo
+   */
+  async setUserInfo(userInfo: SpotifyUserProfile, tokenInfo: Omit<AuthToken, 'token_type'>):  Promise<WithId<SpotifyUserProfile> | null>{
     console.log('!setUserInfo -> ', userInfo);
     if('error' in userInfo) throw new Error('No userInfo set: Error in userInfo.', { cause: userInfo })
     if('error' in tokenInfo) throw new Error('No tokenInfo set: Error in tokenInfo', { cause: tokenInfo })
@@ -345,12 +349,14 @@ class MongoDb {
     return this.#setNewUserInfo(userInfo, tokenInfo)
   }
 
-  async #updateUserInfo(user: mongoDB.WithId<mongoDB.BSON.Document>, userInfo: SpotifyUserProfile, tokenInfo: Omit<AuthToken, 'token_type'>){
+  async #updateUserInfo(user: mongoDB.WithId<mongoDB.BSON.Document>, userInfo: SpotifyUserProfile, tokenInfo: Omit<AuthToken, 'token_type'>): Promise<WithId<SpotifyUserProfile> | null>{
     console.log('!updateUserInfo -> ', userInfo);
     const usersCollection = this.db?.collection('users')
     if (!usersCollection) throw new Error('No users collecion found')
     
     const modifiedFields = Object.keys(userInfo).reduce((newFields, field) => {
+      if (field === '_id') return newFields;
+
       const newValue = (userInfo as any)[field]
       const currentValue = user[field]
 
@@ -368,7 +374,7 @@ class MongoDb {
     }, {} as { [K in keyof SpotifyUserProfile]: SpotifyUserProfile[keyof SpotifyUserProfile] })
 
     console.log(`setUserInfo Updating user endpoint info:`, tokenInfo)
-    const insertedDoc = await usersCollection.updateOne(
+    const updatedUser = await usersCollection.findOneAndUpdate(
       { _id: user._id},
       { $set: {
         ...modifiedFields,
@@ -377,12 +383,14 @@ class MongoDb {
           setAt: new Date(),
         },
         updatedDate: new Date()
-      }}
+      }},
+      // Dont return this sensitive info
+      { projection: { endpoint: 0, playlists: 0 }}
     )
-    return insertedDoc
+    return updatedUser as WithId<SpotifyUserProfile> | null
   }
 
-  async #setNewUserInfo(userInfo: SpotifyUserProfile, tokenInfo: Omit<AuthToken, 'token_type'>){
+  async #setNewUserInfo(userInfo: SpotifyUserProfile, tokenInfo: Omit<AuthToken, 'token_type'>): Promise<WithId<SpotifyUserProfile> | null>{
     const usersCollection = this.db?.collection('users')
     if (!usersCollection) throw new Error('No users collecion found')
     // Insert new user
@@ -396,7 +404,15 @@ class MongoDb {
       createdDate: new Date(),
       playlists: []
     })
-    return insertedDoc
+
+    // Get newley inserted user
+    const insertedUser = await usersCollection.findOne(
+      { _id: insertedDoc.insertedId },
+      // Dont return endpoint info
+      { projection: { endpoint: 0, playlists: 0 }}
+    );
+
+    return insertedUser as WithId<SpotifyUserProfile> | null
   }
 
   async setUsersPlaylist(userUri: SpotifyUserProfile["uri"], spotifyPlaylist: SpotifyPlaylist){
@@ -411,6 +427,7 @@ class MongoDb {
     }})
   }
 
+  
   async setFaradayIdAsNotFound(faradayId: FaradayItemData["id"]){
     console.log('!setFaradayIdAsNotFound -> ', faradayId);
     const albumCollection = this.db?.collection('albums')
@@ -490,7 +507,7 @@ class MongoDb {
     const userCollection = this.db.collection('users')
     if (!userCollection) throw new Error('No userCollection found')
     // Remove accesstoken info
-    const projection = { endpoint: 0 }
+    const projection = { endpoint: 0, playlists: 0 }
     const user = await userCollection.findOne({ uri: uri }, { projection })
     console.log('!getUserInfoById user -> ', user);
     return user

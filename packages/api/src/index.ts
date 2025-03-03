@@ -41,7 +41,7 @@ app.use(cors({
   credentials: true, // Enable cookies to be sent,
   methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify allowed methods
   headers: ['Content-Type', 'Authorization'], // Specify allowed headers
-  expose: ['location','Authorization','X-Updated-Jwt'] // headers we expose in the response
+  expose: ['location','Authorization','X-Updated-Jwt', 'X-Jwt-Remove'] // headers we expose in the response
 } ))
 // app.use(cors())
 app.use(bodyParser())

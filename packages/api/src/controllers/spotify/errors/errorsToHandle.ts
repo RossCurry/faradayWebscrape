@@ -8,3 +8,9 @@ const noScope = { error: { status: 403, message: 'Insufficient client scope' } }
 //   }
 // }
 // !setUserInfo ->  { error: { status: 401, message: 'Invalid access token' } }
+// refreshToken is revoked:
+// Happens because we call the API get a new token but something goes wrong and the DB is not updated
+// {
+//   error: 'invalid_grant',
+//   error_description: 'Refresh token revoked'
+// }

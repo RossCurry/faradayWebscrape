@@ -10,7 +10,7 @@ export default async function setSpotifyTrackInfo(ctx, next) {
         const { mongo } = ctx.services;
         if (!mongo)
             throw new Error('No mongo object found');
-        const inserted = await mongo.setSpotifyTrackData(spotifyTrackInfo);
+        const inserted = await mongo.spotify?.setSpotifyTrackData(spotifyTrackInfo);
         ctx.body = JSON.stringify(inserted);
         ctx.status = 200;
     }

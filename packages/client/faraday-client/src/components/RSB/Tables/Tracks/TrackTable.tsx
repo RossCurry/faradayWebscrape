@@ -84,7 +84,11 @@ export default function TrackTable({
       }
       return
     }
-    dispatch({ type: 'setAudioUrl', track })
+
+    // TODO need a more robust fix for this
+    if (track.preview_url){
+      dispatch({ type: 'setAudioUrl', track })
+    }
   }
 
   const table = useReactTable({

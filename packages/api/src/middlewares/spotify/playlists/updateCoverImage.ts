@@ -27,16 +27,15 @@ export default async function updateCoverImage(ctx: AppContext, next: Applicatio
     // TODO use dynamic userId
     const userId = ctx.services.token.getUserInfo()?.id
     if (!userId) throw new Error('updateCoverImage No user id was found')
-    const updated = await ctx.services.mongo.setCoverImage(userId, playlistId, playlistImageInfo)
+    const updated = await ctx.services.mongo.spotify?.setCoverImage(userId, playlistId, playlistImageInfo)
+
     console.log('!updated -> ', updated);
     ctx.body = playlistImageInfo
     ctx.status = 200;
-    await next()
   } catch (error) {
-    console.error('Error in middleware:', error);
-    ctx.status = 500;
-    ctx.body = `Internal Server Error: ${error}`;
+    ctx.throw([500, error])
   }
+  await next()
 }
 
 export async function getPlaylistImage(playlistId: string, accessToken: string ){

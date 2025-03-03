@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { getIsJwtExpired } from '../utils/decodeJwt';
-import { getUserInfoWithToken } from '../services';
+import { getUserInfoWithToken } from '../services/services';
 import { useAppDispatch, useAppState } from '../state/AppStateHooks';
 import { AppStateDispatch } from '../state/AppStateProvider';
 

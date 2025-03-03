@@ -25,7 +25,7 @@ export default async function getSpotifyTracksInfo(ctx, next) {
                 tracks: spotifyTracks,
             };
             // TODO add to DB as we get the data one by one, otherwise the rate limit kills the request
-            await ctx.services.mongo.setSpotifyTrackData([{ album: trackData.album, tracks: trackData.tracks }]);
+            await ctx.services.mongo.spotify?.setSpotifyTrackData([{ album: trackData.album, tracks: trackData.tracks }]);
             return trackData;
         }
     }));

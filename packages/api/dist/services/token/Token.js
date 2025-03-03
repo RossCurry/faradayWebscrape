@@ -50,7 +50,10 @@ export default class Token {
     }
     decodeJwtToken(token) {
         const decoded = jwt.decode(token, { complete: true });
-        return decoded;
+        if (!decoded)
+            throw new Error('Nothing decoded from JWT token');
+        const { iat, exp, ...rest } = decoded;
+        return rest;
     }
     createJwtToken(userInfo) {
         const JWT_SECRET = process.env.JWT_SECRET;
@@ -59,8 +62,10 @@ export default class Token {
         // The previous token user info will have expiration info
         const { iat, exp, ...user } = userInfo;
         // Actual spotify token last an hour
-        const spotifyTokenExpiration = '55m';
-        const token = jwt.sign(user, JWT_SECRET, { expiresIn: spotifyTokenExpiration });
+        const spotifyTokenExpiration = '10s';
+        // reduce size of token
+        const { id, display_name, uri } = user;
+        const token = jwt.sign({ id, display_name, uri }, JWT_SECRET, { expiresIn: spotifyTokenExpiration });
         console.log('!createJwtToken -> created');
         return token;
     }
@@ -82,8 +87,8 @@ export default class Token {
         if (!JWT_SECRET)
             throw new Error('No ENV vars found for secret');
         try {
-            const verifiedToken = jwt.verify(token, JWT_SECRET);
-            return verifiedToken;
+            jwt.verify(token, JWT_SECRET);
+            return false;
         }
         catch (error) {
             if (error instanceof Error) {
@@ -92,7 +97,7 @@ export default class Token {
                 const isExpired = error.name === expiredName || error.message === expiredMessage;
                 console.error('!isJwtTokenExpired isExpired -> ', isExpired);
                 if (isExpired)
-                    return isExpired;
+                    return true;
             }
             throw error;
         }

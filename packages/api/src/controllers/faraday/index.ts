@@ -18,14 +18,12 @@ faradayRouter.get("/api/faraday/albums",
     const { mongo } = ctx.services
     if (!mongo) throw new Error('No mongo object found')
     try {
-      const spotifyData = await mongo.getSpotifyAlbumData()
-      console.log('!spotifyData length-> ', spotifyData.length);
+      const spotifyData = await mongo.spotify?.getSpotifyAlbumData()
+      console.log('!spotifyData length-> ', spotifyData?.length);
       ctx.status = 200
       ctx.body = spotifyData;
     } catch (error) {
-      console.error('Error in middleware:', error);
-      ctx.status = 500;
-      ctx.body = 'Internal Server Error';
+      ctx.throw([500, error])
     }
   }
 )
@@ -37,24 +35,23 @@ faradayRouter.get("/api/faraday/albums/batch",
   async (ctx: AppContext, _next: Application.Next) => {
     const { mongo } = ctx.services
     if (!mongo) throw new Error('No mongo object found')
+
     console.log('!ctx.params -> ', ctx.params);
     const { limit, offset, filter } = ctx.query
     const filterParsed = filter && typeof filter === 'string' ? JSON.parse(filter) : {}
     try {
-      const spotifyData = await mongo.getSpotifyAlbumData(
+      const spotifyData = await mongo.spotify?.getSpotifyAlbumData(
         null, 
         Number(limit), 
         Number(offset),
         filterParsed,
       )
-      const albumCount = await mongo.getSpotifyAlbumDataCount(null, filterParsed)
-      console.log('!spotify Batch length-> ', spotifyData.length, albumCount );
+      const albumCount = await mongo.spotify?.getSpotifyAlbumDataCount(null, filterParsed)
+      console.log('!spotify Batch length-> ', spotifyData?.length, albumCount );
       ctx.status = 200
       ctx.body = { data: spotifyData, totalCount: albumCount };
     } catch (error) {
-      console.error('Error in middleware:', error);
-      ctx.status = 500;
-      ctx.body = 'Internal Server Error';
+      ctx.throw([500, error])
     }
   }
 )

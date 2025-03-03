@@ -25,19 +25,20 @@ export default async function CreatePlaylist(ctx, next) {
     if (!currentUser)
         throw new Error('No currentUser found in request');
     try {
-        const accessToken = await ctx.services.mongo.getUsersAccessToken(currentUser);
-        const userId = currentUser.id;
+        const accessToken = await ctx.services.mongo.user?.getUsersAccessToken(currentUser);
+        if (!accessToken)
+            throw new Error('No user access token found');
         const playlistParams = {
             accessToken,
             description,
             playlistTitle,
-            userId,
+            userId: currentUser.id,
         };
         // Assert all params. 
         const createdPlaylist = await ctx.services.spotify.createPlaylist(assertPlaylistParams(playlistParams));
         console.log('!spotifyPlaylist -> ', createdPlaylist);
         const userUri = currentUser.uri;
-        await ctx.services.mongo.setUsersPlaylist(userUri, createdPlaylist);
+        await ctx.services.mongo.user?.setUsersPlaylist(userUri, createdPlaylist);
         // Add to request state
         ctx.state.playlist = createdPlaylist;
     }

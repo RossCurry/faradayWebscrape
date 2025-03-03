@@ -1,6 +1,5 @@
 import Router from 'koa-router';
 import mw from '#middlewares/index.js';
-import { redirectToSpotifyAuthorize } from './auth/PKCE/1.codeChallenge.js';
 import { getPlaylistImage } from '#middlewares/spotify/playlists/updateCoverImage.js';
 const spotifyRouter = new Router();
 // // Temporary Route to update missing genre field for existing
@@ -28,12 +27,18 @@ spotifyRouter.post('/api/spotify/playlist/updateCoverImage/:playlistId', mw.auth
  * & redirect FE to the spoti auth
  */
 spotifyRouter.get('/api/spotify/connect', async (ctx, _next) => {
-    const { authUrl: spotifyAuthUrl, codeVerifier: notEncoded } = await redirectToSpotifyAuthorize();
-    // We need this for the authTokenRequest
-    ctx.services.codeVerifier.set(notEncoded);
-    ctx.set('Content-Type', 'application/json');
-    ctx.set('location', spotifyAuthUrl.toString());
-    ctx.status = 201; // created
+    console.log('!ctx. -> ', ctx.ip);
+    try {
+        const { authUrl: spotifyAuthUrl, codeVerifier: notEncoded } = await ctx.services.spotify.redirectToSpotifyAuthorize();
+        // We need this for the authTokenRequest
+        ctx.services.codeVerifier.set(notEncoded);
+        ctx.set('Content-Type', 'application/json');
+        ctx.set('location', spotifyAuthUrl.toString());
+        ctx.status = 201; // created
+    }
+    catch (error) {
+        ctx.throw([500, error]);
+    }
 });
 /**
  * This is used by the FE to create the playlist.
@@ -58,13 +63,13 @@ spotifyRouter.get("/api/spotify/search", mw.auth.getClientCredentialToken, mw.sp
  * Return a json list of spotify track info available by album id
  */
 spotifyRouter.get("/api/spotify/album/:id/tracks", async (ctx, _next) => {
-    const { mongo } = ctx.services;
-    if (!mongo)
+    const { spotify } = ctx.services.mongo;
+    if (!spotify)
         throw new Error('No mongo object found');
     try {
         const { id } = ctx.params;
         console.log('!path -> ', id);
-        const spotifyData = await mongo.getSpotifyTracksListByAlbumId(id);
+        const spotifyData = await spotify.getSpotifyTracksListByAlbumId(id);
         ctx.status = 200;
         ctx.body = { tracklist: spotifyData };
     }
@@ -81,14 +86,14 @@ spotifyRouter.get("/api/spotify/playlists", mw.auth.getClientCredentialToken,
 // update those images in db
 // return everything updated to the FE
 async (ctx, next) => {
-    const { mongo } = ctx.services;
-    if (!mongo)
+    const { faraday } = ctx.services.mongo;
+    if (!faraday)
         throw new Error('No mongo object found');
     try {
         const userId = ctx.services.token.getUserInfo()?.id;
         if (!userId)
             throw Error('Cannot get playlist info. No userId given');
-        const playlistsData = await mongo.getFaradayPlaylistData(userId);
+        const playlistsData = await faraday.getFaradayPlaylistData(userId);
         console.log('!spotifyData length-> ', playlistsData?.length);
         ctx.state.data.userPlaylists = playlistsData;
         await next();
@@ -112,7 +117,7 @@ async (ctx, next) => {
         const playlistsToUpdate = await Promise.all(ctx.state.data.userPlaylists.map(async (playlist) => {
             const imageInfo = await getPlaylistImage(playlist.id, accessToken);
             // Set in DB for next time
-            const updated = await ctx.services.mongo.setCoverImage(userId, playlist.id, imageInfo);
+            const updated = await ctx.services.mongo.spotify?.playlists?.setCoverImage(userId, playlist.id, imageInfo);
             // Update in Memory for response
             playlist.images = imageInfo;
             return playlist;

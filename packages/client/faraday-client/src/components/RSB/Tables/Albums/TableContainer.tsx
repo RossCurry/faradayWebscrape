@@ -29,7 +29,7 @@ import styles from './AlbumTableContainer.module.css'
 import IconButton from '../../../Shared/IconButton/IconButton'
 import { ArrowBackIcon } from '../../../../icons'
 import { msToTime } from '../../../../utils/msToTime'
-import { BatchResponse, getAlbumsInBatch } from '../../../../services'
+import { BatchResponse, getAlbumsInBatch } from '../../../../services/services'
 
 export type CheckedAlbumDict = {
   [K in SpotifySearchResult['id']]: boolean

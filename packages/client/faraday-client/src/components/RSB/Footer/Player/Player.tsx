@@ -21,6 +21,7 @@ export default function Player() {
     if (!audioRef.current) return
     audioRef.current?.play();
     setControls({ ...controls, isPlaying: true, isPaused: false })
+    console.log('!controls -> ', controls);
   }
 
   // Pauses the audio
@@ -107,6 +108,7 @@ export default function Player() {
 
 
   useEffect(() => {
+    const prevTrack = audioRef.current?.src
     if (audioRef.current && audioUrl) {
       audioRef.current.src = audioUrl
       audioRef.current.load(); // Reloads the audio source
@@ -116,11 +118,18 @@ export default function Player() {
           clipDuration: audioRef.current?.duration || 0
         })
       });
-      handlePlay()
+      
+      // Make sure to only autoplay on a new song. 
+      // otherwise component mount will trigger the song.
+      const isNewSong = prevTrack !== audioUrl
+      if (isNewSong) handlePlay()
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [audioUrl]); // Trigger the effect whenever the audioUrl changes
+    
+    // Trigger the effect whenever the audioUrl changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [audioUrl]); 
 
+  console.log('!controls.isPlaying && !controls.isPaused -> ', controls.isPlaying, controls.isPaused);
   return (
     <div className={styles.player}>
     
@@ -146,7 +155,13 @@ export default function Player() {
       {/* PlayPause */}
       <fieldset>
         <button onClick={handleStop}>{'I<'}</button>
-        <button onClick={handlePlayPause}>{controls.isPlaying && !controls.isPaused ? '||' : '>'}</button>
+        <button onClick={handlePlayPause}>{
+          controls.isPlaying && !controls.isPaused 
+            ? 
+            '||' 
+            : '>'
+          }
+        </button>
         {/* PROGESS BAR */}
         <ProgressBar getCurrentTime={getCurrentTime} totalTime={controls.clipDuration}/>
         {/* VOLUME CONTROLS - at least MUTE */}
