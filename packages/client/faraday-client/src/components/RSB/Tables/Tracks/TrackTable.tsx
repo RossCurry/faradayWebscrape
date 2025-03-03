@@ -41,6 +41,16 @@ export default function TrackTable({
     }
   }),[data, customPlaylist])
 
+  const areAllTracksSelected = useMemo(() => {
+    return dataWithCheckbox.every(track => track.isChecked)
+  },[dataWithCheckbox])
+  
+  const allTracksIds = useMemo(() => {
+    return dataWithCheckbox.map(track => track.id)
+  },[dataWithCheckbox])
+
+
+
   // I had this in useCallback but it wasnt being fired
   const handleCheckbox = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value: trackId, checked } = e.target as HTMLInputElement
@@ -51,9 +61,19 @@ export default function TrackTable({
     }
   }
 
+  // TODO this isnt working as expected
+  const handleSelectAllTracks = (checked: boolean) => {
+    console.log('!areAllTracksSelected -> ', checked, areAllTracksSelected);
+    if (checked){
+      dispatch({ type: 'addTracksToCustomPlaylist', trackIds: allTracksIds })
+    } else {
+      dispatch({ type: 'deleteTracksFromCustomPlaylist', trackIds: allTracksIds })
+    }
+  }
+
   const columns = React.useMemo(
     () => [
-      getCheckbox({ handleCheckbox }),
+      getCheckbox({ handleCheckbox, handleSelectAllTracks, areAllTracksSelected }),
       image,
       playButton,
       trackNumber,

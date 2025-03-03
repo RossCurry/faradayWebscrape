@@ -7,7 +7,7 @@ import { AddIcon, LibraryAddIcon, LibraryRemoveIcon, PlayIcon, PlayIconFilled, R
 import Tooltip from "../../../../../Shared/Tooltip/Tooltip"
 import { TrackListData } from "../../../Tracks/TrackTable"
 import IconButton from "../../../../../Shared/IconButton/IconButton"
-import { useAppDispatch } from "../../../../../../state/AppStateHooks"
+import { useAppDispatch, useAppState } from "../../../../../../state/AppStateHooks"
 
 
 export const image: AccessorColumnDef<AlbumItemTableData, { url: SpotifySearchResult["image"]["url"], isSoldOut: SpotifySearchResult["isSoldOut"] }> = {
@@ -45,12 +45,15 @@ export const playButton: AccessorColumnDef<AlbumItemTableData, AlbumItemTableDat
   accessorFn: (data) => data,
   id: 'play',
   cell: function AlbumPlayButton(info){
+    const { audioUrl } = useAppState().player
     const dispatch = useAppDispatch()
     const keyId = `album-playbutton-${React.useId()}`
     const data = info.getValue()
     const { trackList } = data
     const [firstTrack] = Array.isArray(trackList) ?  trackList : [];
     const preview_url = firstTrack?.preview_url
+    // TODO include is playing state
+    const isPlaying = audioUrl === preview_url
     const isDisabled = !preview_url;
 
     return (
@@ -67,6 +70,7 @@ export const playButton: AccessorColumnDef<AlbumItemTableData, AlbumItemTableDat
               className={`
                 ${styles.playButton}
                 ${preview_url ? '' : styles.isDisabled}
+                ${isPlaying ? styles.isPlaying : ''}
               `}
               disabled={isDisabled}
             />

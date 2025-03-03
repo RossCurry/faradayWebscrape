@@ -93,7 +93,11 @@ export default function AlbumTable({ data }: { data: SpotifySearchResult[] }) {
 
   const columns = React.useMemo(
     () => [
-      getCheckbox({ areAllAlbumsSelected, handleSelectAll, handleCheckbox }),
+      getCheckbox({ 
+        areAllAlbumsSelected, 
+        handleSelectAll, 
+        handleCheckbox 
+      }),
       image,
       albumAndArtist,
       category,
