@@ -4,7 +4,7 @@ import { TrackListColumnData } from "../TrackTable"
 import Tooltip from "../../../../Shared/Tooltip/Tooltip"
 import IconButton from "../../../../Shared/IconButton/IconButton"
 import { LibraryAddIcon, LibraryRemoveIcon, PlayIconFilled } from "../../../../../icons"
-import React from "react"
+import React, { useCallback } from "react"
 import { useAppDispatch, useAppState } from "../../../../../state/AppStateHooks"
 
 
@@ -122,26 +122,35 @@ export const player: AccessorColumnDef<TrackListColumnData, TrackListColumnData[
     )
   },
   header: () => null,
-  // header: () => null,
   sortUndefined: 'last', //force undefined values to the end
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
 }
 
 
 export const getCheckbox = ({
-  handleCheckbox,
-  handleSelectAllTracks, 
-  areAllTracksSelected
+  areAllTracksSelected,
+  allTracksIds
 }: {
-  handleCheckbox: (e: React.ChangeEvent<HTMLInputElement>) => void
-  handleSelectAllTracks: (checked: boolean) => void,
-  areAllTracksSelected: boolean
+  areAllTracksSelected: boolean,
+  allTracksIds: string[]
 }) => {
+  
   const checkBox: AccessorColumnDef<TrackListColumnData, { trackId: TrackListColumnData['id'], isChecked: boolean }> = {
     accessorFn: row => ({ trackId: row.id, isChecked: row.isChecked }),
     id: 'checkbox',
-    cell: info => {
+    cell: function TrackCell(info){
+      const dispatch = useAppDispatch()
       const {trackId, isChecked} = info.getValue()
+
+      const handleCheckbox = useCallback(() => (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { value: trackId, checked } = e.target as HTMLInputElement
+        if (checked){
+          dispatch({ type: 'addTrackToCustomPlaylist', trackId: trackId })
+        } else {
+          dispatch({ type: 'deleteTrackFromCustomPlaylist', trackId: trackId })
+        }
+      }, [])
+      
       return (
         <input
           className={styles.rowDataTrack}
@@ -152,9 +161,19 @@ export const getCheckbox = ({
         />
       )
     },
-    // header: () => null,
-    header: function Header(){
+    header: function TrackHeader(){
       const checkBoxId = `album-checkbox-select-all-id-${React.useId()}`
+      const dispatch = useAppDispatch()
+
+      const handleOnChangeHeader = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const checked = e.target.checked;
+        console.log('!handleOnChangeHeader -> ', areAllTracksSelected, checked);
+        if (checked){
+          dispatch({ type: 'addTracksToCustomPlaylist', trackIds: allTracksIds })
+        } else {
+          dispatch({ type: 'deleteTracksFromCustomPlaylist', trackIds: allTracksIds })
+        }
+      },[])
 
       return (
         <label htmlFor={checkBoxId} className={styles.rowDataCentered}>
@@ -169,7 +188,7 @@ export const getCheckbox = ({
             type="checkbox" 
             value={'all'} 
             checked={areAllTracksSelected}
-            onChange={() => handleSelectAllTracks(!areAllTracksSelected)}
+            onChange={handleOnChangeHeader}
             style={{display: 'none'}}
           />
           </label>
