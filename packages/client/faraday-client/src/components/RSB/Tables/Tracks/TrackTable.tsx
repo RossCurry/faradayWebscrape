@@ -28,11 +28,11 @@ export default function TrackTable({
   data,
   albumId,
 }: TrackTableProps) {
+  console.log('!RENDER TrackTable -> ');
   const dispatch = useAppDispatch()
   const tableTracksRef = useRef<HTMLTableElement>(null)
   const [sorting, setSorting] = useState<SortingState>([])
-  const appState = useAppState();
-  const customPlaylist = appState.playlist.custom
+  const customPlaylist = useAppState().playlist.custom;
 
   const dataWithCheckbox = useMemo(() => data.map(track => {
     return {
@@ -50,36 +50,15 @@ export default function TrackTable({
   },[dataWithCheckbox])
 
 
-
-  // I had this in useCallback but it wasnt being fired
-  const handleCheckbox = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value: trackId, checked } = e.target as HTMLInputElement
-    if (checked){
-      dispatch({ type: 'addTrackToCustomPlaylist', trackId: trackId })
-    } else {
-      dispatch({ type: 'deleteTrackFromCustomPlaylist', trackId: trackId })
-    }
-  }
-
-  // TODO this isnt working as expected
-  const handleSelectAllTracks = (checked: boolean) => {
-    console.log('!areAllTracksSelected -> ', checked, areAllTracksSelected);
-    if (checked){
-      dispatch({ type: 'addTracksToCustomPlaylist', trackIds: allTracksIds })
-    } else {
-      dispatch({ type: 'deleteTracksFromCustomPlaylist', trackIds: allTracksIds })
-    }
-  }
-
   const columns = React.useMemo(
     () => [
-      getCheckbox({ handleCheckbox, handleSelectAllTracks, areAllTracksSelected }),
+      getCheckbox({ areAllTracksSelected, allTracksIds }),
       image,
       playButton,
       trackNumber,
       songAndArtist,
       duration,
-    ], []
+    ], [areAllTracksSelected, allTracksIds]
   )
 
   const handleOnClick = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, track: TrackListData) => {
