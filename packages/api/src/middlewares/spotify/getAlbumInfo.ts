@@ -61,7 +61,8 @@ function parseAlbumTitle(title: string): ParsedTitle {
   console.log('!parseAlbumTitle -> ', title);
   // const [artist, album] = title.split('-')
   // decode, split and normalise letters
-  const words = decodeURIComponent(title)
+  // const words = decodeURIComponent(title) // decodeURIComponent is throwing errors for certain strings
+  const words = title
     .split(' ')
     .map(word => convertToEnglishAlphabet(word))
   const divisionIndex = words.indexOf('-')
@@ -285,10 +286,12 @@ type ParsedTitle = {
  * @param authString 
  * @returns 
  */
-export async function searchSingleAlbum(album: { title: string }, authString: string): Promise<SpotifySearchProjection | undefined> {
+export async function searchSingleAlbum(album: Partial<FaradayItemData>, authString: string): Promise<SpotifySearchProjection | undefined> {
   console.log('!searchSingleAlbum -> ', album.title);
+  const title = album.linkLabel || album.title
+  if (!title) throw new Error('No title to search')
   try {
-    const parsedTitle = parseAlbumTitle(album.title)
+    const parsedTitle = parseAlbumTitle(title);
     console.log('!parsedTitle -> ', parsedTitle);
     const searchTerm = encodeURIComponent(`artist:${parsedTitle.artist}` + ' ' + (parsedTitle.album ? `album:${parsedTitle.album}` : ''))
     const limit = 50
@@ -386,7 +389,6 @@ export default async function getAlbumInfoSpotify(ctx: AppContext, next: Applica
 
   // Dont use map, as the concurrent approach burns the rate limit.
   try {
-    // TODO for testing only search a few albums,
     const albumsInfo: AlbumsInfo[] = []
     for (const album of faradayAlbums){
       console.log('!Current album search -> ', album.title);

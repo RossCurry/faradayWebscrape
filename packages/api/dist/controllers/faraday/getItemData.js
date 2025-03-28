@@ -53,7 +53,11 @@ async function getItems(gridItems) {
                 if (!context.length)
                     return null;
                 try {
-                    const cleanString = context.replaceAll('\n', '').replaceAll('\t', '');
+                    let cleanString = context.replaceAll('\n', '').replaceAll('\t', '').trim();
+                    // Ensure the JSON string is properly closed
+                    if (!cleanString.endsWith('}')) {
+                        cleanString += '" }'; // Attempt to close incomplete objects
+                    }
                     const parsed = JSON.parse(cleanString);
                     parseError = undefined;
                     return parsed;
@@ -62,8 +66,21 @@ async function getItems(gridItems) {
                     parseError = { message: 'not json', context };
                 }
             }
-            const [priceEl] = el.getElementsByClassName('product-price');
-            const price = priceEl?.textContent?.replaceAll('\n', '').replace('€', '').trim();
+            /**
+             * Assumes id=thumb-gil-scott-heron-jamie-xx-were-new-here
+             */
+            function parseIdTitle(idTitle) {
+                if (!idTitle)
+                    return;
+                return idTitle.replace('thumb-', '').replaceAll('-', ' ').trim();
+            }
+            const id = el.id;
+            const idTitle = parseIdTitle(id);
+            const [linkEl] = Array.from(el.getElementsByTagName('a'));
+            const link = linkEl.href;
+            const linkLabel = linkEl.ariaLabel;
+            const [priceEl] = Array.from(el.getElementsByClassName('product-price'));
+            const price = priceEl?.textContent?.replaceAll('\n', '').replaceAll('€', '').trim();
             const context = el.getAttribute('data-current-context');
             const isSoldOut = el.classList.contains('sold-out');
             const fullCategoryString = Array.from(el.classList.values()).find(val => val.includes('category'));
@@ -78,6 +95,9 @@ async function getItems(gridItems) {
                 category: category || fullCategoryString,
                 sourceContext: context,
                 price: price || '',
+                link: link,
+                linkLabel: linkLabel,
+                idTitle: idTitle,
                 parseError: parseError
             };
             // return context && typeof context === 'string' ? JSON.parse(context) : null

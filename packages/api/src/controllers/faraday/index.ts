@@ -56,6 +56,11 @@ faradayRouter.get("/api/faraday/albums/batch",
   }
 )
 
+
+faradayRouter.get("/api/faraday/errors",
+  mw.faraday.getFaradayErrors,
+)
+
 // faradayRouter.post("/api/faraday/update",
 //   // (ctx, _next) => {
 //   //   ctx.body = 'all good'

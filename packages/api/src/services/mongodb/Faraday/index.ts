@@ -39,11 +39,15 @@ export default class FaradayMongo extends BaseConnection {
      */
     const needsUpdate = prevStock.filter(prevItem => {
       const currentItem = data.find(currentItem => currentItem.id === prevItem.id)
+      // TODO make this more extensible. Based on the types.
       if (currentItem) {
         const newAvailablility = currentItem.isSoldOut !== prevItem.isSoldOut
         const newCategory = currentItem.category !== prevItem.category
         const newPrice = currentItem.price !== prevItem.price
-        const needsUpdate = newAvailablility || newCategory || newPrice
+        const newLink = currentItem.link !== prevItem.link
+        const newLinkLabel = currentItem.linkLabel !== prevItem.linkLabel
+        const newIdTitle = currentItem.idTitle !== prevItem.idTitle
+        const needsUpdate = newAvailablility || newCategory || newPrice || newLink || newLinkLabel || newIdTitle
         return needsUpdate
       }
       return false
@@ -78,6 +82,20 @@ export default class FaradayMongo extends BaseConnection {
     }
   }
 
+  async setFaradayErrors(errors: FaradayItemData[]){
+    console.log('!setFaradayErrors -> ', errors);
+    const errorsCollection = this.db?.collection('errors')
+    await errorsCollection.insertMany(errors);
+  }
+
+  async getFaradayErrors(){
+    console.log('!getFaradayErrors -> ');
+    const errorsCollection = this.db?.collection('errors')
+    const errorData =  await errorsCollection.find({}).toArray();
+    console.log('!getFaradayErrors -> ', errorData.length);
+    const sourceContext = errorData.map(data => data.sourceContext);
+    return sourceContext;
+  }
 
   async getFaradayData() {
     console.log('!getFaradayData -> ');
