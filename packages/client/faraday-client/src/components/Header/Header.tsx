@@ -1,7 +1,6 @@
 import React from 'react'
 import styles from './header.module.css'
 import SpotifyConnect from './SpotifyConnect/Spotify'
-import { useAppDispatch } from '../../state/AppStateHooks'
 import { FaradayLogo } from '../../logos/FaradayLogo';
 
 export default function Header() {

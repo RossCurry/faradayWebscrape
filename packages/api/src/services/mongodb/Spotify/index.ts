@@ -136,6 +136,7 @@ export default class SpotifyMongo extends BaseConnection {
       'faraday.category': 1,
       'faraday.isSoldOut': 1,
       'faraday.price': 1,
+      'faraday.link': 1,
       'spotify.albumType': 1,
       'spotify.totalTracks': 1,
       'spotify.releaseDate': 1,

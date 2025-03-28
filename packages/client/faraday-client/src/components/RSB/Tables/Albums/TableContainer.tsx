@@ -28,9 +28,12 @@ import { useAppDispatch, useAppState } from '../../../../state/AppStateHooks'
 import TrackTable, { TrackListData } from '../Tracks/TrackTable'
 import styles from './AlbumTableContainer.module.css'
 import IconButton from '../../../Shared/IconButton/IconButton'
-import { ArrowBackIcon } from '../../../../icons'
+import { ArrowBackIcon, ShoppingCartIcon } from '../../../../icons'
 import { msToTimeDivision } from '../../../../utils/msToTime'
 import { BatchResponse, getAlbumsInBatch } from '../../../../services/services'
+import { SpotifyGreenLogo } from '../../../../logos'
+import Tooltip from '../../../Shared/Tooltip/Tooltip'
+import { FaradayLogo } from '../../../../logos/FaradayLogo'
 
 export type CheckedAlbumDict = {
   [K in SpotifySearchResult['id']]: boolean
@@ -509,27 +512,36 @@ function TableCell({ cell }: { cell: Cell<AlbumItemTableData, unknown> }) {
   )
 }
 
-
+/**
+ * Container for the tracklist view
+ * @param param0 
+ * @returns 
+ */
 function TrackTableOverlay({ 
   parentElementHeight, 
 }: { 
   parentElementHeight: number, 
 }) {
+  const dispatch = useAppDispatch()
   const { showTrackTableOverlay, openAlbumInfo } = useAppState().rsb
   const { albumInfo, trackList, albumId } = openAlbumInfo
-  const dispatch = useAppDispatch()
   const imageUrl = trackList?.at(0)?.imageUrl
   const { hours, minutes, seconds } = useMemo(() => {
     const totalDurationMs = trackList?.reduce((duration, info) => info.duration_ms + duration, 0)
     return msToTimeDivision(totalDurationMs || 0)
   }, [trackList])
   const durationString = `${hours > 0 ? `${hours}h` : ''} ${minutes}m ${seconds}s`
+  const albumLink = albumId && `https://open.spotify.com/album/${albumId}`
+
   const handleCloseOverlay = () => {
     dispatch({ 
       type: 'setShowTrackTableOverlay', 
       showTrackTableOverlay: false 
     })
   }
+  
+  
+
   const renderTrackList = !!albumId && !!trackList && trackList?.length > 0
   return (
     <section
@@ -563,6 +575,8 @@ function TrackTableOverlay({
           <h2>{albumInfo?.name}</h2>
           <h3>{albumInfo?.artists.join(', ')}</h3>
         </div>
+
+        <Links albumLink={albumLink} faradayLink={albumInfo?.link} />
         <div
           className={styles.trackTableHeaderAlbumStats}
         >
@@ -578,5 +592,48 @@ function TrackTableOverlay({
         />
       }
     </section>
+  )
+}
+
+
+function Links({ 
+  albumLink, 
+  faradayLink 
+}: { 
+  albumLink: string | null,
+  faradayLink?: string,
+}){
+  return (
+    <span
+      className={styles.trackTableHeaderLinks}
+    >
+    {albumLink && 
+      <a 
+        href={albumLink} 
+        target='_blank'
+      >
+        <Tooltip
+          Component={<SpotifyGreenLogo width={28} height={28} />}
+          tooltipText='Listen on Spotify'
+        />
+      </a>
+      }
+    {faradayLink && 
+      <a 
+        href={faradayLink} 
+        target='_blank'
+      >
+        <Tooltip
+          Component={<ShoppingCartIcon width={28} height={28} />}
+          tooltipText='Buy on Faraday'
+        />
+        {/* <Tooltip
+          Component={<FaradayLogo className={styles.faradayLinkLogo} />}
+          tooltipText='Buy on Faraday'
+        /> */}
+      </a>
+      }
+    
+    </span>
   )
 }
