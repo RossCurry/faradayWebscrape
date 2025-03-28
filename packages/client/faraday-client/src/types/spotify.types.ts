@@ -643,6 +643,7 @@ export type SearchResponse =
     category?: string,
     popularity: number,
     price: string,
+    link?: string
     releaseDate: string | undefined,
     albumType: string,
     totalTracks: number,

@@ -127,6 +127,7 @@ td {}
   grid-template-columns: 0.25fr 1fr 3fr 1fr;
   grid-row: 1fr;
   grid-template-areas: 
+    "closeButton albumImg albumInfo links"
     "closeButton albumImg albumInfo albumStats"
   ;
   gap: var(--p-5);
@@ -182,6 +183,20 @@ td {}
 }
 .trackTableHeader .trackTableHeaderAlbumInfo h2 {
   font-size: 2.5rem;
+}
+.trackTableHeader .trackTableHeaderLinks {
+  grid-area: links;
+  gap: var(--p-4);
+  display: flex;
+  flex-direction: column-reverse;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.trackTableHeader .faradayLinkLogo {
+  width: 28px;
+  aspect-ratio: 1/1;
+  object-fit: contain;
+  border-radius: 50%;
 }
 .trackTableHeader .trackTableHeaderAlbumStats {
   grid-area: albumStats;
