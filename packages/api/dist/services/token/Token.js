@@ -62,7 +62,7 @@ export default class Token {
         // The previous token user info will have expiration info
         const { iat, exp, ...user } = userInfo;
         // Actual spotify token last an hour
-        const spotifyTokenExpiration = '10s';
+        const spotifyTokenExpiration = '1h';
         // reduce size of token
         const { id, display_name, uri } = user;
         const token = jwt.sign({ id, display_name, uri }, JWT_SECRET, { expiresIn: spotifyTokenExpiration });
