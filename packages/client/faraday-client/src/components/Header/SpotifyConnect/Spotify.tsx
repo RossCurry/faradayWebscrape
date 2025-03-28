@@ -1,9 +1,9 @@
 import React from 'react'
 import styles from './Spotify.module.css'
-import { InfoIcon } from '../../../icons/index';
+import { InfoIcon, LogoutIcon } from '../../../icons/index';
 
 import { connectToSpoti } from '../../../services/services';
-import { useAppState } from '../../../state/AppStateHooks';
+import { useAppDispatch, useAppState } from '../../../state/AppStateHooks';
 import Tooltip from '../../Shared/Tooltip/Tooltip';
 
 
@@ -24,10 +24,7 @@ export default function SpotifyConnect() {
           <button onClick={() => connectToSpoti()}>Connect to Spotify</button>
         </div>
       :
-        <Tooltip
-          Component={<User />}
-          tooltipText={user.display_name}
-        />
+        <LoggedIn />
       }
     </fieldset>
   )
@@ -63,5 +60,52 @@ const User = () => {
         </span>
       }
     </>
+  )
+}
+
+
+function LoggedIn(){
+  const { user } = useAppState()
+  if (!user) return null;
+  const { display_name } = user
+
+  return (
+    <span style={{
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      cursor: 'pointer'
+    }}>
+      <Tooltip
+        Component={<User />}
+        tooltipText={display_name}
+      />
+      <Tooltip
+        Component={<LogoutButton />}
+        tooltipText='Log out'
+      />
+    </span>
+  )
+}
+
+function LogoutButton(){
+  const dispatch = useAppDispatch()
+  const handleLogout = () => {
+    // remove jwt token & set user to null
+    localStorage.removeItem('jwt')
+    dispatch({ type: 'setUserInfo', userInfo: null })
+  }
+  return (
+    <button
+      style={{
+        background: 'inherit',
+        border: 0,
+        padding: 0,
+        margin: 0,
+      }} 
+      onClick={handleLogout} 
+    >
+      <LogoutIcon width={28} height={28} />
+    </button>
   )
 }

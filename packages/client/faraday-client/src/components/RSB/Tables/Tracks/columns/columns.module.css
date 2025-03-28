@@ -70,8 +70,12 @@ input[type="checkbox"].rowDataCheckbox{
   opacity: 0.5;
 }
 
+
 .playButton:not(.isDisabled):hover  {
   background-color: var(--bg-dark-1);
+}
+.playButton:not(.isDisabled):hover svg {
+  fill: var(--bg-dark-1);
 }
 .playButton.isPlaying svg,
 .playButton:not(.isDisabled):focus svg,

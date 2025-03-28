@@ -607,6 +607,21 @@ function Links({
     <span
       className={styles.trackTableHeaderLinks}
     >
+    {faradayLink && 
+    <a 
+      href={faradayLink} 
+      target='_blank'
+    >
+      <Tooltip
+        Component={<ShoppingCartIcon width={28} height={28} />}
+        tooltipText='Buy on Faraday'
+      />
+      {/* <Tooltip
+        Component={<FaradayLogo className={styles.faradayLinkLogo} />}
+        tooltipText='Buy on Faraday'
+      /> */}
+    </a>
+    }
     {albumLink && 
       <a 
         href={albumLink} 
@@ -618,22 +633,6 @@ function Links({
         />
       </a>
       }
-    {faradayLink && 
-      <a 
-        href={faradayLink} 
-        target='_blank'
-      >
-        <Tooltip
-          Component={<ShoppingCartIcon width={28} height={28} />}
-          tooltipText='Buy on Faraday'
-        />
-        {/* <Tooltip
-          Component={<FaradayLogo className={styles.faradayLinkLogo} />}
-          tooltipText='Buy on Faraday'
-        /> */}
-      </a>
-      }
-    
     </span>
   )
 }
