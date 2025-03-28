@@ -3,7 +3,7 @@ import styles from './columns.module.css'
 import { TrackListColumnData } from "../TrackTable"
 import Tooltip from "../../../../Shared/Tooltip/Tooltip"
 import IconButton from "../../../../Shared/IconButton/IconButton"
-import { LibraryAddIcon, LibraryRemoveIcon, PlayIconFilled } from "../../../../../icons"
+import { AddIcon, CheckCircleIcon, CheckCircleIconFilled, LibraryAddIcon, LibraryRemoveIcon, PlayIconFilled } from "../../../../../icons"
 import React, { useCallback } from "react"
 import { useAppDispatch, useAppState } from "../../../../../state/AppStateHooks"
 
@@ -141,29 +141,50 @@ export const getCheckbox = ({
     cell: function TrackCell(info){
       const dispatch = useAppDispatch()
       const {trackId, isChecked} = info.getValue()
+      const inputId = `tracklist-checkbox-id-${trackId?.toString()}`
 
-      const handleCheckbox = useCallback(() => (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { value: trackId, checked } = e.target as HTMLInputElement
-        if (checked){
+      const handleCheckbox = () => (e: React.ChangeEvent<HTMLElement>) => {
+        console.log('!handleCheckbox -> ', isChecked);
+        e.stopPropagation()
+        // const { value: trackId, checked } = e.target as HTMLInputElement
+        // const checked = !isChecked;
+        if (!isChecked){
           dispatch({ type: 'addTrackToCustomPlaylist', trackId: trackId })
         } else {
           dispatch({ type: 'deleteTrackFromCustomPlaylist', trackId: trackId })
         }
-      }, [])
+      }
       
       return (
-        <input
-          className={styles.rowDataTrack}
-          type="checkbox" 
-          value={trackId} 
-          checked={isChecked}
-          onChange={handleCheckbox}
-        />
+        <div 
+          onClick={handleCheckbox}
+          >
+          <label 
+            htmlFor={inputId} 
+            className={styles.rowDataCheckboxLabel}
+          >
+            {isChecked 
+              ? <CheckCircleIconFilled fill={'#facc15'}  />
+              : <CheckCircleIcon  /> 
+            }
+            <input
+
+              id={inputId}
+              style={{display:'none'}}
+              type="checkbox" 
+              value={trackId} 
+              checked={isChecked}
+              onChange={handleCheckbox}
+            />
+          </label>
+      </div>
       )
     },
     header: function TrackHeader(){
       const checkBoxId = `album-checkbox-select-all-id-${React.useId()}`
       const dispatch = useAppDispatch()
+      const view = useAppState().rsb.view
+      const isPlaylistView = view === 'playlist';
 
       const handleOnChangeHeader = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const checked = e.target.checked;
@@ -175,6 +196,8 @@ export const getCheckbox = ({
         }
       },[])
 
+      // Don't show this in the playlist
+      if (isPlaylistView) return null
       return (
         <label htmlFor={checkBoxId} className={styles.rowDataCentered}>
           <Tooltip 
