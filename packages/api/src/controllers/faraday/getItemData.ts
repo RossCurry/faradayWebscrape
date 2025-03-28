@@ -11,6 +11,9 @@ export type FaradayItemData = {
   notAvailable?: boolean,
   sourceContext: string | null,
   price: string,
+  link: string,
+  linkLabel: string | null,
+  idTitle: string | undefined,
   parseError?: { message: 'not json', context: string },
 }
 export type ScrapedData = { cleanItems: FaradayItemData[], errorItems?: FaradayItemData[]}
@@ -78,7 +81,13 @@ async function getItems(gridItems: puppeteer.ElementHandle<Element>[]) {
       function parseContext(context:string){
         if (!context.length) return null
         try {
-          const cleanString = context.replaceAll('\n', '').replaceAll('\t', '')
+          let cleanString = context.replaceAll('\n', '').replaceAll('\t', '').trim()
+
+          // Ensure the JSON string is properly closed
+          if (!cleanString.endsWith('}')) {
+            cleanString += '" }'; // Attempt to close incomplete objects
+          }
+
           const parsed = JSON.parse(cleanString)
           parseError = undefined
           return parsed
@@ -86,8 +95,22 @@ async function getItems(gridItems: puppeteer.ElementHandle<Element>[]) {
           parseError = { message: 'not json', context }
         }
       }
-      const [priceEl] = el.getElementsByClassName('product-price')
-      const price = priceEl?.textContent?.replaceAll('\n', '').replace('€', '').trim()
+
+      /**
+       * Assumes id=thumb-gil-scott-heron-jamie-xx-were-new-here
+       */
+      function parseIdTitle(idTitle: string){
+        if (!idTitle) return;
+        return idTitle.replace('thumb-', '').replaceAll('-', ' ').trim();
+      }
+
+      const id = el.id;
+      const idTitle = parseIdTitle(id)
+      const [linkEl] = Array.from(el.getElementsByTagName('a'))
+      const link = linkEl.href;
+      const linkLabel = linkEl.ariaLabel;
+      const [priceEl] = Array.from(el.getElementsByClassName('product-price'))
+      const price = priceEl?.textContent?.replaceAll('\n', '').replaceAll('€', '').trim()
 
       const context = el.getAttribute('data-current-context')
       const isSoldOut = el.classList.contains('sold-out')
@@ -108,6 +131,9 @@ async function getItems(gridItems: puppeteer.ElementHandle<Element>[]) {
         category: category || fullCategoryString, 
         sourceContext: context,
         price: price || '',
+        link: link,
+        linkLabel: linkLabel,
+        idTitle: idTitle,
         parseError: parseError
       }
       // return context && typeof context === 'string' ? JSON.parse(context) : null
