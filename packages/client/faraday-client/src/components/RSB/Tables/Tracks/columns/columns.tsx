@@ -7,6 +7,7 @@ import { AddIcon, CheckCircleIcon, CheckCircleIconFilled, LibraryAddIcon, Librar
 import React, { useCallback } from "react"
 import { useAppDispatch, useAppState } from "../../../../../state/AppStateHooks"
 import { msToFormattedDuration } from "../../../../../utils/msToTime"
+import { PlaylistView } from "../../../Views/PlaylistView/PlaylistView"
 
 
 export const image: AccessorColumnDef<TrackListColumnData, { url: TrackListColumnData["imageUrl"] }> = {
@@ -222,13 +223,16 @@ export const playButton: AccessorColumnDef<TrackListColumnData, TrackListColumnD
   cell: function PlayButtonTracklist(info){
     const dispatch = useAppDispatch();
     const { audioUrl } = useAppState().player
+    const view = useAppState().rsb.view
     const id = React.useId()
     const track = info.getValue()
     const preview_url = track?.preview_url
     // TODO add isPlaying state from Player controls
     const isPlaying = audioUrl === preview_url;
     const isDisabled = !preview_url;
+    const isPlaylistView = view === 'playlist';
 
+    if (isPlaylistView) return null;
     return (
       <span className={styles.rowDataCentered} key={`tracklist-playbutton-${id}`}>
         <Tooltip 
