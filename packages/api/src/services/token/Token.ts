@@ -80,7 +80,7 @@ export default class Token {
     const { iat, exp, ...user } = userInfo as any;
     
     // Actual spotify token last an hour
-    const spotifyTokenExpiration = '10s'
+    const spotifyTokenExpiration = '1h'
 
     // reduce size of token
     const { id, display_name, uri } = user as JwtPayloadUser;
