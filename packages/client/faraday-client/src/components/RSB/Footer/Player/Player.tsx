@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import styles from '../Footer.module.css'
 import { useAppDispatch, useAppState } from '../../../../state/AppStateHooks';
 import { faradayLogo } from '../../../../logos/FaradayLogo';
 import IconButton from '../../../Shared/IconButton/IconButton';
 import { PauseIcon, PlayIcon, SkipPrevious, VolumeOff, VolumeOn } from '../../../../icons';
+import { msToFormattedDuration } from '../../../../utils/msToTime';
 
 export default function Player() {
   const dispatch = useAppDispatch()
@@ -52,11 +53,7 @@ export default function Player() {
     return audioRef.current.currentTime;
   }
 
-  // Sets the current playback position in seconds
-  function handleSetCurrentTime(seconds: number) {
-    if (!audioRef.current) return
-    audioRef.current.currentTime = seconds;
-  }
+
   
   // Sets the current playback position in seconds
   function handleStop() {
@@ -65,31 +62,6 @@ export default function Player() {
     audioRef.current.currentTime = 0;
   }
 
-  // Returns the length of the audio in seconds
-  function handleGetDuration() {
-    return audioRef.current?.duration;
-  }
-
-  // Gets the current audio volume (0.0 to 1.0)
-  function handleGetVolume() {
-    return audioRef.current?.volume;
-  }
-
-  // Sets the audio volume (0.0 to 1.0)
-  function handleSetVolume(volume: number) {
-    if (!audioRef.current) return
-    audioRef.current.volume = volume;
-  }
-
-  // Returns true if the audio is paused
-  function handleIsPaused() {
-    return audioRef.current?.paused;
-  }
-
-  // Gets whether the audio is muted
-  function handleGetMuted() {
-    return audioRef.current?.muted;
-  }
 
   // Sets whether the audio is muted
   function handleSetMuted() {
@@ -99,15 +71,9 @@ export default function Player() {
     setControls({ ...controls, isMuted: toogleValue })
   }
 
-  // Gets the current playback rate
-  function handleGetPlaybackRate() {
-    return audioRef.current?.playbackRate;
-  }
-
-  // Sets the speed of playback
-  function handleSetPlaybackRate(rate: number) {
-    if (!audioRef.current) return
-    audioRef.current.playbackRate = rate;
+  // Returns the length of the audio in seconds
+  function getDuration() {
+    return controls.clipDuration;
   }
 
 
@@ -156,6 +122,7 @@ export default function Player() {
       </div>
       {/* REPRODUCIR CONTROLS */}
       <fieldset>
+
         {/* StopBack */}
         <IconButton 
           Icon={SkipPrevious}
@@ -169,7 +136,8 @@ export default function Player() {
           text=''
         />
         {/* PROGESS BAR */}
-        <ProgressBar getCurrentTime={getCurrentTime} totalTime={controls.clipDuration}/>
+        <Time time={getDuration()} />
+        <ProgressBar getCurrentTime={getCurrentTime} totalTime={getDuration()} />
         {/* VOLUME CONTROLS - at least MUTE */}
         <IconButton 
           Icon={controls.isMuted ? VolumeOff : VolumeOn}
@@ -188,12 +156,14 @@ export default function Player() {
 const ProgressBar = ({ getCurrentTime, totalTime }: { getCurrentTime: () => number, totalTime: number }) => {
   const [currentTime, setCurrentTime] = useState<number>(0)
   const progress = currentTime/totalTime * 100;
+
   useEffect(() => {
     const internvalId = setInterval(() => {
       setCurrentTime(getCurrentTime())
     }, 150)
     return () => clearInterval(internvalId)
   })
+
   return (
     <div className={styles.progressBarContainer}>
       <div 
@@ -204,17 +174,31 @@ const ProgressBar = ({ getCurrentTime, totalTime }: { getCurrentTime: () => numb
   )
 }
 
-const BasicPlayerWithControls = () => {
-  const { audioUrl } = useAppState().player
+// Time is given in seconds
+const Time = ({ time }: { time: number | undefined }) => {
+  console.log('!Time -> ', time);
+  const formattedTime = useMemo(() => {
+    const asMilliseconds = time && time * 1000;
+    return asMilliseconds ? msToFormattedDuration(asMilliseconds) : 0
+  }, [time])
+  console.log('!formattedTime -> ', formattedTime);
+  if (!formattedTime) return null;
   return (
-    <audio 
-      controls 
-      // ref={audioRef}
-    >
-      <source src={audioUrl || '#'} media='audio/mpeg' />
-    </audio>
+    <p>{formattedTime}</p>
   )
 }
+
+// const BasicPlayerWithControls = () => {
+//   const { audioUrl } = useAppState().player
+//   return (
+//     <audio 
+//       controls 
+//       // ref={audioRef}
+//     >
+//       <source src={audioUrl || '#'} media='audio/mpeg' />
+//     </audio>
+//   )
+// }
 
 
 /**

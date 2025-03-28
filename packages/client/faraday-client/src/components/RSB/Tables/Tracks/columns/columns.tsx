@@ -6,6 +6,7 @@ import IconButton from "../../../../Shared/IconButton/IconButton"
 import { AddIcon, CheckCircleIcon, CheckCircleIconFilled, LibraryAddIcon, LibraryRemoveIcon, PlayIconFilled } from "../../../../../icons"
 import React, { useCallback } from "react"
 import { useAppDispatch, useAppState } from "../../../../../state/AppStateHooks"
+import { msToFormattedDuration } from "../../../../../utils/msToTime"
 
 
 export const image: AccessorColumnDef<TrackListColumnData, { url: TrackListColumnData["imageUrl"] }> = {
@@ -69,14 +70,7 @@ export const title: AccessorColumnDef<TrackListColumnData, TrackListColumnData["
 
 export const duration: AccessorColumnDef<TrackListColumnData, string> = {
   accessorFn: row => {
-    const minutes = Math.floor(row.duration_ms / 60000); // 1 minute = 60000 row.duration_ms
-    const seconds = Math.floor((row.duration_ms % 60000) / 1000); // Remaining seconds
-    // Use padStart to ensure two digits for minutes and seconds
-    const formattedMinutes = String(minutes).padStart(2, '0');
-    const formattedSeconds = String(seconds).padStart(2, '0');
-  
-    return `${formattedMinutes}:${formattedSeconds}`;
-    // return row.duration_ms
+    return msToFormattedDuration(row.duration_ms);
   },
   id: 'duration',
   cell: info => <span className={styles.rowDataTrack}>{info.getValue()}</span>,
