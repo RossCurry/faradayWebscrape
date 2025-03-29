@@ -41,7 +41,7 @@ faradayRouter.get("/api/faraday/albums/batch",
     const filterParsed = filter && typeof filter === 'string' ? JSON.parse(filter) : {}
     try {
       const spotifyData = await mongo.spotify?.getSpotifyAlbumData({
-        match: undefined, 
+        match: {'spotify.trackInfo': { $exists: true }}, 
         limit: Number(limit), 
         offset:Number(offset),
         filter: filterParsed,

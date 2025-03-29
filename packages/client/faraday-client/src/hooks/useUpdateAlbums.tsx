@@ -2,6 +2,10 @@ import { useEffect } from 'react'
 import { getAvailableAlbums } from '../services/services'
 import { useAppDispatch, useAppState } from '../state/AppStateHooks'
 
+/**
+ * Old hook used to get all albums.
+ * Prefer batch call
+ */
 export default function useUpdateAlbums() {
   const dispatch = useAppDispatch()
   const { albumCollection } = useAppState()

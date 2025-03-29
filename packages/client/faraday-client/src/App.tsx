@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useLocation, useNavigate, Location } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styles from './App.module.css'
 import './Colors.module.css'
 
@@ -9,19 +9,16 @@ import RightSidebar from './components/RSB'
 import { getUserInfoWithCode } from './services/services'
 import { useAppDispatch } from './state/AppStateHooks'
 import useQuery from './hooks/useQueryParams'
-import useUpdateAlbums from './hooks/useUpdateAlbums'
 import useGetAndSetUserInfo from './hooks/useGetAndSetUserInfo'
 
 
 
 function App({ redirected }: { redirected?: true }) {
-  useUpdateAlbums()
   useGetAndSetUserInfo(redirected)
 
   const [isUserdataLoading, setIsUserdataLoading] = useState<boolean>(false)
   const dispatch = useAppDispatch();
   const { searchParams } = useQuery()
-  const location = useLocation()
   const navigate = useNavigate()
   
   useEffect(() => {

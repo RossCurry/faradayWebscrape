@@ -72,7 +72,9 @@ export async function createPlaylist(playlistTitle: string, playlistTracks: Spot
   }
 }
 
-
+/**
+ * Old route used to get all albums
+ */
 export async function getAvailableAlbums(){
   const getAlbumsPath = '/api/faraday/albums'
   const response = await fetch(baseUrlDev + getAlbumsPath)
