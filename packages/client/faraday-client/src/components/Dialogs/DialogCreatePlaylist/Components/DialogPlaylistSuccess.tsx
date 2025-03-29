@@ -1,10 +1,19 @@
 import { CheckCircleIcon } from "../../../../icons"
 import styles from './DialogComponent.module.css'
 
-export function DialogPlaylistSuccess({ playlistUrl }: { playlistUrl?: string | null }) {
+export function DialogPlaylistSuccess({ 
+  playlistUrl, 
+  closeDialog 
+}: { 
+  playlistUrl?: string | null;
+  closeDialog: () => void;
+}) {
   const handleOpenPlaylistInSpoti = () => {
     if (!playlistUrl) return
+    // open in spotify
     window.open(playlistUrl, '_blank')
+    // close dialog
+    closeDialog()
   }
   return (
     <section className={styles.dialogSection}>

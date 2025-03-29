@@ -18,7 +18,7 @@ faradayRouter.get("/api/faraday/albums",
     const { mongo } = ctx.services
     if (!mongo) throw new Error('No mongo object found')
     try {
-      const spotifyData = await mongo.spotify?.getSpotifyAlbumData()
+      const spotifyData = await mongo.spotify?.getSpotifyAlbumData({})
       console.log('!spotifyData length-> ', spotifyData?.length);
       ctx.status = 200
       ctx.body = spotifyData;
@@ -40,12 +40,12 @@ faradayRouter.get("/api/faraday/albums/batch",
     const { limit, offset, filter } = ctx.query
     const filterParsed = filter && typeof filter === 'string' ? JSON.parse(filter) : {}
     try {
-      const spotifyData = await mongo.spotify?.getSpotifyAlbumData(
-        null, 
-        Number(limit), 
-        Number(offset),
-        filterParsed,
-      )
+      const spotifyData = await mongo.spotify?.getSpotifyAlbumData({
+        match: undefined, 
+        limit: Number(limit), 
+        offset:Number(offset),
+        filter: filterParsed,
+      })
       const albumCount = await mongo.spotify?.getSpotifyAlbumDataCount(null, filterParsed)
       console.log('!spotify Batch length-> ', spotifyData?.length, albumCount );
       ctx.status = 200

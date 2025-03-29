@@ -1,6 +1,6 @@
 import { Collection, Db, ObjectId, UpdateResult, WithId } from "mongodb"
 import { AppState } from "#router/"
-import { SpotifyAlbum, SpotifyCoverImageResponse, SpotifySearchResult } from "#controllers/spotify/spotify.types.js"
+import { SpotifyAlbum, SpotifyAlbumTracksResponse, SpotifyCoverImageResponse, SpotifySearchResult, SpotifyTrackData } from "#controllers/spotify/spotify.types.js"
 import { FaradayItemData } from "#controllers/faraday/getItemData.js"
 import BaseConnection from "../BaseConnection.js"
 // import { GetSpotifyDataFilter, GetSpotifyDataMatch } from "../_refactored/_index.js"
@@ -8,7 +8,9 @@ import BaseConnection from "../BaseConnection.js"
 export type GetSpotifyDataFilter = {
   isSoldOut?: boolean
 }
-export type GetSpotifyDataMatch = Record<keyof SpotifySearchResult, any> | null
+type SpotifyMongoDoc = SpotifySearchResult & { trackInfo: SpotifyAlbumTracksResponse }
+
+export type GetSpotifyDataMatch = Record<keyof SpotifyMongoDoc, any> | null
 
 export default class SpotifyMongo extends BaseConnection {
   collection: Collection<Document>
@@ -125,8 +127,20 @@ export default class SpotifyMongo extends BaseConnection {
    * @param match 
    * @returns 
    */
-  async getSpotifyAlbumData(match?: GetSpotifyDataMatch, limit?: number, offset?: number, filter?: GetSpotifyDataFilter) {
-    console.log('!getSpotifyAlbumData -> ', { limit, offset });
+  async getSpotifyAlbumData({
+    match,
+    limit,
+    offset,
+    filter,
+    fullProjection,
+  }: {
+    match?: Record<string, any>, 
+    limit?: number, 
+    offset?: number, 
+    filter?: GetSpotifyDataFilter,
+    fullProjection?: boolean
+  }) {
+    console.log('!getSpotifyAlbumData -> ', { limit, offset, fullProjection });
     const albumProjection = {
       'spotify.artists': 1,
       'spotify.href': 1,
@@ -168,7 +182,7 @@ export default class SpotifyMongo extends BaseConnection {
     const albums = await albumCollection?.find(
       notFoundMatch || {},
       {
-        projection: albumProjection,
+        ...!fullProjection ? { projection: albumProjection} : {},
         limit,
         skip: offset
       }
@@ -281,5 +295,64 @@ export default class SpotifyMongo extends BaseConnection {
     const update = { $set: { "playlists.$.images": coverImageInfo } }
     const updated = await usersCollection.updateOne(match, update)
     return updated
+  }
+
+  async getSpotifyAlbumDataMissingPreview(){
+    const noPreviewMatch = 'spotify.trackInfo.items.preview_url'
+    const albumCollection = this.db?.collection('albums')
+    const match = {
+      $and: [
+        {
+          'spotify.trackInfo.items': { $exists: true },
+        },
+        {
+          'spotify.trackInfo.items': { $ne: [] },
+        }
+      ],
+      [noPreviewMatch]: null,
+    }
+    const albums = await albumCollection?.find(match).toArray()
+    /**
+     * ReMap the trackInfo data.
+     */
+    const reMapped = albums.map(datum => {
+      console.log('!datum -> ', datum);
+      const { _id, spotify } = datum
+      return {
+        _id,
+        trackList: spotify.trackInfo.items as SpotifyTrackData[]
+      }
+    })
+    return reMapped
+
+  }
+
+  async setSpotifyTracksListById(albumsTracksData: { albumId: ObjectId, trackList: SpotifyTrackData[] }[]) {
+    if (!albumsTracksData.length) {
+      console.log('!setSpotifyTracksListById: albumsTracksData has no items')
+      return
+    }
+    try {
+      const albumsCollection = this.db.collection('albums')
+      if (!albumsCollection) throw new Error('No albums collecion found')
+      
+        const bulkOps = albumsTracksData.map(album => ({
+        updateOne: {
+          filter: { _id: album.albumId }, // Important: Convert _id to ObjectId
+          update: { $set: { 'spotify.trackInfo.items': album.trackList } }, // Update the fields
+        }
+      }));
+  
+      const result = await albumsCollection.bulkWrite(bulkOps);
+  
+      console.log(`Modified ${result.modifiedCount} documents, inserted ${result.upsertedCount}`);
+  
+      if (result.hasWriteErrors()) {
+        console.error('Bulk write errors:', result.getWriteErrors());
+      }
+  
+    } catch (error) {
+      console.error('Error during bulk update:', error);
+    }
   }
 }
