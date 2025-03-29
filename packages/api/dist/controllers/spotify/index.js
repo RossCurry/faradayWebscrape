@@ -132,4 +132,61 @@ async (ctx, next) => {
         ctx.body = `Internal Server Error: ${error}`;
     }
 });
+/**
+ * Used to test the PreviewLink Class
+ */
+spotifyRouter.post('/api/spotify/preview', async (ctx, _next) => {
+    try {
+        console.log('!ctx.body -> ', ctx.body);
+        const tracks = ctx.request.body && typeof ctx.request.body === 'object' && 'tracks' in ctx.request.body && ctx.request.body.tracks;
+        const isArray = Array.isArray(tracks);
+        if (!isArray)
+            throw new Error('Body contains no array of tracks');
+        console.log('!tracks.length -> ', tracks.length);
+        const previewLinks = await ctx.services.previewLinks.searchByTracks(tracks);
+        ctx.body = previewLinks;
+        ctx.status = 200;
+    }
+    catch (error) {
+        ctx.throw([500, error]);
+    }
+});
+/**
+ * Used to update all tracks that are missing a preview with a preview_url
+ */
+spotifyRouter.post('/api/spotify/previews/update', async (ctx, _next) => {
+    try {
+        const noPreviewMatch = 'spotify.trackInfo.items.preview_url';
+        const albums = await ctx.services.mongo.spotify?.getSpotifyAlbumDataMissingPreview();
+        console.log('!previews-update: albums matched -> ', albums?.length);
+        if (albums?.length) {
+            // TODO remove slice. Maybe do in batches
+            const albumsToUpdate = await Promise.all(albums?.slice(0, 1).map(async ({ trackList, _id }) => {
+                // per Album
+                const previewLinks = await ctx.services.previewLinks.searchByTracks(trackList);
+                // Return Album Id with tracks list mapped with previewLink
+                return {
+                    albumId: _id,
+                    trackList: trackList.map(track => {
+                        const previewInfo = previewLinks.find(result => result.trackId === track.id);
+                        const previewUrl = previewInfo?.previewUrls.at(0);
+                        if (!previewUrl)
+                            console.log('No preview url found for album, track', _id, track.id);
+                        return {
+                            ...track,
+                            preview_url: previewUrl || null
+                        };
+                    }),
+                };
+            }));
+            console.log('!albumToUpdate -> ', albumsToUpdate.length);
+            // Bulk Update previews in mongo
+            await ctx.services.mongo.spotify?.setSpotifyTracksListById(albumsToUpdate);
+        }
+        ctx.status = 201;
+    }
+    catch (error) {
+        ctx.throw([500, error]);
+    }
+});
 export default spotifyRouter;

@@ -37,7 +37,8 @@ export default async function getSpotifyTracksInfo(ctx, next) {
 }
 async function searchTracksSingleAlbum(albumId, authString) {
     console.log('!albumId, typeof albumId -> ', albumId, typeof albumId);
-    const getTracksURL = `https://api.spotify.com/v1/albums/${albumId}/tracks`;
+    // TODO testing market for tracks info to see if the preview_url will be populated
+    const getTracksURL = `https://api.spotify.com/v1/albums/${albumId}/tracks?market=ES`;
     const url = new URL(getTracksURL);
     try {
         const res = await fetch(url.toString(), {

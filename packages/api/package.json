@@ -29,6 +29,7 @@
     "@types/koa-router": "^7.4.8",
     "@types/koa-static": "^4.0.4",
     "@types/lodash-es": "^4.17.12",
+    "cheerio": "^1.0.0",
     "dotenv": "^16.4.5",
     "fs-extra": "^11.2.0",
     "jsonwebtoken": "^9.0.2",

@@ -80,7 +80,7 @@ export function DialogCreatePlaylist({
         {!response && <SendPlaylist handleOnClick={handleOnClick} />}
         {response &&
           response === 'ok'
-          ? <DialogPlaylistSuccess playlistUrl={createdPlaylistUrl} />
+          ? <DialogPlaylistSuccess playlistUrl={createdPlaylistUrl} closeDialog={handleOnCloseDialog} />
           : response === 'error'
             ? <DialogPlaylistError />
             : null

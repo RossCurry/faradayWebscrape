@@ -3,6 +3,7 @@ import Router from "koa-router";
 import MongoDB from '#services/mongodb/Mongo.js';
 import CodeVerifier from '#services/codeVerifier/CodeVerifier.js';
 import Token from '#services/token/Token.js';
+import PreviewLinks from '#services/previewLinks/index.js';
 // routers
 import faradayRouter from '#controllers/faraday/index.js';
 import spotifyRouter from '#controllers/spotify/index.js';
@@ -16,6 +17,7 @@ function createServices() {
         mongo: new MongoDB(),
         token: new Token(),
         spotify: new SpotifyApi(),
+        previewLinks: new PreviewLinks(),
     };
     return services;
 }

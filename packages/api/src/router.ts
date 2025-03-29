@@ -5,6 +5,7 @@ import Router from "koa-router"
 import MongoDB from '#services/mongodb/Mongo.js'
 import CodeVerifier from '#services/codeVerifier/CodeVerifier.js'
 import Token from '#services/token/Token.js'
+import PreviewLinks from '#services/previewLinks/index.js'
 
 // types
 import type { SpotifyAlbumTracksResponse, SpotifyCoverImageResponse, SpotifyPlaylist, SpotifySearchResult, SpotifyUserProfile } from '#controllers/spotify/spotify.types.js'
@@ -50,6 +51,7 @@ export interface AppContext extends Application.ExtendableContext {
     mongo: MongoDB;
     token: Token;
     spotify: SpotifyApi,
+    previewLinks: PreviewLinks,
   }
 } 
 
@@ -64,6 +66,7 @@ function createServices(){
     mongo: new MongoDB(),
     token: new Token(),
     spotify: new SpotifyApi(),
+    previewLinks: new PreviewLinks(),
   }
   return services
 }

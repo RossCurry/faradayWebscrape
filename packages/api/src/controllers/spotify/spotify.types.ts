@@ -567,35 +567,37 @@ export type SearchResponse =
     uri: string
   }
 
-  export type SpotifyAlbumTracksResponse = {
-    href: string;
-    items: Array<{
-      artists: Array<{
-        external_urls: {
-          spotify: string;
-        };
-        href: string;
-        id: string;
-        name: string;
-        type: string;
-        uri: string;
-      }>;
-      disc_number: number;
-      duration_ms: number;
-      explicit: boolean;
+  export type SpotifyTrackData = {
+    artists: Array<{
       external_urls: {
         spotify: string;
       };
       href: string;
       id: string;
-      is_local: boolean;
-      is_playable: boolean;
       name: string;
-      preview_url: string | null;
-      track_number: number;
       type: string;
       uri: string;
     }>;
+    disc_number: number;
+    duration_ms: number;
+    explicit: boolean;
+    external_urls: {
+      spotify: string;
+    };
+    href: string;
+    id: string;
+    is_local: boolean;
+    is_playable: boolean;
+    name: string;
+    preview_url: string | null;
+    track_number: number;
+    type: string;
+    uri: string;
+  }
+
+  export type SpotifyAlbumTracksResponse = {
+    href: string;
+    items: Array<SpotifyTrackData>;
     limit: number;
     next: string | null;
     offset: number;
