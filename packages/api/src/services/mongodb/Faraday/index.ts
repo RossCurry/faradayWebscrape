@@ -116,7 +116,7 @@ export default class FaradayMongo extends BaseConnection {
     return userPlaylists.playlists
   }
 
-  async getFaradayDataMissingSpotifyInfo() {
+  async getFaradayDataMissingSpotifyInfo(limit: number) {
     console.log('!getFaradayDataMissingSpotifyInfo -> ');
     const albumCollection = this.db?.collection('albums')
     // const match = { notFound: true }
@@ -124,7 +124,7 @@ export default class FaradayMongo extends BaseConnection {
       spotify: { $exists: false },
       $or: [{ notFound: { $exists: false } }, { notFound: false }]
     }
-    const albums = await albumCollection?.find(match, {}).toArray()
+    const albums = await albumCollection?.find(match, { limit }).toArray()
     const faradayData: Array<FaradayItemData & { _id: string }> | undefined = albums?.map(album => ({ _id: album._id.toString(), ...album.faraday }))
     console.log('!getFaradayDataMissingSpotifyInfo length -> ', faradayData?.length);
     return faradayData ? faradayData : []

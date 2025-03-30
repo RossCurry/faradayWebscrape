@@ -4,6 +4,7 @@ import mw from '#middlewares/index.js'
 import { AppContext, AppState } from "../../router.js";
 import { getPlaylistImage } from '#middlewares/spotify/playlists/updateCoverImage.js';
 import { SpotifyTrackData } from './spotify.types.js';
+import { searchSingleAlbum } from '#middlewares/spotify/getAlbumInfo.js';
 const spotifyRouter = new Router<AppState, AppContext>()
 
 // // Temporary Route to update missing genre field for existing
@@ -202,7 +203,7 @@ spotifyRouter.post('/api/spotify/previews/update',
       console.log('!previews-update: albums matched -> ', albums?.length);
       if (albums?.length){
         // TODO remove slice. Maybe do in batches
-        const albumsToUpdate = await Promise.all(albums?.slice(0,1).map(async ({ trackList, _id }) => {
+        const albumsToUpdate = await Promise.all(albums?.slice(0,100).map(async ({ trackList, _id }) => {
           // per Album
           const previewLinks = await ctx.services.previewLinks.searchByTracks(trackList)
           // Return Album Id with tracks list mapped with previewLink
@@ -225,6 +226,29 @@ spotifyRouter.post('/api/spotify/previews/update',
         await ctx.services.mongo.spotify?.setSpotifyTracksListById(albumsToUpdate)
       }
       ctx.status = 201;
+    } catch (error) {
+      ctx.throw([500, error])
+    }
+  }
+)
+
+/**
+ * Use this route to test the searchSingleAlbum function
+ */
+spotifyRouter.get("/api/spotify/albums/search",
+  mw.auth.getClientCredentialToken,
+  async (ctx: AppContext, _next: Application.Next) => {
+    try {
+      const params = ctx.request.search
+      const searchParams = new URLSearchParams(params)
+      const title = searchParams.get('title');
+      if (!title) throw new Error("Missing required field 'title' in params");
+      if (!ctx.state.accessToken) throw new Error("Missing auth access token in state");
+      
+      const authString = `Bearer ${ctx.state.accessToken}`
+      const results = await searchSingleAlbum({ title }, authString)
+      ctx.body = results
+      ctx.status = 200
     } catch (error) {
       ctx.throw([500, error])
     }

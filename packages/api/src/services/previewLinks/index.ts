@@ -10,6 +10,7 @@ export default class PreviewLinks {
   async searchByTracks(tracks: SpotifyTrackData[]){
     const results = await Promise.all(tracks.map(async (track) => {
       const spotifyUrl = track.external_urls.spotify;
+      console.log('!spotifyUrl -> ', spotifyUrl);
       const previewUrls = await this.#getSpotifyLinks(spotifyUrl);
       
       return {
