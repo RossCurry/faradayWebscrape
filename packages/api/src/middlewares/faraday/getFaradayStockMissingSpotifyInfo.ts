@@ -10,7 +10,9 @@ export default async function getFaradayStockMissingSpotifyInfo(ctx: AppContext,
     const { mongo } = ctx.services
     if (!mongo) throw new Error('No mongo object found')
     
-      const faradayData = await mongo.faraday?.getFaradayDataMissingSpotifyInfo()
+    const BATCH_LIMIT = 10
+    // Best to do this in BATCHES - only return 10 
+    const faradayData = await mongo.faraday?.getFaradayDataMissingSpotifyInfo(BATCH_LIMIT)
     if (!faradayData) throw new Error('No faradayData found')
     
     // Assuming data in the DB is clean 😅

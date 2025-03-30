@@ -164,34 +164,50 @@ function projectSingleSearchResults(results: SearchResponse, searchTerm: string)
 /**
  * Tries to match results found from Spotify with original search artist and album
  */
-function matchResults(itemsArr: SearchResponse["albums"]["items"], albumAndArtist: ParsedTitle): SearchResponse["albums"]["items"] {
-  console.log('!matchResults -> ', itemsArr.length);
+function matchResults(searchResponse: SearchResponse["albums"]["items"], albumAndArtist: ParsedTitle): SearchResponse["albums"]["items"][number] | null {
+  console.log('!matchResults -> ', searchResponse.length);
 
   const { album, artist } = albumAndArtist
-  const decodedArtistName = artist.trim().toLowerCase()
-  const decodedAlbumName = album.trim().toLowerCase()
-  console.log('!decodedArtistName -> ', decodedArtistName);
-  console.log('!decodedAlbumName -> ', decodedAlbumName);
+  const artistSearchTerm = artist.trim().toLowerCase()
+  const albumSearchTerm = album.trim().toLowerCase()
+  console.log('!artistSearchTerm -> ', artistSearchTerm);
+  console.log('!albumSearchTerm -> ', albumSearchTerm);
 
-  const matchedArtistOrAlbum = itemsArr.filter(searchResult => {
+  let foundExactMatch = null;
+  // Filter searchResults - try and find a matching artist or album
+  const matchedArtistOrAlbum = searchResponse.filter(searchResult => {
     console.log('!matched single result album name -> ', searchResult.name);
     console.log('!matched single result artists name -> ', searchResult.artists.map(a => a.name));
-    const isAlbum = searchResult.name.toLowerCase() === decodedAlbumName
+    const isAlbum = searchResult.name.toLowerCase() === albumSearchTerm
+    const isArtist = convertToEnglishAlphabet(searchResult.artists.map(a => a.name).join(', ').toLowerCase()) === artistSearchTerm
+
+    if (isAlbum && isArtist) foundExactMatch = searchResult
     const hasArtist = searchResult.artists.some(artist => {
-      return convertToEnglishAlphabet(artist.name).toLowerCase() === decodedArtistName
+      return convertToEnglishAlphabet(artist.name).toLowerCase() === artistSearchTerm
     })
     return isAlbum || hasArtist
   })
 
-  console.log('!matchedArtistOrAlbum -> ', matchedArtistOrAlbum);
+  // Return early if we found an exact match already
+  if (foundExactMatch) return foundExactMatch
+
+  // console.log('!matchedArtistOrAlbum -> ', matchedArtistOrAlbum);
+  console.log('!matchedArtistOrAlbum -> ', matchedArtistOrAlbum.map(res => ({ album: res.name, artist: convertToEnglishAlphabet(res.artists.map(a => a.name).join(', ').toLowerCase())})));
   console.log('!matchResults filteredResults len -> ', matchedArtistOrAlbum.length);
   // If we get too many results for album or artist match, 
   // filter again by matching artists names and giving a score
-  if (matchedArtistOrAlbum.length > 1){
+  // if (matchedArtistOrAlbum.length > 1){
+  if (matchedArtistOrAlbum.length){
     const scores = matchedArtistOrAlbum.map((searchResult, i) => {
-      const isAlbum = searchResult.name.toLowerCase() === decodedAlbumName
-      const artistSingleNames = decodedArtistName.split(' ')
+      const artistSingleNames = artistSearchTerm.split(' ')
+      const isAlbumMatch = convertToEnglishAlphabet(searchResult.name).toLowerCase() === albumSearchTerm
+      const containsAlbumMatch = convertToEnglishAlphabet(searchResult.name).toLowerCase().includes(albumSearchTerm)
+      const containsArtistMatch = convertToEnglishAlphabet(searchResult.artists.map(a => a.name).join(', ').toLowerCase()).includes(artistSearchTerm)
       let score = 0
+      // If the album name is an exact Match give it a high score
+      if (isAlbumMatch) score += 20
+      if (containsArtistMatch) score += 10
+      // if (containsAlbumMatch) score += 5
       searchResult.artists.forEach((artist) => {
         // try and get a score from individual matches
         const splitNames = convertToEnglishAlphabet(artist.name).toLowerCase().split(' ')
@@ -200,18 +216,24 @@ function matchResults(itemsArr: SearchResponse["albums"]["items"], albumAndArtis
           if (artistSingleNames.includes(name)) score++
         })
       })
+      // tuple of [index, score]
       const matchScore = [i , score]
-      return matchScore
+      return matchScore as [number, number]
     })
     // sort by scores
     scores.sort((a, b) => b[1] - a[1])
     const [bestMatch] = scores
     const bestMatchIndex = bestMatch[0]
-    // Return best score result. expects an array
-    return [matchedArtistOrAlbum[bestMatchIndex]]
+    // Return best score result
+    const bestResult = matchedArtistOrAlbum.at(bestMatchIndex)
+    if (!bestResult) return null;
+    // Strict album match
+    const isStrictAlbumMatch = convertToEnglishAlphabet(bestResult.name).toLowerCase().includes(albumSearchTerm)
+    // Strict artist match
+    const isStrictArtistMatch = convertToEnglishAlphabet(bestResult.artists.join(', ')).includes(artistSearchTerm)
+    if (isStrictAlbumMatch && isStrictArtistMatch) return bestResult 
   }
-
-  return matchedArtistOrAlbum as SearchResponse["albums"]["items"]
+  return null
 }
 
 // TODO figure out what to do with so many match results, at the moment I just take the first one
@@ -219,11 +241,9 @@ export type SpotifySearchProjection = ReturnType<typeof getProjection>
 /**
  * Gets final projection from matched results
  */
-function getProjection(filteredResults:  SearchResponse["albums"]["items"], searchTerm: string){
-  console.log('!getProjection(filteredResults len-> ', filteredResults.length );
-  if (!filteredResults.length) return
-  const [item] = filteredResults
-  if (!item) return
+function getProjection(filteredResult:  SearchResponse["albums"]["items"][number] | null, searchTerm: string){
+  console.log('!getProjection(filteredResults len-> ', filteredResult );
+  if (!filteredResult) return
   const {
     id,
     href,
@@ -237,7 +257,7 @@ function getProjection(filteredResults:  SearchResponse["albums"]["items"], sear
     total_tracks,
     release_date,
     popularity
-  } = item;
+  } = filteredResult;
 
   const [image] = images
   const projection = {
@@ -288,6 +308,7 @@ type ParsedTitle = {
  */
 export async function searchSingleAlbum(album: Partial<FaradayItemData>, authString: string): Promise<SpotifySearchProjection | undefined> {
   console.log('!searchSingleAlbum -> ', album.title);
+  // TODO test which is better.
   const title = album.linkLabel || album.title
   if (!title) throw new Error('No title to search')
   try {
@@ -321,11 +342,11 @@ export async function searchSingleAlbum(album: Partial<FaradayItemData>, authStr
         
       if ('error' in res){
         // TODO add handling for specific error cases
-        throw new Error(JSON.stringify(res))
+        throw new Error(JSON.stringify(res), { cause: res.error })
       }
 
       if (!res.ok) {
-        throw new Error(`Faraday.title: ${album.title} | Error status: ${(res.status)}: ${(res.statusText)}`)
+        throw new Error(`Faraday.title: ${album.title} | Error status: ${(res.status)}: ${(res.statusText)}`, { cause: JSON.stringify(res) })
       }
 
       // Parse results
@@ -342,34 +363,6 @@ export async function searchSingleAlbum(album: Partial<FaradayItemData>, authStr
   }
 }
 
-// TODO don't use, not working as expected
-async function searchMultiplAlbums(albums: FaradayItemData[], authString: string) {
-  const filtered = albums
-    .filter(album => {
-      return (!album.isSoldOut && album.title)
-    })
-    .map(album => {
-      return parseAlbumTitle(album.title)
-    })
-  const type = "type=album,artist"
-  const searchTerm = filtered.join(',')
-  const limit = 50
-  // TODO can probably search all terms together. in which case batches of 50
-  const fullUrl = spotiBaseUrl + "search?" + "q=" + searchTerm + "&" + type
-  const res = await fetch(fullUrl, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `${authString}`,
-    },
-  })
-  if (!res) throw new Error("No response")
-  if (res.ok) {
-    const searchResults = await res.json() as unknown as SearchResponse
-    const projection = projectMultipsSearchResults(searchResults, searchTerm)
-    return projection
-  }
-}
 
 type AlbumsInfo = {
   faraday: FaradayItemData;
@@ -394,10 +387,10 @@ export default async function getAlbumInfoSpotify(ctx: AppContext, next: Applica
       console.log('!Current album search -> ', album.title);
       const authString = `Bearer ${ctx.state.accessToken}`
       const faraday = album;
-      const spotify = await searchSingleAlbum(album, authString);
-      console.log('!searchSingleAlbum result-> ', spotify);
+      const spotifySearchResult = await searchSingleAlbum(album, authString);
+      console.log('!searchSingleAlbum result-> ', spotifySearchResult);
       // If we dont find any result, set it as not found in the DB so as not to search for it again
-      if (!spotify) {
+      if (!spotifySearchResult) {
         await ctx.services.mongo.faraday?.setFaradayIdAsNotFound(faraday.id);
         continue
       };
@@ -406,13 +399,13 @@ export default async function getAlbumInfoSpotify(ctx: AppContext, next: Applica
       // set directly in the DB - hitting all sort of rate limits 😂
       await ctx.services.mongo.spotify?.setSpotifyData([{
           faraday,
-          spotify
+          spotify: spotifySearchResult
         }], 
         faradayData
       )
       albumsInfo.push({
         faraday,
-        spotify
+        spotify: spotifySearchResult
       })
     }
 
