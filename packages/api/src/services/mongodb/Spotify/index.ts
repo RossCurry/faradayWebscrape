@@ -131,7 +131,7 @@ export default class SpotifyMongo extends BaseConnection {
     match,
     limit,
     offset,
-    filter,
+    // filter,
     fullProjection,
   }: {
     match?: Record<string, any>, 
@@ -176,8 +176,8 @@ export default class SpotifyMongo extends BaseConnection {
       ...match,
       spotify: { $exists: true },
       $or: [{ notFound: false }, { notFound: { $exists: false } }],
-      // TODO remove
-      'faraday.isSoldOut': !!filter?.isSoldOut
+      // TODO remove. let FE filter it
+      // 'faraday.isSoldOut': !!filter?.isSoldOut
     }
     const albums = await albumCollection?.find(
       notFoundMatch || {},
