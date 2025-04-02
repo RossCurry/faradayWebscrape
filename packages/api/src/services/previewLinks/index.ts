@@ -8,18 +8,36 @@ export default class PreviewLinks {
   }
 
   async searchByTracks(tracks: SpotifyTrackData[]){
-    const results = await Promise.all(tracks.map(async (track) => {
+    const results = []
+    // TODO dirty hack to batch
+    const BATCH_SIZE = 10
+    for (const track of tracks.slice(0, BATCH_SIZE)){
       const spotifyUrl = track.external_urls.spotify;
       console.log('!spotifyUrl -> ', spotifyUrl);
       const previewUrls = await this.#getSpotifyLinks(spotifyUrl);
       
-      return {
-        name: `${track.name} - ${track.artists.map(artist => artist.name).join(', ')}`,
-        trackId: track.id,
-        spotifyUrl: spotifyUrl,
-        previewUrls: previewUrls
-      };
-    }));
+      results.push(
+        {
+          name: `${track.name} - ${track.artists.map(artist => artist.name).join(', ')}`,
+          trackId: track.id,
+          spotifyUrl: spotifyUrl,
+          previewUrls: previewUrls
+        }
+      ) 
+    }
+
+    // const results = await Promise.all(tracks.map(async (track) => {
+    //   const spotifyUrl = track.external_urls.spotify;
+    //   console.log('!spotifyUrl -> ', spotifyUrl);
+    //   const previewUrls = await this.#getSpotifyLinks(spotifyUrl);
+      
+    //   return {
+    //     name: `${track.name} - ${track.artists.map(artist => artist.name).join(', ')}`,
+    //     trackId: track.id,
+    //     spotifyUrl: spotifyUrl,
+    //     previewUrls: previewUrls
+    //   };
+    // }));
     return results
   }
 
@@ -42,7 +60,7 @@ export default class PreviewLinks {
   
       return Array.from(scdnLinks);
     } catch (error) {
-      throw new Error(`Failed to fetch preview URLs: ${(error as Error)?.message}`);
+      throw new Error(`Failed to fetch preview URLs: ${(error as Error)?.message}`, { cause: JSON.stringify(error)});
     }
   }
 }
