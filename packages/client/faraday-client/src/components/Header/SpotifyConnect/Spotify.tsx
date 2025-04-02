@@ -5,6 +5,7 @@ import { InfoIcon, LogoutIcon } from '../../../icons/index';
 import { connectToSpoti } from '../../../services/services';
 import { useAppDispatch, useAppState } from '../../../state/AppStateHooks';
 import Tooltip from '../../Shared/Tooltip/Tooltip';
+import { SpotifyGreenLogo } from '../../../logos';
 
 
 export default function SpotifyConnect() {
@@ -21,12 +22,24 @@ export default function SpotifyConnect() {
             tooltipText="Log into Spotify to create a playlist."
             componentStyle={{ width: '24px', height: '24px', marginRight: '8px' }}
           />
-          <button onClick={() => connectToSpoti()}>Connect to Spotify</button>
+          <ConnectToSpotifyButton />
         </div>
       :
         <LoggedIn />
       }
     </fieldset>
+  )
+}
+
+export function ConnectToSpotifyButton(){
+  return (
+    <button 
+      onClick={() => connectToSpoti()}
+      style={{ display: 'flex', alignItems: 'center', gap: '0.5rem'}}
+    >
+      <p style={{ margin: 0, padding: 0 }}>Connect to Spotify</p> 
+      <SpotifyGreenLogo width={24} height={24} />
+    </button>
   )
 }
 

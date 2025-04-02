@@ -1,5 +1,5 @@
 import { ErrorIcon } from '../../../../icons'
-import { connectToSpoti } from '../../../../services/services'
+import { ConnectToSpotifyButton } from '../../../Header/SpotifyConnect/Spotify'
 import styles from './DialogComponent.module.css'
 
 export function DialogPlaylistError({ errorMessage }: { errorMessage?: string }) {
@@ -14,7 +14,7 @@ export function DialogPlaylistError({ errorMessage }: { errorMessage?: string })
         <h3>Error</h3>
       </div>
       <p>Please try re-connecting to Spotify</p>
-      <button onClick={() => connectToSpoti()}>Connect to Spotify</button>
+      <ConnectToSpotifyButton />
     </section>
   )
 }
