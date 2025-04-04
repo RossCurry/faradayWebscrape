@@ -38,7 +38,8 @@ type AppState = {
     selectedAlbumRowRef: React.RefObject<HTMLTableElement> | null
     filters: {
       availability: Filter['availability']
-    }
+    },
+    totalCollectionCount: number
   },
   player: {
     audioUrl: string | null,
@@ -74,8 +75,9 @@ const initialAppState: AppState = {
     tableContainerHeight: 0,
     selectedAlbumRowRef: null,
     filters: {
-      availability: 'all'
-    }
+      availability: 'available'
+    },
+    totalCollectionCount: 0
   },
   player: {
     audioUrl: null,
@@ -109,6 +111,7 @@ type ActionTypes =
 | { type: 'setSelectedAlbumRowRef', selectedAlbumRowRef: AppState['rsb']['selectedAlbumRowRef'] }
 | { type: 'setScrollToTop', scrollToTop: AppState['rsb']['scrollToTop'] }
 | { type: 'setFilters', filters: AppState['rsb']['filters'] }
+| { type: 'setTotalCollectionCount', totalCollectionCount: AppState['rsb']['totalCollectionCount'] }
 // Main album collection
 | { type: 'setAlbumCollection', albums: SpotifySearchResult[] | null }
 // Player
@@ -345,6 +348,18 @@ function stateReducer(state: AppState, action: ActionTypes) {
         } }
       };
     }
+    case 'setTotalCollectionCount': {
+      const { totalCollectionCount } = action;
+      
+      return { 
+        ...state,
+        rsb: { 
+          ...state.rsb,
+          totalCollectionCount
+        }
+      }
+    };
+    
     // Album Reducers
     case 'setAlbumCollection': {
       return { 

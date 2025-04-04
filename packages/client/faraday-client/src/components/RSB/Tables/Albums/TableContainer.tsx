@@ -33,7 +33,6 @@ import { msToTimeDivision } from '../../../../utils/msToTime'
 import { BatchResponse, getAlbumsInBatch } from '../../../../services/services'
 import { SpotifyGreenLogo } from '../../../../logos'
 import Tooltip from '../../../Shared/Tooltip/Tooltip'
-import { FaradayLogo } from '../../../../logos/FaradayLogo'
 
 export type CheckedAlbumDict = {
   [K in SpotifySearchResult['id']]: boolean
@@ -44,6 +43,7 @@ export type CheckedTrackDict = {
 export type AlbumItemTableData = SpotifySearchResult & { isChecked: boolean }
 
 export default function AlbumTableContainer({ data }: { data: SpotifySearchResult[] }) {
+  const dispatch = useAppDispatch()
   const { selectedAlbums, openAlbumInfo, showTrackTableOverlay, filters } = useAppState().rsb
   const { trackList, albumId } = openAlbumInfo
 
@@ -141,6 +141,17 @@ export default function AlbumTableContainer({ data }: { data: SpotifySearchResul
       if (tableRef) resizeObserver.unobserve(tableRef);
     };
   })
+
+  // Calculate total album count from meta data
+  const totalAlbumCount = useMemo(() => {
+    const totalAlbumCount = albumData?.pages.flatMap(page => page?.meta.totalCount)[0] || 0
+    return totalAlbumCount
+  }, [albumData?.pages])
+
+  // Set total album count
+  useEffect(()=>{
+    dispatch({type: 'setTotalCollectionCount', totalCollectionCount: totalAlbumCount})
+  }, [totalAlbumCount])
   
   return (
     <>
