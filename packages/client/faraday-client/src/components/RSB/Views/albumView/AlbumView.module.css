@@ -1,0 +1,5 @@
+.filterSection,
+.filterSection label {
+  display: flex;
+  gap: var(--g-2);
+}

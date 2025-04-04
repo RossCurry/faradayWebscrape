@@ -6,10 +6,17 @@ function convertToEnglishAlphabet(str) {
     return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 function normalizeArtists(artists) {
-    return convertToEnglishAlphabet(artists.map(a => a.name).join(', ')).toLowerCase().trim();
+    return artists.map(a => normalizeName(a.name)).join(' ').toLowerCase().trim();
 }
-function normalizeName(name) {
-    return convertToEnglishAlphabet(name).toLowerCase().trim();
+function normalizeName(name, noRegex = false) {
+    const formattedName = name.split(' ').map(word => {
+        if (word === '&')
+            return 'and';
+        return word;
+    }).join(' ');
+    // use english alphabet and remove special characters: not a letter, number, or whitespace
+    const normalized = convertToEnglishAlphabet(formattedName).toLowerCase().trim();
+    return noRegex ? normalized : normalized.replace(/[^a-zA-Z0-9\s]/g, "");
 }
 function parseNoHyphenFound(words) {
     console.log('!parseNoHyphenFound -> ');
@@ -85,7 +92,7 @@ function parseAlbumTitle(title) {
     // const words = decodeURIComponent(title) // decodeURIComponent is throwing errors for certain strings
     const words = title
         .split(' ')
-        .map(word => normalizeName(word))
+        .map(word => normalizeName(word, true))
         .filter(word => word.length > 0);
     console.log('!words -> ', words);
     const divisionIndex = words.indexOf('-');
@@ -169,8 +176,8 @@ function projectSingleSearchResults(results, searchTerm) {
 function matchResults(searchResponse, albumAndArtist) {
     console.log('!matchResults -> ', searchResponse.length);
     const { album, artist } = albumAndArtist;
-    const artistSearchTerm = artist.trim().toLowerCase();
-    const albumSearchTerm = album.trim().toLowerCase();
+    const artistSearchTerm = normalizeName(artist);
+    const albumSearchTerm = normalizeName(album);
     console.log('!artistSearchTerm -> ', artistSearchTerm);
     console.log('!albumSearchTerm -> ', albumSearchTerm);
     let foundExactMatch = null;
@@ -178,14 +185,15 @@ function matchResults(searchResponse, albumAndArtist) {
     const matchedArtistOrAlbum = searchResponse.filter(searchResult => {
         console.log('!matched single result album name -> ', searchResult.name);
         console.log('!matched single result artists name -> ', searchResult.artists.map(a => a.name));
-        const isAlbum = searchResult.name.toLowerCase().trim() === albumSearchTerm;
+        const isAlbum = normalizeName(searchResult.name) === albumSearchTerm;
         const isArtist = normalizeArtists(searchResult.artists) === artistSearchTerm;
         if (isAlbum && isArtist)
             foundExactMatch = searchResult;
         const hasArtist = searchResult.artists.some(artist => {
             return normalizeName(artist.name) === artistSearchTerm;
         });
-        return isAlbum || hasArtist;
+        const hasAlbum = normalizeName(searchResult.name).includes(albumSearchTerm);
+        return hasAlbum || hasArtist;
     });
     // Return early if we found an exact match already
     if (foundExactMatch)
@@ -201,24 +209,26 @@ function matchResults(searchResponse, albumAndArtist) {
     // if (matchedArtistOrAlbum.length > 1){
     if (matchedArtistOrAlbum.length) {
         const scores = matchedArtistOrAlbum.map((searchResult, i) => {
-            const artistSingleNames = artistSearchTerm.split(' ');
             const isAlbumMatch = normalizeName(searchResult.name) === albumSearchTerm;
             const containsAlbumMatch = normalizeName(searchResult.name).includes(albumSearchTerm);
             const containsArtistMatch = normalizeArtists(searchResult.artists).includes(artistSearchTerm);
             let score = 0;
             // If the album name is an exact Match give it a high score
-            if (isAlbumMatch)
-                score += 20;
-            if (containsArtistMatch)
-                score += 10;
-            // if (containsAlbumMatch) score += 5
+            // if (isAlbumMatch) score += 5
+            // if (containsArtistMatch) score += 10
+            if (containsAlbumMatch)
+                score += 2;
             searchResult.artists.forEach((artist) => {
                 // try and get a score from individual matches
                 const splitNames = normalizeName(artist.name).split(' ');
                 // see if any match
+                const artistSingleNames = artistSearchTerm.split(' ');
                 splitNames.forEach(name => {
-                    if (artistSingleNames.includes(name))
+                    const nameIsInSearch = artistSingleNames.some(singleName => name.includes(singleName));
+                    console.log('!increase name score -> ', nameIsInSearch, artistSingleNames, 'includes', name);
+                    if (nameIsInSearch) {
                         score++;
+                    }
                 });
             });
             // tuple of [index, score]
@@ -277,6 +287,7 @@ function getProjection(filteredResult, searchTerm) {
  * @param authString
  * @returns
  */
+// export async function searchSingleAlbum(album: Partial<FaradayItemData>, authString: string): Promise<SpotifySearchProjection | undefined> {
 export async function searchSingleAlbum(album, authString) {
     console.log('!searchSingleAlbum -> ', album.title);
     // TODO test which is better.
@@ -287,6 +298,8 @@ export async function searchSingleAlbum(album, authString) {
         const parsedTitle = parseAlbumTitle(title);
         console.log('!parsedTitle -> ', parsedTitle);
         // TODO I'm making adjustments here. The spotify website shows a double encoding.
+        // const unencodedSearchTerm = `artist:${encodeURIComponent(parsedTitle.artist)}`
+        // const unencodedSearchTerm = `album:${encodeURIComponent(parsedTitle.album)}`
         const unencodedSearchTerm = `artist:${encodeURIComponent(parsedTitle.artist)}`
             + encodeURIComponent(' ')
             + (parsedTitle.album ? `album:${encodeURIComponent(parsedTitle.album)}` : '');
@@ -297,7 +310,7 @@ export async function searchSingleAlbum(album, authString) {
         url.searchParams.append('type', 'album');
         url.searchParams.append('type', 'artist');
         url.searchParams.append('market', 'ES');
-        url.searchParams.append('include_external', 'audio');
+        // url.searchParams.append('include_external', 'audio')
         url.searchParams.append('limit', `${limit}`);
         console.log('!searchTerm -> ', searchTerm);
         console.log('!searchSingleAlbum URL -> ', url.toString());
@@ -324,6 +337,7 @@ export async function searchSingleAlbum(album, authString) {
             }
             // Parse results
             const searchResults = await res.json();
+            // console.log('!searchResults -> ', JSON.stringify(searchResults));
             // TODO check matched results. I can see in the logs that sometime the match should be made but isn't.
             const matchedResults = matchResults(searchResults.albums.items, parsedTitle);
             const projection = getProjection(matchedResults, searchTerm);
