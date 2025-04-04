@@ -44,7 +44,7 @@ export type CheckedTrackDict = {
 export type AlbumItemTableData = SpotifySearchResult & { isChecked: boolean }
 
 export default function AlbumTableContainer({ data }: { data: SpotifySearchResult[] }) {
-  const { selectedAlbums, openAlbumInfo, showTrackTableOverlay } = useAppState().rsb
+  const { selectedAlbums, openAlbumInfo, showTrackTableOverlay, filters } = useAppState().rsb
   const { trackList, albumId } = openAlbumInfo
 
   const tableContainerRef = useRef<HTMLDivElement>(null);
@@ -65,11 +65,12 @@ export default function AlbumTableContainer({ data }: { data: SpotifySearchResul
     queryKey: [
       'albumData',
       // sorting, //refetch when sorting changes
+      filters
     ],
     queryFn: async ({ pageParam = 0 }) => {
       const offset = (pageParam as number) * FETCH_SIZE
       const cursor = pageParam as number
-      const fetchedData = await getAlbumsInBatch(offset, FETCH_SIZE, cursor)
+      const fetchedData = await getAlbumsInBatch({offset, batchSize: FETCH_SIZE, cursor, filters})
       return fetchedData
     },
     initialPageParam: 0,

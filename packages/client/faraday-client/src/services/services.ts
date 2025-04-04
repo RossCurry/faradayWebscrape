@@ -1,6 +1,7 @@
 import { SortingState } from "@tanstack/react-table"
 import {  SpotifyPlaylist, SpotifySearchResult, SpotifyUserProfile } from "../types/spotify.types"
 import { getTokenFromAuthorizationHeader } from "../utils/decodeJwt"
+import { Filter } from "../types/app.types"
 
 // TODO change endpoint to suit purpose
 export const baseUrlDev = 'http://localhost:3000'
@@ -85,12 +86,30 @@ export async function getAvailableAlbums(){
 }
 
 export type BatchResponse = Awaited<ReturnType<typeof getAlbumsInBatch>>
-export async function getAlbumsInBatch(offset: number, batchSize: number, cursor: number, sorting?: SortingState){
+export async function getAlbumsInBatch({
+  offset,
+  batchSize,
+  cursor,
+  sorting,
+  filters,
+}: {
+  offset: number, 
+  batchSize: number, 
+  cursor: number, 
+  sorting?: SortingState,
+  filters: Filter
+}){
   
   const getAlbumsPath = '/api/faraday/albums/batch'
   const url = new URL(baseUrlDev + getAlbumsPath)
   url.searchParams.set('limit', batchSize.toString())
   url.searchParams.set('offset', offset.toString())
+
+  Object.entries(filters).forEach(([filter, value]) => {
+    url.searchParams.set(filter, value.toString())
+  })
+
+  console.log('!url.toString() -> ', url.toString());
 
   const response = await fetch(url.toString())
   if (response.ok){

@@ -10,6 +10,7 @@ import { SpotifySearchResult, SpotifyUserProfile } from '../types/spotify.types'
 import { TrackListData } from '../components/RSB/Tables/Tracks/TrackTable';
 import { AlbumItemTableData } from '../components/RSB/Tables/Albums/TableContainer';
 import { getLocalStoragePlaylist, getLocalStorageSelectedAlbums, updateLocalStoragePlaylist, updateLocalStorageSelectedAlbums } from '../utils/localStoragePlaylist';
+import { Filter } from '../types/app.types';
 
 type AppState = {
   albumCollection: SpotifySearchResult[] | null,
@@ -35,6 +36,9 @@ type AppState = {
     }
     tableContainerHeight: number
     selectedAlbumRowRef: React.RefObject<HTMLTableElement> | null
+    filters: {
+      availability: Filter['availability']
+    }
   },
   player: {
     audioUrl: string | null,
@@ -45,7 +49,7 @@ type AppState = {
 
 const playlistPlaceholderTitle = `Faraday ${new Date().toLocaleString('en-US', { month: 'long' })} ${new Date().toLocaleString('en-US', { year: 'numeric' })}`
 
-const initialAppState = {
+const initialAppState: AppState = {
   albumCollection: [],
   playlist: {
     custom: getLocalStoragePlaylist() || {},
@@ -68,7 +72,10 @@ const initialAppState = {
       albumInfo: null
     },
     tableContainerHeight: 0,
-    selectedAlbumRowRef: null
+    selectedAlbumRowRef: null,
+    filters: {
+      availability: 'all'
+    }
   },
   player: {
     audioUrl: null,
@@ -101,6 +108,7 @@ type ActionTypes =
 | { type: 'setShowTrackTableOverlay', showTrackTableOverlay: AppState['rsb']['showTrackTableOverlay'] }
 | { type: 'setSelectedAlbumRowRef', selectedAlbumRowRef: AppState['rsb']['selectedAlbumRowRef'] }
 | { type: 'setScrollToTop', scrollToTop: AppState['rsb']['scrollToTop'] }
+| { type: 'setFilters', filters: AppState['rsb']['filters'] }
 // Main album collection
 | { type: 'setAlbumCollection', albums: SpotifySearchResult[] | null }
 // Player
@@ -324,6 +332,17 @@ function stateReducer(state: AppState, action: ActionTypes) {
       return { 
         ...state,
         rsb: { ...state.rsb, scrollToTop }
+      };
+    }
+    case 'setFilters': {
+      const { filters } = action;
+      
+      return { 
+        ...state,
+        rsb: { ...state.rsb, filters: {
+          ...state.rsb.filters,
+          ...filters
+        } }
       };
     }
     // Album Reducers
