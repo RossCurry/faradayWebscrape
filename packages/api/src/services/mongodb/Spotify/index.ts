@@ -5,8 +5,8 @@ import { FaradayItemData } from "#controllers/faraday/getItemData.js"
 import BaseConnection from "../BaseConnection.js"
 // import { GetSpotifyDataFilter, GetSpotifyDataMatch } from "../_refactored/_index.js"
 
-export type GetSpotifyDataFilter = {
-  isSoldOut?: boolean
+export type GetSpotifyDataFilters = {
+  availability?: 'all'|'sold out'|'available'
 }
 type SpotifyMongoDoc = SpotifySearchResult & { trackInfo: SpotifyAlbumTracksResponse }
 
@@ -131,13 +131,13 @@ export default class SpotifyMongo extends BaseConnection {
     match,
     limit,
     offset,
-    // filter,
+    filters,
     fullProjection,
   }: {
     match?: Record<string, any>, 
     limit?: number, 
     offset?: number, 
-    filter?: GetSpotifyDataFilter,
+    filters?: GetSpotifyDataFilters,
     fullProjection?: boolean
   }) {
     console.log('!getSpotifyAlbumData -> ', { limit, offset, fullProjection });
@@ -172,12 +172,15 @@ export default class SpotifyMongo extends BaseConnection {
       // 'spotify.trackInfo.items.is_local': 1,
     }
     const albumCollection = this.db?.collection('albums')
+    const parsedFilters = this.#getParsedFilters(filters)
     const notFoundMatch = {
       ...match,
+      'faraday.link': { $exists: true },
       spotify: { $exists: true },
       $or: [{ notFound: false }, { notFound: { $exists: false } }],
       // TODO remove. let FE filter it
       // 'faraday.isSoldOut': !!filter?.isSoldOut
+      ...parsedFilters
     }
     const albums = await albumCollection?.find(
       notFoundMatch || {},
@@ -204,16 +207,40 @@ export default class SpotifyMongo extends BaseConnection {
     return reMapped
   }
 
+  #getParsedFilters(filters: GetSpotifyDataFilters | undefined){
+    const parsedFilters: Record<string,any> = {}
+    if (!filters) return parsedFilters
+    const { availability } = filters;
+    if (availability){
+      switch (availability) {
+        case 'all':
+          // do nothing
+          break;
+        case 'available':
+          parsedFilters['faraday.isSoldOut'] = false
+          break;
+        case 'sold out':
+          parsedFilters['faraday.isSoldOut'] = true
+          break;
+      
+        default:
+          break;
+      }
+    }
+    return parsedFilters
+  }
+
   /**
    * @returns totalCount for all Spotify Albums
    */
-  async getSpotifyAlbumDataCount(match: GetSpotifyDataMatch, filter: GetSpotifyDataFilter) {
+  async getSpotifyAlbumDataCount(match: GetSpotifyDataMatch, filters: GetSpotifyDataFilters) {
     const albumCollection = this.db?.collection('albums')
+    const parsedFilters = this.#getParsedFilters(filters);
     const notFoundMatch = {
       ...match || {},
       $or: [{ notFound: false }, { notFound: { $exists: false } }],
-      // TODO remove
-      'faraday.isSoldOut': !!filter.isSoldOut
+      // 'faraday.isSoldOut': !!filters.isSoldOut
+      ...parsedFilters
     }
     const albumCount = await albumCollection?.countDocuments(notFoundMatch)
     return albumCount || 0
