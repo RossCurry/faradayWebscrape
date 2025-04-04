@@ -176,12 +176,11 @@ export default class SpotifyMongo extends BaseConnection {
     const notFoundMatch = {
       ...match,
       'faraday.link': { $exists: true },
-      spotify: { $exists: true },
+      'spotify.trackInfo': { $exists: true },
       $or: [{ notFound: false }, { notFound: { $exists: false } }],
-      // TODO remove. let FE filter it
-      // 'faraday.isSoldOut': !!filter?.isSoldOut
       ...parsedFilters
     }
+    console.log('!notFoundMatch -> ', notFoundMatch);
     const albums = await albumCollection?.find(
       notFoundMatch || {},
       {
@@ -233,13 +232,14 @@ export default class SpotifyMongo extends BaseConnection {
   /**
    * @returns totalCount for all Spotify Albums
    */
-  async getSpotifyAlbumDataCount(match: GetSpotifyDataMatch, filters: GetSpotifyDataFilters) {
+  async getSpotifyAlbumDataCount(match: Record<string, any> | null, filters: GetSpotifyDataFilters) {
     const albumCollection = this.db?.collection('albums')
     const parsedFilters = this.#getParsedFilters(filters);
     const notFoundMatch = {
       ...match || {},
+      'spotify.trackInfo': { $exists: true },
+      'faraday.link': { $exists: true },
       $or: [{ notFound: false }, { notFound: { $exists: false } }],
-      // 'faraday.isSoldOut': !!filters.isSoldOut
       ...parsedFilters
     }
     const albumCount = await albumCollection?.countDocuments(notFoundMatch)
