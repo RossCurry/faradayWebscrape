@@ -1,0 +1,91 @@
+
+.player {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  align-items: center;
+  overflow: hidden;
+  /* justify-content: space-around; */
+}
+
+.playerImg{
+  width: 3rem;
+  height: 3rem;
+  aspect-ratio: 1/1;
+  content: '';
+  /* for bg-image */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  padding: 0;
+  margin: 0;
+  border-radius: 8px;
+}
+
+.playerTrackInfo{
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+.playerTrackInfo p {
+  margin: 0;
+  padding: 0;
+}
+.playerTrackInfo p:first-child {
+  font-weight: 800;
+}
+.playerTrackInfo p:nth-child(2) {
+  font-size: 0.9rem;
+}
+
+.player fieldset {
+  /* reset fieldset inherited styles */
+  min-inline-size: min-content;
+  margin-inline: 2px;
+  margin-inline-start: 0;
+  margin-inline-end: 0;
+  border-width: 1px;
+  border-style: solid;
+  border-color: transparent;
+  border-image: none;
+  padding-block: 0;
+  padding-inline: 0;
+  /* custom styles here */
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  justify-content: flex-end;
+  flex: 1;
+}
+.player fieldset button {
+  --button-size: 2.5rem;
+  font-size: .8rem;
+  text-align: center;
+  min-width: var(--button-size);
+  min-height: var(--button-size);
+  max-width: var(--button-size);
+  max-height: var(--button-size);
+  overflow: hidden;
+}
+.player fieldset button:active{
+  background-color: #73737378;
+}
+.player fieldset button.playerButtonMute.isMuted {
+  background-color: #73737378;
+}
+
+.progressBarContainer {
+  width: 200px;
+  background-color: #e0e0e0; /* Light gray background */
+  border-radius: 10px; /* Rounded corners */
+  overflow: hidden; /* Ensure the progress bar stays inside the container */
+  height: 5px; /* Height of the progress bar */
+}
+
+.progressBar {
+  height: 100%; /* Fill the height of the container */
+  width: 0%; /* Initial width */
+  background-color: #76c7c0; /* Progress bar color */
+  transition: width 750ms ; /* Smooth width transition */
+}

@@ -32,16 +32,14 @@ faradayRouter.get("/api/faraday/albums/batch", async (ctx, _next) => {
     const filters = {
         availability
     };
-    // const filterParsed = availability && typeof filter === 'string' ? JSON.parse(filter) : {}
     try {
         const spotifyData = await mongo.spotify?.getSpotifyAlbumData({
-            match: { 'spotify.trackInfo': { $exists: true } },
+            match: {},
             limit: Number(limit),
             offset: Number(offset),
             filters,
         });
         const albumCount = await mongo.spotify?.getSpotifyAlbumDataCount(null, filters);
-        console.log('!spotify Batch length-> ', spotifyData?.length, albumCount);
         ctx.status = 200;
         ctx.body = { data: spotifyData, totalCount: albumCount };
     }

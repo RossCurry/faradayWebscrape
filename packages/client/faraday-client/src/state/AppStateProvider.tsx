@@ -43,7 +43,15 @@ type AppState = {
   },
   player: {
     audioUrl: string | null,
-    track: TrackListData | null
+    track: TrackListData | null,
+    controls : {
+      isPlaying: boolean,
+      isPaused: boolean,
+      isMuted: boolean,
+      volume: number,
+      playbackRate: number,
+      clipDuration: number
+    }
   }
   user: SpotifyUserProfile | null
 };
@@ -51,6 +59,7 @@ type AppState = {
 const playlistPlaceholderTitle = `Faraday ${new Date().toLocaleString('en-US', { month: 'long' })} ${new Date().toLocaleString('en-US', { year: 'numeric' })}`
 
 const initialAppState: AppState = {
+  // TODO check we still use the albumCollection
   albumCollection: [],
   playlist: {
     custom: getLocalStoragePlaylist() || {},
@@ -82,6 +91,14 @@ const initialAppState: AppState = {
   player: {
     audioUrl: null,
     track: null,
+    controls: {
+      isPlaying: false,
+      isPaused: false,
+      isMuted: false,
+      volume: 1,
+      playbackRate: 1,
+      clipDuration: 0
+    }
   },
   user: null
 }
@@ -116,6 +133,7 @@ type ActionTypes =
 | { type: 'setAlbumCollection', albums: SpotifySearchResult[] | null }
 // Player
 | { type: 'setAudioUrl', track: TrackListData | null }
+| { type: 'setControls', controls: Partial<AppState['player']['controls']> }
 // User
 | { type: 'setUserInfo', userInfo: SpotifyUserProfile | null }
 
@@ -372,6 +390,19 @@ function stateReducer(state: AppState, action: ActionTypes) {
       return { 
         ...state,
         player: { ...state.player, audioUrl: action.track?.preview_url || null, track: action.track }
+      };
+    }
+    case 'setControls': {
+      const { controls } = action;
+      return { 
+        ...state,
+        player: { 
+          ...state.player,  
+          controls: {
+            ...state.player.controls,
+            ...controls
+          }
+        }
       };
     }
     // User Reducers
