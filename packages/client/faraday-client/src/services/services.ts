@@ -109,8 +109,6 @@ export async function getAlbumsInBatch({
     url.searchParams.set(filter, value.toString())
   })
 
-  console.log('!url.toString() -> ', url.toString());
-
   const response = await fetch(url.toString())
   if (response.ok){
     const jsonRes: { 

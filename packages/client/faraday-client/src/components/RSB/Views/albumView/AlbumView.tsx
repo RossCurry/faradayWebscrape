@@ -1,13 +1,11 @@
-import { useAppState } from "../../../../state/AppStateHooks"
 import Footer from "../../Footer"
-import AlbumTableContainer from "../../Tables/Albums/TableContainer"
+import AlbumTableContainer from "../../Tables/Albums/AlbumTableContainer"
 
 import sharedStyles from '../SharedStyles.module.css'
 import { AlbumCount } from "./components/AlbumCount"
 import { FilterSection } from "./components/FilterSection"
 
 export function AlbumView() {
-  const { albumCollection } = useAppState()
   return (
     <section 
       id='albumView' 
@@ -18,9 +16,7 @@ export function AlbumView() {
     >
       <HeaderAlbumView />
       <section className={sharedStyles.viewTableContainer}>
-        {albumCollection &&
-          <AlbumTableContainer data={albumCollection} />
-        }
+        <AlbumTableContainer />
       </section>
         <Footer />
     </section>

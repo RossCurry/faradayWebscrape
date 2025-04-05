@@ -8,7 +8,7 @@ import { CheckedAlbumDict, CheckedTrackDict } from '../components/RSB/Tables/Alb
 import { CONSTANTS, Views } from './constants';
 import { SpotifySearchResult, SpotifyUserProfile } from '../types/spotify.types';
 import { TrackListData } from '../components/RSB/Tables/Tracks/TrackTable';
-import { AlbumItemTableData } from '../components/RSB/Tables/Albums/TableContainer';
+import { AlbumItemTableData } from '../components/RSB/Tables/Albums/AlbumTableContainer';
 import { getLocalStorageAreAllAlbumsSelected, getLocalStoragePlaylist, getLocalStorageSelectedAlbums, updateLocalStoragePlaylist, updateLocalStorageSelectedAlbums } from '../utils/localStorage';
 import { Filter } from '../types/app.types';
 
@@ -28,6 +28,7 @@ type AppState = {
     scrollAction: 'fetch' | null
     scrollElement: HTMLElement | null
     scrollToTop: number
+    shouldScroll: boolean
     showTrackTableOverlay: boolean
     openAlbumInfo: {
       trackList: TrackListData[] | null,
@@ -74,6 +75,7 @@ const initialAppState: AppState = {
     scrollAction: null,
     scrollElement: null,
     scrollToTop: 0,
+    shouldScroll: true,
     showTrackTableOverlay: false,
     openAlbumInfo: {
       trackList: null,
@@ -124,6 +126,7 @@ type ActionTypes =
 | { type: 'setTableContainerHeight', tableContainerHeight: AppState['rsb']['tableContainerHeight'] }
 | { type: 'setShowTrackTableOverlay', showTrackTableOverlay: AppState['rsb']['showTrackTableOverlay'] }
 | { type: 'setScrollToTop', scrollToTop: AppState['rsb']['scrollToTop'] }
+| { type: 'setShouldScroll', shouldScroll: AppState['rsb']['shouldScroll'] }
 | { type: 'setFilters', filters: AppState['rsb']['filters'] }
 | { type: 'setTotalCollectionCount', totalCollectionCount: AppState['rsb']['totalCollectionCount'] }
 // Main album collection
@@ -344,6 +347,13 @@ function stateReducer(state: AppState, action: ActionTypes) {
       return { 
         ...state,
         rsb: { ...state.rsb, scrollToTop }
+      };
+    }
+    case 'setShouldScroll': {
+      const { shouldScroll } = action;
+      return { 
+        ...state,
+        rsb: { ...state.rsb, shouldScroll }
       };
     }
     case 'setFilters': {

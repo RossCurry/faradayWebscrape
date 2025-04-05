@@ -6,7 +6,6 @@ import {
   getCoreRowModel,
   getSortedRowModel,
   Row,
-  SortingState,
   Table,
   useReactTable,
 } from '@tanstack/react-table'
@@ -25,14 +24,9 @@ import {
 } from './sections/columns/columns'
 import { SpotifySearchResult } from '../../../../types/spotify.types'
 import { useAppDispatch, useAppState } from '../../../../state/AppStateHooks'
-import TrackTable, { TrackListData } from '../Tracks/TrackTable'
+import { TrackListData } from '../Tracks/TrackTable'
 import styles from './AlbumTableContainer.module.css'
-import IconButton from '../../../Shared/IconButton/IconButton'
-import { ArrowBackIcon, ShoppingCartIcon } from '../../../../icons'
-import { msToTimeDivision } from '../../../../utils/msToTime'
 import { BatchResponse, getAlbumsInBatch } from '../../../../services/services'
-import { SpotifyGreenLogo } from '../../../../logos'
-import Tooltip from '../../../Shared/Tooltip/Tooltip'
 
 export type CheckedAlbumDict = {
   [K in SpotifySearchResult['id']]: boolean
@@ -42,7 +36,7 @@ export type CheckedTrackDict = {
 }
 export type AlbumItemTableData = SpotifySearchResult & { isChecked: boolean }
 
-export default function AlbumTableContainer({ data }: { data: SpotifySearchResult[] }) {
+export default function AlbumTableContainer() {
   const dispatch = useAppDispatch()
   const { 
     selectedAlbums, 
@@ -50,6 +44,7 @@ export default function AlbumTableContainer({ data }: { data: SpotifySearchResul
     areAllAlbumsSelected 
   } = useAppState().rsb
 
+  console.log('!RENDER AlbumTableContainer -> ');
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const [parentElementHeight, setParentElementHeight] = useState<number|null>(null)
 
@@ -179,13 +174,6 @@ export default function AlbumTableContainer({ data }: { data: SpotifySearchResul
         data={albumDataWithCheckbox} 
         scrollableContainerRef={tableContainerRef} 
       />
-      {/* {!showTrackTableOverlay && 
-      } */}
-      {/* {canShowTrackTable && 
-        <TrackTableOverlay
-          parentElementHeight={parentElementHeight || 0}
-        />
-      } */}
     </div>
     </>
   )
@@ -193,11 +181,12 @@ export default function AlbumTableContainer({ data }: { data: SpotifySearchResul
 
 
 function VirtualizedTable({ data, scrollableContainerRef }: { data: AlbumItemTableData[], scrollableContainerRef: React.RefObject<HTMLDivElement> }) {
+  console.log('!RENDER  VirtualizedTable-> ' );
+  
   const appDispatch = useAppDispatch()
   const { areAllAlbumsSelected } = useAppState().rsb
 
   const tableAlbumsRef = useRef<HTMLTableElement>(null)
-  const [tracklistNumTracks, setTracklistNumTracks] = useState<number>(0)
   
 
   // List of all track ids
@@ -278,7 +267,6 @@ function VirtualizedTable({ data, scrollableContainerRef }: { data: AlbumItemTab
     <TableBody 
       table={table} 
       scrollableContainerRef={scrollableContainerRef}
-      setTracklistNumTracks={setTracklistNumTracks}
     />
   </table>
   )
@@ -361,9 +349,10 @@ function TableBody ({
 }: { 
   table: Table<AlbumItemTableData>, 
   scrollableContainerRef: React.RefObject<HTMLDivElement> 
-  setTracklistNumTracks: React.Dispatch<React.SetStateAction<number>>
 }){
-  const { scrollToTop } = useAppState().rsb
+  const dispatch = useAppDispatch()
+  const { scrollToTop, shouldScroll } = useAppState().rsb
+  console.log('!RENDER TableBody  shouldScroll-> ', scrollToTop, shouldScroll);
 
   // VIRTUALIZER LOGIC //
   // Important: Keep the row virtualizer in the lowest component possible to avoid unnecessary re-renders.
@@ -378,16 +367,22 @@ function TableBody ({
         navigator.userAgent.indexOf('Firefox') === -1
         ? element => element?.getBoundingClientRect().height
         : undefined,
-    overscan: 5,
-    // gap: 24,
-
+    overscan: 10,
+    gap: 8,
+    initialOffset: scrollToTop
   })
 
-  // ScrollTo Last selected row
+  // TODO the scroll on mount has stopped working. I think due to so many rerenders
+  // onMount ScrollTo Last selected row
+  // if (shouldScroll){
+  //   rowVirtualizer.scrollToIndex(scrollToTop + 1 , { behavior: 'auto', align: 'center' })
+  //   dispatch({ type: 'setShouldScroll', shouldScroll: false })
+  // }
+
   useEffect(() => {
-    console.log('Call scroll useEffect ROW')
     rowVirtualizer.scrollToIndex(scrollToTop + 1 , { behavior: 'auto', align: 'center' })
   }, [])
+
 
   return (
     <tbody
@@ -452,7 +447,6 @@ function TableBodyRow({
       imageUrl: row.original.image.url,
     }) as TrackListData)
 
-    console.log('!row.original -> ', row.original);
     dispatch({
       type: 'setOpenAlbumInfo', 
       openAlbumInfo: {
@@ -466,8 +460,9 @@ function TableBodyRow({
     setTrackListVisible({ albumId: isSelected ? null : albumId })
     
     // Record ScrollTop
-    console.log('!row.index -> ', row.index);
+    console.log('!setScrollToTop -> ', row.index);
     dispatch({ type: 'setScrollToTop', scrollToTop: row.index })
+    dispatch({ type: 'setShouldScroll', shouldScroll: true })
   }
 
    // TODO also should be true if any track of the album is selected
