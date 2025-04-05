@@ -246,7 +246,7 @@ function stateReducer(state: AppState, action: ActionTypes) {
     case 'addSelectedAlbum': {
       // TODO This shuold work but its off by 1 less
       const selectedAlbumsCount = Object.keys(state.rsb.selectedAlbums).length + 1
-      const fullCollectionCount = state.albumCollection?.length || 0
+      const fullCollectionCount = state.rsb.totalCollectionCount
       const setAllAlbumsSelected = (selectedAlbumsCount === fullCollectionCount)
       const updatedAlbums = { ...state.rsb.selectedAlbums, [action.albumId]: true }
 

@@ -22,7 +22,7 @@ import { useAppDispatch, useAppState } from '../../../../state/AppStateHooks'
 export type TrackListData = SpotifySearchResult["trackList"][number] & { imageUrl?: string }
 export type TrackListColumnData = TrackListData & { isChecked: boolean }
 export type TrackTableProps = { data: TrackListData[] } & { 
-  albumId?: string,
+  albumId: string,
 }
 export default function TrackTable({
   data,
@@ -52,13 +52,13 @@ export default function TrackTable({
 
   const columns = React.useMemo(
     () => [
-      getCheckbox({ areAllTracksSelected, allTracksIds }),
+      getCheckbox({ areAllTracksSelected, allTracksIds, albumId }),
       image,
       playButton,
       trackNumber,
       songAndArtist,
       duration,
-    ], [areAllTracksSelected, allTracksIds]
+    ], [areAllTracksSelected, allTracksIds, albumId]
   )
 
   const handleOnClick = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, track: TrackListData) => {
