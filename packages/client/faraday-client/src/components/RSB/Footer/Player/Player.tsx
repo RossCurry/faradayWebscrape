@@ -38,11 +38,9 @@ export default function Player() {
 
   return (
     <div className={styles.player}>
-    
-        <audio ref={audioRef}>
-          <source src={audioUrl || '#'} media='audio/mpeg' />
-        </audio>
-      
+      <audio ref={audioRef}>
+        <source src={audioUrl || '#'} media='audio/mpeg' />
+      </audio>
       <PlayerTrackImage />
       <PlayerTrackDetails />
       <PlayerControls audioRef={audioRef} />

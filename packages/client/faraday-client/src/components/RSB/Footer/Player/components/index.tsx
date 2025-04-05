@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import styles from '../Player.module.css'
 import { useAppDispatch, useAppState } from '../../../../../state/AppStateHooks';
 import { faradayLogo } from '../../../../../logos/FaradayLogo';
-import { SkipPrevious, PlayIcon, PauseIcon, VolumeOff, VolumeOn } from '../../../../../icons';
+import { PlayIcon, PauseIcon, VolumeOff, VolumeOn } from '../../../../../icons';
 import { msToFormattedDuration } from '../../../../../utils/msToTime';
 import IconButton from '../../../../Shared/IconButton/IconButton';
 
@@ -28,7 +28,19 @@ export function PlayerTrackDetails() {
   );
 }
 
-const CurrentTime = ({ getCurrentTime }: { getCurrentTime: () => number; }) => {
+// Time is given in seconds
+const Time = ({ time }: { time: number | undefined; }) => {
+  const formattedTime = useMemo(() => {
+    const asMilliseconds = time && time * 1000;
+    return asMilliseconds ? msToFormattedDuration(asMilliseconds) : null;
+  }, [time]);
+  // if (formattedTime === null) return null;
+  return (
+    <p style={{ width: '50px' }}>{formattedTime || '00:00'}</p>
+  );
+};
+
+const CurrentTime = ({ getCurrentTime, duration }: { getCurrentTime: () => number, duration: number }) => {
   const [currentTime, setCurrentTime] = useState<number>(0);
 
   useEffect(() => {
@@ -39,7 +51,12 @@ const CurrentTime = ({ getCurrentTime }: { getCurrentTime: () => number; }) => {
   });
 
   return (
-    <Time time={currentTime || 0} />
+    <>
+      {/* <p>preview</p> */}
+      <Time time={currentTime || 0} />
+      {'/'}
+      <Time time={duration} />
+    </>
   );
 
 };
@@ -61,18 +78,6 @@ const ProgressBar = ({ getCurrentTime, totalTime }: { getCurrentTime: () => numb
         className={styles.progressBar} id="progress-bar"
         style={{ width: `${progress}%` }} />
     </div>
-  );
-};
-
-// Time is given in seconds
-const Time = ({ time }: { time: number | undefined; }) => {
-  const formattedTime = useMemo(() => {
-    const asMilliseconds = time && time * 1000;
-    return asMilliseconds ? msToFormattedDuration(asMilliseconds) : null;
-  }, [time]);
-  // if (formattedTime === null) return null;
-  return (
-    <p style={{ width: '50px' }}>{formattedTime || '00:00'}</p>
   );
 };
 
@@ -103,15 +108,6 @@ export function PlayerControls({ audioRef }: { audioRef: React.RefObject<HTMLAud
     return audioRef.current.currentTime;
   }
 
-
-  // Sets the current playback position in seconds
-  function handleStop() {
-    if (!audioRef.current) return;
-    dispatch({ type: 'setControls', controls: { isPlaying: false } });
-    audioRef.current?.pause();
-    audioRef.current.currentTime = 0;
-  }
-
   // Sets whether the audio is muted
   function handleSetMuted() {
     if (!audioRef.current) return;
@@ -127,11 +123,6 @@ export function PlayerControls({ audioRef }: { audioRef: React.RefObject<HTMLAud
 
   return (
     <fieldset>
-      {/* StopBack */}
-      <IconButton
-        Icon={SkipPrevious}
-        handleOnClick={handleStop}
-        text='' />
       {/* Play */}
       {!controls.isPlaying && <IconButton
         Icon={PlayIcon}
@@ -143,8 +134,7 @@ export function PlayerControls({ audioRef }: { audioRef: React.RefObject<HTMLAud
         handleOnClick={handlePause}
         text='' />}
       {/* PROGESS BAR */}
-      <CurrentTime getCurrentTime={getCurrentTime} />
-      {/* <Time time={getDuration()} /> */}
+      <CurrentTime getCurrentTime={getCurrentTime} duration={getDuration()} />
       <ProgressBar getCurrentTime={getCurrentTime} totalTime={getDuration()} />
       {/* VOLUME CONTROLS - at least MUTE */}
       <IconButton
