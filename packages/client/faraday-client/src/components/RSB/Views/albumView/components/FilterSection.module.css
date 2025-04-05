@@ -3,3 +3,10 @@
   display: flex;
   gap: var(--g-2);
 }
+
+.availabilitySelect {
+  padding: var(--p-2) var(--p-3);
+}
+.availabilitySelect option {
+  padding: var(--p-2) var(--p-3);
+}
