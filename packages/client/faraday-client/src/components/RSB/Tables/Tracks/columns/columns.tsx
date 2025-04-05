@@ -124,10 +124,12 @@ export const player: AccessorColumnDef<TrackListColumnData, TrackListColumnData[
 
 export const getCheckbox = ({
   areAllTracksSelected,
-  allTracksIds
+  allTracksIds,
+  albumId
 }: {
   areAllTracksSelected: boolean,
-  allTracksIds: string[]
+  allTracksIds: string[],
+  albumId: string
 }) => {
   
   const checkBox: AccessorColumnDef<TrackListColumnData, { trackId: TrackListColumnData['id'], isChecked: boolean }> = {
@@ -185,8 +187,10 @@ export const getCheckbox = ({
         const checked = e.target.checked;
         console.log('!handleOnChangeHeader -> ', areAllTracksSelected, checked);
         if (checked){
+          dispatch({ type: 'addSelectedAlbum', albumId })
           dispatch({ type: 'addTracksToCustomPlaylist', trackIds: allTracksIds })
         } else {
+          dispatch({ type: 'deleteSelectedAlbum', albumId })
           dispatch({ type: 'deleteTracksFromCustomPlaylist', trackIds: allTracksIds })
         }
       },[])
