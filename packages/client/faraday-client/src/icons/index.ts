@@ -21,3 +21,4 @@ export { default as VolumeOff } from './VolumeOff';
 export { default as VolumeOn } from './VolumeOn';
 export { default as ShoppingCartIcon } from './ShoppingCartIcon';
 export { default as LogoutIcon } from './LogoutIcon';
+export { default as OpenInNew } from './OpenInNew';

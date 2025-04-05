@@ -1,4 +1,5 @@
 import { useAppState } from '../../../state/AppStateHooks';
+import { AlbumDetailView } from './AlbumDetailView';
 import { AlbumView } from './AlbumView/AlbumView';
 import { PlaylistView } from './PlaylistView/PlaylistView';
 
@@ -11,6 +12,9 @@ export default function Views() {
     }
     case 'playlist': {
       return (<PlaylistView />)
+    }
+    case 'albumDetail': {
+      return (<AlbumDetailView />)
     }
     default: {
       return ( <AlbumView />)
