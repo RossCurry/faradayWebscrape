@@ -58,8 +58,9 @@ function AvailabilitySelect(){
   }
   return (
     <div className={styles.filterSection}>
-      <label htmlFor="availability-filter" style={{ display: 'none' }}>Filter availability:</label>
+      <label htmlFor="availability-filter" style={{ display: 'none' }}>Availability Filter:</label>
       <select
+        className={styles.availabilitySelect}
         id="availability-filter"
         name="available"
         value={checked}
