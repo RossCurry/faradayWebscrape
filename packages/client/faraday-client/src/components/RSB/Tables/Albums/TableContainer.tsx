@@ -44,7 +44,7 @@ export type AlbumItemTableData = SpotifySearchResult & { isChecked: boolean }
 
 export default function AlbumTableContainer({ data }: { data: SpotifySearchResult[] }) {
   const dispatch = useAppDispatch()
-  const { selectedAlbums, openAlbumInfo, showTrackTableOverlay, filters } = useAppState().rsb
+  const { selectedAlbums, openAlbumInfo, showTrackTableOverlay, filters, areAllAlbumsSelected } = useAppState().rsb
   const { trackList, albumId } = openAlbumInfo
 
   const tableContainerRef = useRef<HTMLDivElement>(null);
@@ -87,8 +87,8 @@ export default function AlbumTableContainer({ data }: { data: SpotifySearchResul
   const albumDataWithCheckbox = useMemo(
     () => albumData?.pages.flatMap(page => page?.data.map(album => ({
       ...album,
-      isChecked: !!selectedAlbums[album.id]
-    }) as AlbumItemTableData)), [albumData?.pages, selectedAlbums]
+      isChecked: areAllAlbumsSelected || !!selectedAlbums[album.id]
+    }) as AlbumItemTableData)), [albumData?.pages, selectedAlbums, areAllAlbumsSelected]
   ) || []
 
   // HANDLERS //
@@ -149,9 +149,11 @@ export default function AlbumTableContainer({ data }: { data: SpotifySearchResul
   }, [albumData?.pages])
 
   // Set total album count
+  // Set albumCollection
   useEffect(()=>{
     dispatch({type: 'setTotalCollectionCount', totalCollectionCount: totalAlbumCount})
-  }, [totalAlbumCount])
+    dispatch({type: 'setAlbumCollection', albums: albumDataWithCheckbox })
+  }, [totalAlbumCount, albumDataWithCheckbox])
   
   return (
     <>
@@ -205,6 +207,8 @@ function VirtualizedTable({ data, scrollableContainerRef }: { data: AlbumItemTab
       },[] as string[])
     }, [data])
 
+
+  // Callback for Header Checkbox
   const handleSelectAll = useCallback((checkboxValue?: boolean) => {
       const addAll = !!checkboxValue
       // Modify playlist and checkbox selection
@@ -221,6 +225,7 @@ function VirtualizedTable({ data, scrollableContainerRef }: { data: AlbumItemTab
     // eslint-disable-next-line react-hooks/exhaustive-deps
     },[allTrackIds, areAllAlbumsSelected])
   
+  // Callback for album row Checkbox
   const handleSelectCheckbox = useCallback((trackList: TrackListData[], isChecked: boolean, albumId: string) => {
       // controls input components for rows
       if (isChecked) {

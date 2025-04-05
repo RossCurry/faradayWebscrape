@@ -9,7 +9,7 @@ import { CONSTANTS, Views } from './constants';
 import { SpotifySearchResult, SpotifyUserProfile } from '../types/spotify.types';
 import { TrackListData } from '../components/RSB/Tables/Tracks/TrackTable';
 import { AlbumItemTableData } from '../components/RSB/Tables/Albums/TableContainer';
-import { getLocalStoragePlaylist, getLocalStorageSelectedAlbums, updateLocalStoragePlaylist, updateLocalStorageSelectedAlbums } from '../utils/localStoragePlaylist';
+import { getLocalStorageAreAllAlbumsSelected, getLocalStoragePlaylist, getLocalStorageSelectedAlbums, updateLocalStoragePlaylist, updateLocalStorageSelectedAlbums } from '../utils/localStorage';
 import { Filter } from '../types/app.types';
 
 type AppState = {
@@ -62,7 +62,7 @@ const initialAppState: AppState = {
   // TODO check we still use the albumCollection
   albumCollection: [],
   playlist: {
-    custom: getLocalStoragePlaylist() || {},
+    custom: getLocalStoragePlaylist(),
     selectedPlaylistId: null,
     tracksCollection: null,
     title: playlistPlaceholderTitle,
@@ -71,7 +71,7 @@ const initialAppState: AppState = {
   rsb: {
     view: CONSTANTS.views.albums,
     selectedAlbums: getLocalStorageSelectedAlbums() || {},
-    areAllAlbumsSelected: false,
+    areAllAlbumsSelected: getLocalStorageAreAllAlbumsSelected() || false,
     scrollAction: null,
     scrollElement: null,
     scrollToTop: 0,
@@ -199,10 +199,10 @@ function stateReducer(state: AppState, action: ActionTypes) {
       };
     }
     case 'resetCustomPlaylist': {
-
+      const areAllAlbumsSelected = false
       // Quick and dirty local storage solution
       updateLocalStoragePlaylist(null)
-      updateLocalStorageSelectedAlbums(null)
+      updateLocalStorageSelectedAlbums(null, areAllAlbumsSelected)
 
       return { 
         ...state, 
@@ -213,7 +213,7 @@ function stateReducer(state: AppState, action: ActionTypes) {
         },
         rsb: { ...state.rsb, 
           selectedAlbums: {}, 
-          areAllAlbumsSelected: false 
+          areAllAlbumsSelected 
         }
       };
     }
@@ -251,7 +251,7 @@ function stateReducer(state: AppState, action: ActionTypes) {
       const updatedAlbums = { ...state.rsb.selectedAlbums, [action.albumId]: true }
 
       // Quick and dirty localStorage
-      updateLocalStorageSelectedAlbums(updatedAlbums)
+      updateLocalStorageSelectedAlbums(updatedAlbums, state.rsb.areAllAlbumsSelected)
 
       return { 
         ...state,
@@ -267,7 +267,7 @@ function stateReducer(state: AppState, action: ActionTypes) {
       delete copy[action.albumId]
 
       // Quick and dirty localStorage
-      updateLocalStorageSelectedAlbums(copy)
+      updateLocalStorageSelectedAlbums(copy, state.rsb.areAllAlbumsSelected)
 
       return { 
         ...state,
@@ -279,22 +279,23 @@ function stateReducer(state: AppState, action: ActionTypes) {
         selection[album.id] = true;
         return selection
       }, {} as Record<SpotifySearchResult['id'], boolean>)
-
+      const areAllAlbumsSelected = true
       // Quick and dirty localStorage
-      updateLocalStorageSelectedAlbums(allSelected)
+      updateLocalStorageSelectedAlbums(allSelected, areAllAlbumsSelected)
 
       return { 
         ...state,
-        rsb: { ...state.rsb, selectedAlbums: allSelected } 
+        rsb: { ...state.rsb, selectedAlbums: allSelected, areAllAlbumsSelected } 
       };
     }
     case 'deselectAllAlbums': {
+      const areAllAlbumsSelected = false
       // Quick and dirty localStorage
-      updateLocalStorageSelectedAlbums(null)
+      updateLocalStorageSelectedAlbums(null, areAllAlbumsSelected)
 
       return { 
         ...state,
-        rsb: { ...state.rsb, selectedAlbums: {} } 
+        rsb: { ...state.rsb, selectedAlbums: {}, areAllAlbumsSelected } 
       };
     }
     case 'setAllAlbumsSelected': {
