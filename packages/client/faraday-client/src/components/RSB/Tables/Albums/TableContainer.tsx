@@ -44,12 +44,14 @@ export type AlbumItemTableData = SpotifySearchResult & { isChecked: boolean }
 
 export default function AlbumTableContainer({ data }: { data: SpotifySearchResult[] }) {
   const dispatch = useAppDispatch()
-  const { selectedAlbums, openAlbumInfo, showTrackTableOverlay, filters, areAllAlbumsSelected } = useAppState().rsb
-  const { trackList, albumId } = openAlbumInfo
+  const { 
+    selectedAlbums, 
+    filters, 
+    areAllAlbumsSelected 
+  } = useAppState().rsb
 
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const [parentElementHeight, setParentElementHeight] = useState<number|null>(null)
-  const canShowTrackTable = !!albumId && !!trackList?.length
 
 
   // QUERY LOGIC - FETCHES DATA //
@@ -173,17 +175,17 @@ export default function AlbumTableContainer({ data }: { data: SpotifySearchResul
       // <<<< || QUERY INFINITE SCROLL || >>>> //
       onScroll={fetchMoreOnBottomReached}
     >
-      {!showTrackTableOverlay && 
-        <VirtualizedTable 
-          data={albumDataWithCheckbox} 
-          scrollableContainerRef={tableContainerRef} 
-        />
-      }
-      {canShowTrackTable && 
+      <VirtualizedTable 
+        data={albumDataWithCheckbox} 
+        scrollableContainerRef={tableContainerRef} 
+      />
+      {/* {!showTrackTableOverlay && 
+      } */}
+      {/* {canShowTrackTable && 
         <TrackTableOverlay
           parentElementHeight={parentElementHeight || 0}
         />
-      }
+      } */}
     </div>
     </>
   )
@@ -436,7 +438,6 @@ function TableBodyRow({
   const { selectedAlbumRowRef } = useAppState().rsb
   // TrackTable Logic
   const [tracklistVisible, setTrackListVisible] = useState<{ albumId: string | null }>({ albumId: null })
-  const [tracklist, setTracklist] = useState<TrackListData[] | null>(null)
   
   const dispatch = useAppDispatch()
   const albumId = row.original.id
@@ -453,31 +454,23 @@ function TableBodyRow({
       ...track, 
       imageUrl: row.original.image.url,
     }) as TrackListData)
-    setTracklist(mappedTracklist)
+
+    console.log('!row.original -> ', row.original);
     dispatch({
-      type: 'setOpenAlbumInfo', openAlbumInfo: {
+      type: 'setOpenAlbumInfo', 
+      openAlbumInfo: {
         albumId: isSelected ? null : albumId,
         trackList: mappedTracklist,
         albumInfo: isSelected ? null : row.original,
       }
     })
-    dispatch({ type: 'setShowTrackTableOverlay', showTrackTableOverlay: true })
+
+    dispatch({ type: 'updateView', view: 'albumDetail', playlistId: null })
     setTrackListVisible({ albumId: isSelected ? null : albumId })
     
     // Record ScrollTop
     console.log('!row.index -> ', row.index);
     dispatch({ type: 'setScrollToTop', scrollToTop: row.index })
-    // TODO MEASURE THE SCROLL HEIGHT HERE
-    // TODO setTrackList in the state
-    // // Sets the height for the dropdown
-    // setTracklistNumTracks(row.original.totalTracks)
-    // Toggle
-    // // Scroll into view
-    // if (!isSelected) {
-    //   e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' })
-    // }
-    // TODO why did I habe this?
-    // selectedAlbumRowRef.current = e.target
   }
 
    // TODO also should be true if any track of the album is selected
@@ -529,127 +522,127 @@ function TableCell({ cell }: { cell: Cell<AlbumItemTableData, unknown> }) {
   )
 }
 
-/**
- * Container for the tracklist view
- * @param param0 
- * @returns 
- */
-function TrackTableOverlay({ 
-  parentElementHeight, 
-}: { 
-  parentElementHeight: number, 
-}) {
-  const dispatch = useAppDispatch()
-  const { showTrackTableOverlay, openAlbumInfo } = useAppState().rsb
-  const { albumInfo, trackList, albumId } = openAlbumInfo
-  const imageUrl = trackList?.at(0)?.imageUrl
-  const { hours, minutes, seconds } = useMemo(() => {
-    const totalDurationMs = trackList?.reduce((duration, info) => info.duration_ms + duration, 0)
-    return msToTimeDivision(totalDurationMs || 0)
-  }, [trackList])
-  const durationString = `${hours > 0 ? `${hours}h` : ''} ${minutes}m ${seconds}s`
-  const albumLink = albumId && `https://open.spotify.com/album/${albumId}`
+// /**
+//  * Container for the tracklist view
+//  * @param param0 
+//  * @returns 
+//  */
+// function TrackTableOverlay({ 
+//   parentElementHeight, 
+// }: { 
+//   parentElementHeight: number, 
+// }) {
+//   const dispatch = useAppDispatch()
+//   const { showTrackTableOverlay, openAlbumInfo } = useAppState().rsb
+//   const { albumInfo, trackList, albumId } = openAlbumInfo
+//   const imageUrl = trackList?.at(0)?.imageUrl
+//   const { hours, minutes, seconds } = useMemo(() => {
+//     const totalDurationMs = trackList?.reduce((duration, info) => info.duration_ms + duration, 0)
+//     return msToTimeDivision(totalDurationMs || 0)
+//   }, [trackList])
+//   const durationString = `${hours > 0 ? `${hours}h` : ''} ${minutes}m ${seconds}s`
+//   const albumLink = albumId && `https://open.spotify.com/album/${albumId}`
 
-  const handleCloseOverlay = () => {
-    dispatch({ 
-      type: 'setShowTrackTableOverlay', 
-      showTrackTableOverlay: false 
-    })
-  }
+//   const handleCloseOverlay = () => {
+//     dispatch({ 
+//       type: 'setShowTrackTableOverlay', 
+//       showTrackTableOverlay: false 
+//     })
+//   }
   
   
 
-  const renderTrackList = !!albumId && !!trackList && trackList?.length > 0
-  return (
-    <section
-    id='trackTableContainerAlbumView'
-    className={`
-      ${styles.trackTableContainer}
-      ${showTrackTableOverlay ? styles.isOpen : styles.isClosed}
-      `}
-      style={{
-        height: `${parentElementHeight}px`,
-      }}
-      >
-      <header
-        className={styles.trackTableHeader}
-      >
-        <IconButton
-          handleOnClick={handleCloseOverlay}
-          Icon={ArrowBackIcon}
-          text={''}
-          className={styles.closeOverlayButton}
-        />
-        <div
-          className={styles.trackTableHeaderImg}
-          style={{
-              backgroundImage: `url(${imageUrl})`
-            }}
-        />
-        <div
-          className={styles.trackTableHeaderAlbumInfo}
-        >
-          <h2>{albumInfo?.name}</h2>
-          <h3>{albumInfo?.artists.join(', ')}</h3>
-        </div>
+//   const renderTrackList = !!albumId && !!trackList && trackList?.length > 0
+//   return (
+//     <section
+//     id='trackTableContainerAlbumView'
+//     className={`
+//       ${styles.trackTableContainer}
+//       ${showTrackTableOverlay ? styles.isOpen : styles.isClosed}
+//       `}
+//       style={{
+//         height: `${parentElementHeight}px`,
+//       }}
+//       >
+//       <header
+//         className={styles.trackTableHeader}
+//       >
+//         <IconButton
+//           handleOnClick={handleCloseOverlay}
+//           Icon={ArrowBackIcon}
+//           text={''}
+//           className={styles.closeOverlayButton}
+//         />
+//         <div
+//           className={styles.trackTableHeaderImg}
+//           style={{
+//               backgroundImage: `url(${imageUrl})`
+//             }}
+//         />
+//         <div
+//           className={styles.trackTableHeaderAlbumInfo}
+//         >
+//           <h2>{albumInfo?.name}</h2>
+//           <h3>{albumInfo?.artists.join(', ')}</h3>
+//         </div>
 
-        <Links albumLink={albumLink} faradayLink={albumInfo?.link} />
-        <div
-          className={styles.trackTableHeaderAlbumStats}
-        >
-          <p>{trackList?.length} track{trackList?.length === 1 ? '' : 's'}</p>
-          <p>{durationString}</p>
-        </div>
-      </header>
-      {renderTrackList && 
-        <TrackTable
-          data={trackList}
-          // deselect the album selection if selected
-          albumId={albumId}
-        />
-      }
-    </section>
-  )
-}
+//         <Links albumLink={albumLink} faradayLink={albumInfo?.link} />
+//         <div
+//           className={styles.trackTableHeaderAlbumStats}
+//         >
+//           <p>{trackList?.length} track{trackList?.length === 1 ? '' : 's'}</p>
+//           <p>{durationString}</p>
+//         </div>
+//       </header>
+//       {renderTrackList && 
+//         <TrackTable
+//           data={trackList}
+//           // deselect the album selection if selected
+//           albumId={albumId}
+//         />
+//       }
+//     </section>
+//   )
+// }
 
 
-function Links({ 
-  albumLink, 
-  faradayLink 
-}: { 
-  albumLink: string | null,
-  faradayLink?: string,
-}){
-  return (
-    <span
-      className={styles.trackTableHeaderLinks}
-    >
-    {faradayLink && 
-    <a 
-      href={faradayLink} 
-      target='_blank'
-    >
-      <Tooltip
-        Component={<ShoppingCartIcon width={28} height={28} />}
-        tooltipText='Buy on Faraday'
-      />
-      {/* <Tooltip
-        Component={<FaradayLogo className={styles.faradayLinkLogo} />}
-        tooltipText='Buy on Faraday'
-      /> */}
-    </a>
-    }
-    {albumLink && 
-      <a 
-        href={albumLink} 
-        target='_blank'
-      >
-        <Tooltip
-          Component={<SpotifyGreenLogo width={28} height={28} />}
-          tooltipText='Listen on Spotify'
-        />
-      </a>
-      }
-    </span>
-  )
-}
+// function Links({ 
+//   albumLink, 
+//   faradayLink 
+// }: { 
+//   albumLink: string | null,
+//   faradayLink?: string,
+// }){
+//   return (
+//     <span
+//       className={styles.trackTableHeaderLinks}
+//     >
+//     {faradayLink && 
+//     <a 
+//       href={faradayLink} 
+//       target='_blank'
+//     >
+//       <Tooltip
+//         Component={<ShoppingCartIcon width={28} height={28} />}
+//         tooltipText='Buy on Faraday'
+//       />
+//       {/* <Tooltip
+//         Component={<FaradayLogo className={styles.faradayLinkLogo} />}
+//         tooltipText='Buy on Faraday'
+//       /> */}
+//     </a>
+//     }
+//     {albumLink && 
+//       <a 
+//         href={albumLink} 
+//         target='_blank'
+//       >
+//         <Tooltip
+//           Component={<SpotifyGreenLogo width={28} height={28} />}
+//           tooltipText='Listen on Spotify'
+//         />
+//       </a>
+//       }
+//     </span>
+//   )
+// }
