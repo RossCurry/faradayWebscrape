@@ -197,7 +197,6 @@ function VirtualizedTable({ data, scrollableContainerRef }: { data: AlbumItemTab
   const { areAllAlbumsSelected } = useAppState().rsb
 
   const tableAlbumsRef = useRef<HTMLTableElement>(null)
-  const selectedAlbumRowRef = useRef<HTMLTableElement>(null)
   const [tracklistNumTracks, setTracklistNumTracks] = useState<number>(0)
   
 
@@ -435,7 +434,6 @@ function TableBodyRow({
   rowVirtualizer: Virtualizer<HTMLDivElement, Element>, 
   virtualRow: VirtualItem 
 }) {
-  const { selectedAlbumRowRef } = useAppState().rsb
   // TrackTable Logic
   const [tracklistVisible, setTrackListVisible] = useState<{ albumId: string | null }>({ albumId: null })
   
@@ -443,7 +441,6 @@ function TableBodyRow({
   const albumId = row.original.id
   const isSelected = tracklistVisible.albumId === albumId;
   
-  // TODO clean up the logic here
   const handleOpenTrackList = (e: React.MouseEvent<HTMLTableCellElement | HTMLTableRowElement, MouseEvent>) => {
     const isCheckbox = 'id' in e.target && typeof e.target.id === 'string' && e.target.id.startsWith('album-checkbox-id')
     e.stopPropagation()
@@ -521,128 +518,3 @@ function TableCell({ cell }: { cell: Cell<AlbumItemTableData, unknown> }) {
     </td>
   )
 }
-
-// /**
-//  * Container for the tracklist view
-//  * @param param0 
-//  * @returns 
-//  */
-// function TrackTableOverlay({ 
-//   parentElementHeight, 
-// }: { 
-//   parentElementHeight: number, 
-// }) {
-//   const dispatch = useAppDispatch()
-//   const { showTrackTableOverlay, openAlbumInfo } = useAppState().rsb
-//   const { albumInfo, trackList, albumId } = openAlbumInfo
-//   const imageUrl = trackList?.at(0)?.imageUrl
-//   const { hours, minutes, seconds } = useMemo(() => {
-//     const totalDurationMs = trackList?.reduce((duration, info) => info.duration_ms + duration, 0)
-//     return msToTimeDivision(totalDurationMs || 0)
-//   }, [trackList])
-//   const durationString = `${hours > 0 ? `${hours}h` : ''} ${minutes}m ${seconds}s`
-//   const albumLink = albumId && `https://open.spotify.com/album/${albumId}`
-
-//   const handleCloseOverlay = () => {
-//     dispatch({ 
-//       type: 'setShowTrackTableOverlay', 
-//       showTrackTableOverlay: false 
-//     })
-//   }
-  
-  
-
-//   const renderTrackList = !!albumId && !!trackList && trackList?.length > 0
-//   return (
-//     <section
-//     id='trackTableContainerAlbumView'
-//     className={`
-//       ${styles.trackTableContainer}
-//       ${showTrackTableOverlay ? styles.isOpen : styles.isClosed}
-//       `}
-//       style={{
-//         height: `${parentElementHeight}px`,
-//       }}
-//       >
-//       <header
-//         className={styles.trackTableHeader}
-//       >
-//         <IconButton
-//           handleOnClick={handleCloseOverlay}
-//           Icon={ArrowBackIcon}
-//           text={''}
-//           className={styles.closeOverlayButton}
-//         />
-//         <div
-//           className={styles.trackTableHeaderImg}
-//           style={{
-//               backgroundImage: `url(${imageUrl})`
-//             }}
-//         />
-//         <div
-//           className={styles.trackTableHeaderAlbumInfo}
-//         >
-//           <h2>{albumInfo?.name}</h2>
-//           <h3>{albumInfo?.artists.join(', ')}</h3>
-//         </div>
-
-//         <Links albumLink={albumLink} faradayLink={albumInfo?.link} />
-//         <div
-//           className={styles.trackTableHeaderAlbumStats}
-//         >
-//           <p>{trackList?.length} track{trackList?.length === 1 ? '' : 's'}</p>
-//           <p>{durationString}</p>
-//         </div>
-//       </header>
-//       {renderTrackList && 
-//         <TrackTable
-//           data={trackList}
-//           // deselect the album selection if selected
-//           albumId={albumId}
-//         />
-//       }
-//     </section>
-//   )
-// }
-
-
-// function Links({ 
-//   albumLink, 
-//   faradayLink 
-// }: { 
-//   albumLink: string | null,
-//   faradayLink?: string,
-// }){
-//   return (
-//     <span
-//       className={styles.trackTableHeaderLinks}
-//     >
-//     {faradayLink && 
-//     <a 
-//       href={faradayLink} 
-//       target='_blank'
-//     >
-//       <Tooltip
-//         Component={<ShoppingCartIcon width={28} height={28} />}
-//         tooltipText='Buy on Faraday'
-//       />
-//       {/* <Tooltip
-//         Component={<FaradayLogo className={styles.faradayLinkLogo} />}
-//         tooltipText='Buy on Faraday'
-//       /> */}
-//     </a>
-//     }
-//     {albumLink && 
-//       <a 
-//         href={albumLink} 
-//         target='_blank'
-//       >
-//         <Tooltip
-//           Component={<SpotifyGreenLogo width={28} height={28} />}
-//           tooltipText='Listen on Spotify'
-//         />
-//       </a>
-//       }
-//     </span>
-//   )
-// }

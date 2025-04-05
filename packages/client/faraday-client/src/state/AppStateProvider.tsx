@@ -35,7 +35,6 @@ type AppState = {
       albumInfo: AlbumItemTableData | null
     }
     tableContainerHeight: number
-    selectedAlbumRowRef: React.RefObject<HTMLTableElement> | null
     filters: {
       availability: Filter['availability']
     },
@@ -82,7 +81,6 @@ const initialAppState: AppState = {
       albumInfo: null
     },
     tableContainerHeight: 0,
-    selectedAlbumRowRef: null,
     filters: {
       availability: 'available'
     },
@@ -125,7 +123,6 @@ type ActionTypes =
 | { type: 'setOpenAlbumInfo', openAlbumInfo: AppState['rsb']['openAlbumInfo'] }
 | { type: 'setTableContainerHeight', tableContainerHeight: AppState['rsb']['tableContainerHeight'] }
 | { type: 'setShowTrackTableOverlay', showTrackTableOverlay: AppState['rsb']['showTrackTableOverlay'] }
-| { type: 'setSelectedAlbumRowRef', selectedAlbumRowRef: AppState['rsb']['selectedAlbumRowRef'] }
 | { type: 'setScrollToTop', scrollToTop: AppState['rsb']['scrollToTop'] }
 | { type: 'setFilters', filters: AppState['rsb']['filters'] }
 | { type: 'setTotalCollectionCount', totalCollectionCount: AppState['rsb']['totalCollectionCount'] }
@@ -340,13 +337,6 @@ function stateReducer(state: AppState, action: ActionTypes) {
       return { 
         ...state,
         rsb: { ...state.rsb, showTrackTableOverlay }
-      };
-    }
-    case 'setSelectedAlbumRowRef': {
-      const { selectedAlbumRowRef } = action;
-      return { 
-        ...state,
-        rsb: { ...state.rsb, selectedAlbumRowRef }
       };
     }
     case 'setScrollToTop': {
