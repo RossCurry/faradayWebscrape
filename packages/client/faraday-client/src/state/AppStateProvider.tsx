@@ -4,11 +4,10 @@ import {
   useReducer, 
   Dispatch,
 } from 'react';
-import { CheckedAlbumDict, CheckedTrackDict } from '../components/RSB/Tables/Albums/Versions/virtualizedTableBasicWorking/AlbumTableWithVirtualization_Working';
 import { CONSTANTS, Views } from './constants';
 import { SpotifySearchResult, SpotifyUserProfile } from '../types/spotify.types';
 import { TrackListData } from '../components/RSB/Tables/Tracks/TrackTable';
-import { AlbumItemTableData } from '../components/RSB/Tables/Albums/AlbumTableContainer';
+import { AlbumItemTableData, CheckedAlbumDict, CheckedTrackDict } from '../components/RSB/Tables/Albums/AlbumTableContainer';
 import { getLocalStorageAreAllAlbumsSelected, getLocalStoragePlaylist, getLocalStorageSelectedAlbums, updateLocalStoragePlaylist, updateLocalStorageSelectedAlbums } from '../utils/localStorage';
 import { Filter } from '../types/app.types';
 

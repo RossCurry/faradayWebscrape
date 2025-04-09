@@ -1,13 +1,13 @@
 import { AccessorColumnDef } from "@tanstack/react-table"
 import styles from './columns.module.css'
 import { SpotifySearchResult } from "../../../../../../types/spotify.types"
-import { AlbumItemTableData } from "../../Versions/virtualizedTableBasicWorking/AlbumTableWithVirtualization_Working"
 import React from "react"
-import { AddIcon, LibraryAddIcon, LibraryRemoveIcon, PlayIcon, PlayIconFilled, RemoveIcon } from "../../../../../../icons"
+import { AddIcon, LibraryAddIcon, LibraryRemoveIcon, PlayIconFilled, RemoveIcon } from "../../../../../../icons"
 import Tooltip from "../../../../../Shared/Tooltip/Tooltip"
 import { TrackListData } from "../../../Tracks/TrackTable"
 import IconButton from "../../../../../Shared/IconButton/IconButton"
 import { useAppDispatch, useAppState } from "../../../../../../state/AppStateHooks"
+import { AlbumItemTableData } from "../../AlbumTableContainer"
 
 
 export const image: AccessorColumnDef<AlbumItemTableData, { url: SpotifySearchResult["image"]["url"], isSoldOut: SpotifySearchResult["isSoldOut"] }> = {

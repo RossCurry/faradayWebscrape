@@ -1,8 +1,5 @@
-import React from 'react'
 import Player from './Player/Player'
 import styles from './Footer.module.css'
-import { useAppState } from '../../../state/AppStateHooks'
-import TrackTable from '../Tables/Tracks/TrackTable'
 
 export default function Footer() {
   // const { openAlbumInfo, tableContainerHeight } = useAppState().rsb

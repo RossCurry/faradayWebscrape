@@ -1,4 +1,3 @@
-import React from 'react'
 import styles from './LeftSidebar.module.css'
 import { SpotifyPlaylist } from '../../types/spotify.types'
 import { useAppDispatch, useAppState } from '../../state/AppStateHooks'
@@ -79,23 +78,23 @@ function AlbumCollectionButton() {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-function PlaylistsList({ playlistCollection }: { playlistCollection: SpotifyPlaylist[] | null }) {
-  return (
-    <section 
-      id='playlistCollection' 
-      className={styles.playlistContainer}
-    >
-      <ol className={styles.playlistCollection}>
-        <PlaceholderItem />
-        {playlistCollection?.map(playlist => {
-          return (
-            <PlaylistItem playlist={playlist} key={playlist.id}/>
-          )
-        })}
-      </ol>
-    </section>
-  )
-}
+// function PlaylistsList({ playlistCollection }: { playlistCollection: SpotifyPlaylist[] | null }) {
+//   return (
+//     <section 
+//       id='playlistCollection' 
+//       className={styles.playlistContainer}
+//     >
+//       <ol className={styles.playlistCollection}>
+//         <PlaceholderItem />
+//         {playlistCollection?.map(playlist => {
+//           return (
+//             <PlaylistItem playlist={playlist} key={playlist.id}/>
+//           )
+//         })}
+//       </ol>
+//     </section>
+//   )
+// }
 
 export function PlaceholderItem() {
   const { title } = useAppState().playlist
