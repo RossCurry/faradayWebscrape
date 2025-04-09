@@ -162,7 +162,7 @@ export async function getTrackList(albumId: string) {
 
 
 export async function getUserInfoWithToken(token: string) {
-  const tokenPath = `/user`
+  const tokenPath = `user`
   const url = new URL(baseUrlDev + tokenPath)
 
   try {
