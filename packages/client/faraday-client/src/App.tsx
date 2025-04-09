@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
-import styles from './App.module.css'
+import styles from './app.module.css'
 import './Colors.module.css'
 
 import Header from './components/Header/Header'
