@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import styles from './app.module.css'
-import './Colors.module.css'
+import './vars.css'
 
 import Header from './components/Header/Header'
 import LeftSidebar from './components/LSB/LeftSidebar'
