@@ -3,7 +3,9 @@ import {  SpotifyPlaylist, SpotifySearchResult, SpotifyUserProfile } from "../ty
 import { getTokenFromAuthorizationHeader } from "../utils/decodeJwt"
 import { Filter } from "../types/app.types"
 
-export const baseUrlDev =  import.meta.env.VITE_BASE_URL
+console.log('!import.meta -> ', import.meta);
+// export const baseUrlDev =  import.meta.env.VITE_BASE_URL
+export const baseUrlDev =  import.meta.env.PROD ? 'https://www.rosscurry.dev/api/' : 'http://localhost:3000/api/'
 
 export async function connectToSpoti(){
   const localConnectEndpoint = `${baseUrlDev}spotify/connect`
