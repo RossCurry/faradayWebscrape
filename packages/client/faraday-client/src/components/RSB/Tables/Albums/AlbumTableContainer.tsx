@@ -137,7 +137,7 @@ export default function AlbumTableContainer() {
     return () => {
       if (tableRef) resizeObserver.unobserve(tableRef);
     };
-  })
+  },[])
 
   // Calculate total album count from meta data
   const totalAlbumCount = useMemo(() => {
@@ -145,6 +145,7 @@ export default function AlbumTableContainer() {
     return totalAlbumCount
   }, [albumData?.pages])
 
+  // TODO this is causing a re-render loop
   // Set total album count
   // Set albumCollection
   useEffect(()=>{
