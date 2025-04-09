@@ -37,7 +37,7 @@ export type CheckedTrackDict = {
 export type AlbumItemTableData = SpotifySearchResult & { isChecked: boolean }
 
 export default function AlbumTableContainer() {
-  const dispatch = useAppDispatch()
+  // const dispatch = useAppDispatch()
   const { 
     selectedAlbums, 
     filters, 
@@ -139,11 +139,11 @@ export default function AlbumTableContainer() {
     };
   },[])
 
-  // Calculate total album count from meta data
-  const totalAlbumCount = useMemo(() => {
-    const totalAlbumCount = albumData?.pages.flatMap(page => page?.meta.totalCount)[0] || 0
-    return totalAlbumCount
-  }, [albumData?.pages])
+  // // Calculate total album count from meta data
+  // const totalAlbumCount = useMemo(() => {
+  //   const totalAlbumCount = albumData?.pages.flatMap(page => page?.meta.totalCount)[0] || 0
+  //   return totalAlbumCount
+  // }, [albumData?.pages])
 
   // TODO this is causing a re-render loop
   // Set total album count
