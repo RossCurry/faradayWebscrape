@@ -3,6 +3,8 @@ import {  SpotifyPlaylist, SpotifySearchResult, SpotifyUserProfile } from "../ty
 import { getTokenFromAuthorizationHeader } from "../utils/decodeJwt"
 import { Filter } from "../types/app.types"
 
+console.log('!import.meta.env -> ', import.meta.env);
+console.log('!import.meta.env.PROD -> ', import.meta.env.PROD);
 export const PROD_ENV = import.meta.env.PROD
 export const baseUrlDev =  PROD_ENV ? '/api/' : 'http://localhost:3000/api/'
 
