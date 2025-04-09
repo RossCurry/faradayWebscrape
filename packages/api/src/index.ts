@@ -31,7 +31,7 @@ app.use(cors({
     const origin = ctx.req.headers.origin;
     console.log('!origin -> ', origin, );
     // Allow requests from http://127.0.0.1:5500
-    if (origin === 'http://localhost:5500' || origin === 'http://localhost:5173') {
+    if (origin === 'http://rosscurry.dev' || origin === 'http://localhost:5173') {
       console.log('!returning origin -> ', origin);
       return origin;
     }
