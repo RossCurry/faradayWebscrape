@@ -148,10 +148,10 @@ export default function AlbumTableContainer() {
   // TODO this is causing a re-render loop
   // Set total album count
   // Set albumCollection
-  useEffect(()=>{
-    dispatch({type: 'setTotalCollectionCount', totalCollectionCount: totalAlbumCount})
-    dispatch({type: 'setAlbumCollection', albums: albumDataWithCheckbox })
-  }, [totalAlbumCount, albumDataWithCheckbox])
+  // useEffect(()=>{
+  //   dispatch({type: 'setTotalCollectionCount', totalCollectionCount: totalAlbumCount})
+  //   dispatch({type: 'setAlbumCollection', albums: albumDataWithCheckbox })
+  // }, [totalAlbumCount, albumDataWithCheckbox])
   
   return (
     <>
