@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { getIsJwtExpired } from '../utils/decodeJwt';
 import { getUserInfoWithToken } from '../services/services';
-import { useAppDispatch, useAppState } from '../state/AppStateHooks';
+import { useAppDispatch } from '../state/AppStateHooks';
 import { AppStateDispatch } from '../state/AppStateProvider';
 
 
@@ -13,7 +13,6 @@ async function getAndSetUserInfo(token: string, dispatch: AppStateDispatch) {
 
 export default function useGetAndSetUserInfo(redirected?: boolean) {
   const dispatch = useAppDispatch()
-  // const { user } = useAppState()
   
   // TODO check that changes here means that we wont log in after token expiration. but no other side effects
   useEffect(() => {
@@ -27,6 +26,7 @@ export default function useGetAndSetUserInfo(redirected?: boolean) {
         getAndSetUserInfo(token, dispatch)
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [redirected])
 }
 

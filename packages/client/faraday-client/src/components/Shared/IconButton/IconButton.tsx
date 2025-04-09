@@ -7,7 +7,7 @@ type IconButtonProps = {
   isSelected?: boolean,
   Icon: React.FC,
   text: string,
-  className?: string
+  className?: string | CSSModuleClasses
   disabled?: boolean
   width?: number 
 }

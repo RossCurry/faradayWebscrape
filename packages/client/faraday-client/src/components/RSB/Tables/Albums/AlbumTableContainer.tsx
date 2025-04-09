@@ -56,7 +56,7 @@ export default function AlbumTableContainer() {
     data: albumData,
     fetchNextPage,
     isFetching,
-    isLoading,
+    // isLoading,
     hasNextPage
   } = useInfiniteQuery<BatchResponse>({
     queryKey: [
@@ -350,7 +350,6 @@ function TableBody ({
   table: Table<AlbumItemTableData>, 
   scrollableContainerRef: React.RefObject<HTMLDivElement> 
 }){
-  const dispatch = useAppDispatch()
   const { scrollToTop, shouldScroll } = useAppState().rsb
   console.log('!RENDER TableBody  shouldScroll-> ', scrollToTop, shouldScroll);
 

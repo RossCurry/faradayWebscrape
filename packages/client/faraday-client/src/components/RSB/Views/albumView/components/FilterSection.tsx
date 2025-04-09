@@ -20,34 +20,34 @@ export function FilterSection(){
   )
 }
 
-function AvailabilityRadio(){
-  const availabilityOptions: Filter['availability'][] = ['all','sold out','available']
-  const dispatch = useAppDispatch();
-  const selectedAvailability = useAppState().rsb.filters.availability
-  const checked = selectedAvailability
-  const handleOnChange = (id: Filter['availability']) => {
-    dispatch({ type: 'setFilters', filters: { availability: id }})
-  }
-  return (
-    <fieldset className={styles.filterSection}>
-      <legend>Filter availability:</legend>
-      {availabilityOptions.map(availabilityOption => {
-        return (
-          <label htmlFor={availabilityOption} key={availabilityOption}>
-            <input 
-              type="radio" 
-              name="available" 
-              id={availabilityOption} 
-              checked={checked === availabilityOption}
-              onChange={() => handleOnChange(availabilityOption)}
-              />
-            <p>{availabilityOption}</p>
-          </label>
-        )
-      })}
-    </fieldset>
-  )
-}
+// function AvailabilityRadio(){
+//   const availabilityOptions: Filter['availability'][] = ['all','sold out','available']
+//   const dispatch = useAppDispatch();
+//   const selectedAvailability = useAppState().rsb.filters.availability
+//   const checked = selectedAvailability
+//   const handleOnChange = (id: Filter['availability']) => {
+//     dispatch({ type: 'setFilters', filters: { availability: id }})
+//   }
+//   return (
+//     <fieldset className={styles.filterSection}>
+//       <legend>Filter availability:</legend>
+//       {availabilityOptions.map(availabilityOption => {
+//         return (
+//           <label htmlFor={availabilityOption} key={availabilityOption}>
+//             <input 
+//               type="radio" 
+//               name="available" 
+//               id={availabilityOption} 
+//               checked={checked === availabilityOption}
+//               onChange={() => handleOnChange(availabilityOption)}
+//               />
+//             <p>{availabilityOption}</p>
+//           </label>
+//         )
+//       })}
+//     </fieldset>
+//   )
+// }
 function AvailabilitySelect(){
   const availabilityOptions: Filter['availability'][] = ['available', 'sold out', 'all']
   const dispatch = useAppDispatch();

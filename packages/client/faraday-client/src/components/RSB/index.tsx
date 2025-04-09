@@ -1,6 +1,5 @@
 import styles from './RightSidebar.module.css'
 import Views from './Views'
-import Footer from './Footer'
 
 
 export default function RightSidebar() {

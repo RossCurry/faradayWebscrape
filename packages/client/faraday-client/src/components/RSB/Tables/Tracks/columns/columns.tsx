@@ -3,11 +3,10 @@ import styles from './columns.module.css'
 import { TrackListColumnData } from "../TrackTable"
 import Tooltip from "../../../../Shared/Tooltip/Tooltip"
 import IconButton from "../../../../Shared/IconButton/IconButton"
-import { AddIcon, CheckCircleIcon, CheckCircleIconFilled, LibraryAddIcon, LibraryRemoveIcon, PlayIconFilled } from "../../../../../icons"
+import { CheckCircleIcon, CheckCircleIconFilled, LibraryAddIcon, LibraryRemoveIcon, PlayIconFilled } from "../../../../../icons"
 import React, { useCallback } from "react"
 import { useAppDispatch, useAppState } from "../../../../../state/AppStateHooks"
 import { msToFormattedDuration } from "../../../../../utils/msToTime"
-import { PlaylistView } from "../../../Views/PlaylistView/PlaylistView"
 
 
 export const image: AccessorColumnDef<TrackListColumnData, { url: TrackListColumnData["imageUrl"] }> = {

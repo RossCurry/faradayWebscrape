@@ -1,5 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react'
 import {
+  ColumnDef,
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
@@ -22,7 +23,7 @@ import { useAppDispatch, useAppState } from '../../../../state/AppStateHooks'
 export type TrackListData = SpotifySearchResult["trackList"][number] & { imageUrl?: string }
 export type TrackListColumnData = TrackListData & { isChecked: boolean }
 export type TrackTableProps = { data: TrackListData[] } & { 
-  albumId: string,
+  albumId?: string,
 }
 export default function TrackTable({
   data,
@@ -52,7 +53,7 @@ export default function TrackTable({
 
   const columns = React.useMemo(
     () => [
-      getCheckbox({ areAllTracksSelected, allTracksIds, albumId }),
+      albumId ? getCheckbox({ areAllTracksSelected, allTracksIds, albumId }) : null,
       image,
       playButton,
       trackNumber,
@@ -61,7 +62,7 @@ export default function TrackTable({
     ], [areAllTracksSelected, allTracksIds, albumId]
   )
 
-  const handleOnClick = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>, track: TrackListData) => {
+  const handleOnClick = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
     e.stopPropagation()
     const { target } = e
     const { tagName, checked, value: trackId } = target as HTMLInputElement;
@@ -91,7 +92,8 @@ export default function TrackTable({
   }
 
   const table = useReactTable({
-    columns,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    columns: columns.filter(Boolean) as ColumnDef<TrackListColumnData, any>[],
     data: dataWithCheckbox,
     // debugTable: true,
     getCoreRowModel: getCoreRowModel(),
