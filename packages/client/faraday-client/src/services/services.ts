@@ -3,12 +3,12 @@ import {  SpotifyPlaylist, SpotifySearchResult, SpotifyUserProfile } from "../ty
 import { getTokenFromAuthorizationHeader } from "../utils/decodeJwt"
 import { Filter } from "../types/app.types"
 
-// TODO change endpoint to suit purpose
-export const baseUrlDev = 'http://localhost:3000'
+export const PROD_ENV = import.meta.env.PROD
+export const baseUrlDev =  PROD_ENV ? '/api' : 'http://localhost:3000/api'
 
 
 export async function connectToSpoti(){
-  const localConnectEndpoint = 'http://localhost:3000/api/spotify/connect'
+  const localConnectEndpoint = `${baseUrlDev}/spotify/connect`
   try {
     const response = await fetch(localConnectEndpoint, {
       method: 'GET',
@@ -37,7 +37,7 @@ export async function connectToSpoti(){
 
 const DESCRIPTION = 'Faraday Collection of what is available on Spotify'
 export async function createPlaylist(playlistTitle: string, playlistTracks: SpotifySearchResult["trackList"]) {
-  const createPath = '/api/spotify/playlist/create';
+  const createPath = '/spotify/playlist/create';
   const token = window.localStorage.getItem('jwt') || ''
   
   const url = new URL(baseUrlDev + createPath)
@@ -77,7 +77,7 @@ export async function createPlaylist(playlistTitle: string, playlistTracks: Spot
  * Old route used to get all albums
  */
 export async function getAvailableAlbums(){
-  const getAlbumsPath = '/api/faraday/albums'
+  const getAlbumsPath = '/faraday/albums'
   const response = await fetch(baseUrlDev + getAlbumsPath)
   if (response.ok){
     const jsonRes: SpotifySearchResult[] = await response.json()
@@ -100,7 +100,7 @@ export async function getAlbumsInBatch({
   filters: Filter
 }){
   
-  const getAlbumsPath = '/api/faraday/albums/batch'
+  const getAlbumsPath = '/faraday/albums/batch'
   const url = new URL(baseUrlDev + getAlbumsPath)
   url.searchParams.set('limit', batchSize.toString())
   url.searchParams.set('offset', offset.toString())
@@ -150,7 +150,7 @@ export async function getAlbumsInBatch({
 }
 
 export async function getTrackList(albumId: string) {
-  const getTracksPath = `/api/spotify/album/${albumId}/tracks`
+  const getTracksPath = `/spotify/album/${albumId}/tracks`
   const response = await fetch(baseUrlDev + getTracksPath)
   if (response.ok) {
     const jsonRes = await response.json()
@@ -161,7 +161,7 @@ export async function getTrackList(albumId: string) {
 
 
 export async function getUserInfoWithToken(token: string) {
-  const tokenPath = `/api/user`
+  const tokenPath = `/user`
   const url = new URL(baseUrlDev + tokenPath)
 
   try {
@@ -204,7 +204,7 @@ export async function getUserInfoWithToken(token: string) {
 
 
 export async function getUserInfoWithCode(code: string) {
-  const verifyPath = `/api/user/verify`
+  const verifyPath = `/user/verify`
   const url = new URL(baseUrlDev + verifyPath)
   url.searchParams.set('code', code)
 
@@ -228,7 +228,7 @@ export async function getUserInfoWithCode(code: string) {
 
 // TODO send user id
 export async function getAvailablePlaylists(){
-  const getAlbumsPath = '/api/spotify/playlists'
+  const getAlbumsPath = '/spotify/playlists'
   const response = await fetch(baseUrlDev + getAlbumsPath)
   if (response.ok){
     const jsonRes: SpotifyPlaylist[] = await response.json()
@@ -238,7 +238,7 @@ export async function getAvailablePlaylists(){
 
 // TODO send user id
 export async function getTracksByIds(trackIds: string[]){
-  const getTracksPath = '/api/spotify/tracks'
+  const getTracksPath = '/spotify/tracks'
   const response = await fetch(baseUrlDev + getTracksPath, {
     method: 'POST',
     headers: {
