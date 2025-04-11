@@ -92,6 +92,10 @@ export default function AlbumTableContainer() {
       }) as AlbumItemTableData)) || []
       // update albumCollection here to prevent re-renders
       dispatch({type: 'setAlbumCollection', albums: mappedAlbums })
+      // If all albums are selected, we need to update the customPlaylist state
+      if (areAllAlbumsSelected) {
+        dispatch({ type: 'addTracksToCustomPlaylist', trackIds: mappedAlbums.flatMap(album => album.trackList.map(track => track.id)) })
+      }
       return mappedAlbums
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [albumData?.pages, selectedAlbums, areAllAlbumsSelected]
