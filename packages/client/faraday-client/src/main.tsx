@@ -11,6 +11,7 @@ import {
 } from '@tanstack/react-query'
 import StateProvider from './state/AppStateProvider.tsx';
 import { router } from './router.tsx';
+import { PersistentAudioPlayer } from './components/PersistentAudioPlayer/index.tsx';
 
 const queryClient = new QueryClient()
 
@@ -19,6 +20,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <StateProvider>
+        <PersistentAudioPlayer />
         <RouterProvider router={router} />
       </StateProvider>
     </QueryClientProvider>

@@ -18,7 +18,7 @@ export function AlbumView() {
       <section className={sharedStyles.viewTableContainer}>
         <AlbumTableContainer />
       </section>
-        <Footer />
+      <Footer />
     </section>
   )
 }

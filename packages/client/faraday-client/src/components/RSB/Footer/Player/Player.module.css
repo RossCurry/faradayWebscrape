@@ -5,6 +5,7 @@
   gap: 1rem;
   align-items: center;
   overflow: hidden;
+  max-height: 48px;
   /* justify-content: space-around; */
 }
 

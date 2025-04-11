@@ -73,3 +73,9 @@ button:focus-visible {
   /* margin: 0 auto; */
   text-align: center;
 }
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
