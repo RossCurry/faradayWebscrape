@@ -55,6 +55,7 @@
 
 @media screen and (max-width: 820px) {
   .outerHeader {
+    border-radius: var(--r-0);
     padding: var(--p-4);
   }
   .headerText {
@@ -65,5 +66,13 @@
   .header a,
   .header .logo {
     width: 4em;
+  }
+}
+
+/* Mobile size layout */
+@media screen and (max-width: 430px) {
+  .outerHeader {
+    padding: var(--p-2);
+    border-radius: var(--r-0);
   }
 }
