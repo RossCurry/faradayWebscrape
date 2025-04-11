@@ -37,7 +37,7 @@ export type CheckedTrackDict = {
 export type AlbumItemTableData = SpotifySearchResult & { isChecked: boolean }
 
 export default function AlbumTableContainer() {
-  // const dispatch = useAppDispatch()
+  const dispatch = useAppDispatch()
   const { 
     selectedAlbums, 
     filters, 
@@ -68,6 +68,9 @@ export default function AlbumTableContainer() {
       const offset = (pageParam as number) * FETCH_SIZE
       const cursor = pageParam as number
       const fetchedData = await getAlbumsInBatch({offset, batchSize: FETCH_SIZE, cursor, filters})
+      // update total count
+      const totalAlbumCount = fetchedData.meta.totalCount || 0
+      dispatch({type: 'setTotalCollectionCount', totalCollectionCount: totalAlbumCount})
       return fetchedData
     },
     initialPageParam: 0,
@@ -82,11 +85,17 @@ export default function AlbumTableContainer() {
   
   // TODO this is not pretty.
   const albumDataWithCheckbox = useMemo(
-    () => albumData?.pages.flatMap(page => page?.data.map(album => ({
-      ...album,
-      isChecked: areAllAlbumsSelected || !!selectedAlbums[album.id]
-    }) as AlbumItemTableData)), [albumData?.pages, selectedAlbums, areAllAlbumsSelected]
-  ) || []
+    () => {
+      const mappedAlbums = albumData?.pages.flatMap(page => page?.data.map(album => ({
+        ...album,
+        isChecked: areAllAlbumsSelected || !!selectedAlbums[album.id]
+      }) as AlbumItemTableData)) || []
+      // update albumCollection here to prevent re-renders
+      dispatch({type: 'setAlbumCollection', albums: mappedAlbums })
+      return mappedAlbums
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [albumData?.pages, selectedAlbums, areAllAlbumsSelected]
+  ) 
 
   // HANDLERS //
   //called on scroll and possibly on mount to fetch more data as the user scrolls and reaches bottom of table
@@ -139,19 +148,6 @@ export default function AlbumTableContainer() {
     };
   },[])
 
-  // // Calculate total album count from meta data
-  // const totalAlbumCount = useMemo(() => {
-  //   const totalAlbumCount = albumData?.pages.flatMap(page => page?.meta.totalCount)[0] || 0
-  //   return totalAlbumCount
-  // }, [albumData?.pages])
-
-  // TODO this is causing a re-render loop
-  // Set total album count
-  // Set albumCollection
-  // useEffect(()=>{
-  //   dispatch({type: 'setTotalCollectionCount', totalCollectionCount: totalAlbumCount})
-  //   dispatch({type: 'setAlbumCollection', albums: albumDataWithCheckbox })
-  // }, [totalAlbumCount, albumDataWithCheckbox])
   
   return (
     <>
