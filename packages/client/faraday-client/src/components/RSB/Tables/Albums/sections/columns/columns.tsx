@@ -9,83 +9,87 @@ import IconButton from "../../../../../Shared/IconButton/IconButton"
 import { useAppDispatch, useAppState } from "../../../../../../state/AppStateHooks"
 import { AlbumItemTableData } from "../../AlbumTableContainer"
 
-
-export const image: AccessorColumnDef<AlbumItemTableData, { url: SpotifySearchResult["image"]["url"], isSoldOut: SpotifySearchResult["isSoldOut"] }> = {
-  accessorFn: ({ isSoldOut, image }) => {
-    return {
-      url: image?.url,
-      isSoldOut
-    }
-  },
-  id: 'image',
-  cell: info => {
-    const { isSoldOut, url } = info.getValue()
-    return (
-      <>
-        <div
-          className={styles.rowDataImg}
-          style={{
-            backgroundImage: `url(${url})`
-          }}
-        >
-          {isSoldOut && <div className={styles.albumItemSoldOut}></div>}
-        </div>
-      </>
-    )
-  },
-  header: () => null,
-  enableSorting: false,
-  // column size options
-  // enableResizing: true // default
-  size: 150
-
+export const getImage = ({ isMobile }: { isMobile: boolean }) => {
+  const image: AccessorColumnDef<AlbumItemTableData, { url: SpotifySearchResult["image"]["url"], isSoldOut: SpotifySearchResult["isSoldOut"] }> = {
+    accessorFn: ({ isSoldOut, image }) => {
+      return {
+        url: image?.url,
+        isSoldOut
+      }
+    },
+    id: 'image',
+    cell: info => {
+      const { isSoldOut, url } = info.getValue()
+      return (
+        <>
+          <div
+            className={styles.rowDataImg}
+            style={{
+              backgroundImage: `url(${url})`
+            }}
+          >
+            {isSoldOut && <div className={styles.albumItemSoldOut}></div>}
+          </div>
+        </>
+      )
+    },
+    header: () => null,
+    enableSorting: false,
+    // column size options
+    // enableResizing: true // default
+    size: isMobile ? 60 : 150,
+  }
+  return image;
 }
 
-export const playButton: AccessorColumnDef<AlbumItemTableData, AlbumItemTableData> = {
-  accessorFn: (data) => data,
-  id: 'play',
-  cell: function AlbumPlayButton(info){
-    const { audioUrl } = useAppState().player
-    const dispatch = useAppDispatch()
-    const keyId = `album-playbutton-${React.useId()}`
-    const data = info.getValue()
-    const { trackList } = data
-    const [firstTrack] = Array.isArray(trackList) ?  trackList : [];
-    const preview_url = firstTrack?.preview_url
-    // TODO include is playing state
-    const isPlaying = audioUrl === preview_url
-    const isDisabled = !preview_url;
-
-    return (
-      <span className={styles.rowDataCentered} key={keyId}>
-        <Tooltip 
-          Component={
-            <IconButton 
-              Icon={PlayIconFilled}
-              handleOnClick={(e) => { 
-                e?.stopPropagation()
-                dispatch({ type: 'setAudioUrl', track: { ...firstTrack, imageUrl: data.image.url } })
-              }}
-              text=""
-              className={`
-                ${styles.playButton}
-                ${preview_url ? '' : styles.isDisabled}
-                ${isPlaying ? styles.isPlaying : ''}
-              `}
-              disabled={isDisabled}
-            />
-          }
-          tooltipText={'No preview available'}
-          hideTooltip={!isDisabled}
-        />
-      </span>
-    )
-  },
-  header: () => null,
-  enableSorting: false,
-  // column size options
-  // enableResizing: true // default
-  size: 60
+export const getPlayButton = ({ isMobile }: { isMobile: boolean }) => {
+  const playButton: AccessorColumnDef<AlbumItemTableData, AlbumItemTableData> = {
+    accessorFn: (data) => data,
+    id: 'play',
+    cell: function AlbumPlayButton(info){
+      const { audioUrl } = useAppState().player
+      const dispatch = useAppDispatch()
+      const keyId = `album-playbutton-${React.useId()}`
+      const data = info.getValue()
+      const { trackList } = data
+      const [firstTrack] = Array.isArray(trackList) ?  trackList : [];
+      const preview_url = firstTrack?.preview_url
+      // TODO include is playing state
+      const isPlaying = audioUrl === preview_url
+      const isDisabled = !preview_url;
+  
+      return (
+        <span className={styles.rowDataCentered} key={keyId}>
+          <Tooltip 
+            Component={
+              <IconButton 
+                Icon={PlayIconFilled}
+                handleOnClick={(e) => { 
+                  e?.stopPropagation()
+                  dispatch({ type: 'setAudioUrl', track: { ...firstTrack, imageUrl: data.image.url } })
+                }}
+                text=""
+                className={`
+                  ${styles.playButton}
+                  ${preview_url ? '' : styles.isDisabled}
+                  ${isPlaying ? styles.isPlaying : ''}
+                `}
+                disabled={isDisabled}
+              />
+            }
+            tooltipText={'No preview available'}
+            hideTooltip={!isDisabled}
+          />
+        </span>
+      )
+    },
+    header: () => null,
+    enableSorting: false,
+    // column size options
+    // enableResizing: true // default
+    size: isMobile ? 50 : 60,
+  }
+  return playButton
 }
 
 export const albumAndArtist: AccessorColumnDef<AlbumItemTableData, SpotifySearchResult> = {
@@ -108,6 +112,7 @@ export const albumAndArtist: AccessorColumnDef<AlbumItemTableData, SpotifySearch
   size: 300,
   minSize: 200,
   maxSize: 500,
+
 }
 
 export const album: AccessorColumnDef<AlbumItemTableData, SpotifySearchResult["name"]> = {
@@ -126,6 +131,7 @@ export const artists: AccessorColumnDef<AlbumItemTableData, SpotifySearchResult[
   header: () => <span>Artist</span>,
   sortUndefined: 'last', //force undefined values to the end
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
+
 }
 
 export const availablity: AccessorColumnDef<AlbumItemTableData, SpotifySearchResult["isSoldOut"]> = {
@@ -142,6 +148,7 @@ export const availablity: AccessorColumnDef<AlbumItemTableData, SpotifySearchRes
   header: () => <span>Available</span>,
   sortUndefined: 'last', //force undefined values to the end
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
+
 }
 
 export const category: AccessorColumnDef<AlbumItemTableData, SpotifySearchResult["category"]> = {
@@ -168,6 +175,7 @@ export const price: AccessorColumnDef<AlbumItemTableData, SpotifySearchResult["p
   header: () => <span>Price</span>,
   sortUndefined: 'last', //force undefined values to the end
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
+
 }
 
 export const popularity: AccessorColumnDef<AlbumItemTableData, SpotifySearchResult["popularity"]> = {
@@ -177,6 +185,7 @@ export const popularity: AccessorColumnDef<AlbumItemTableData, SpotifySearchResu
   header: () => <span>Popularity</span>,
   sortUndefined: 'last', //force undefined values to the end
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
+
 }
 
 export const releaseDate: AccessorColumnDef<AlbumItemTableData, SpotifySearchResult["releaseDate"]> = {
@@ -192,6 +201,7 @@ export const releaseDate: AccessorColumnDef<AlbumItemTableData, SpotifySearchRes
   header: () => <span>Release</span>,
   sortUndefined: 'last', //force undefined values to the end
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
+
 }
 
 export const genre: AccessorColumnDef<AlbumItemTableData, SpotifySearchResult["genres"]> = {
@@ -201,7 +211,8 @@ export const genre: AccessorColumnDef<AlbumItemTableData, SpotifySearchResult["g
   header: () => <span>Genre</span>,
   sortUndefined: 'last', //force undefined values to the end
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
-  size: 200
+  size: 200,
+
 }
 
 export const getCheckbox = ({
@@ -270,7 +281,7 @@ export const getCheckbox = ({
       )
     },
     enableSorting: false,
-    size: 60
+    size: 60,
   }
   return checkbox
 }

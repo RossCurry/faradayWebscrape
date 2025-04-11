@@ -14,19 +14,20 @@ import { useVirtualizer, VirtualItem, Virtualizer } from '@tanstack/react-virtua
 // Infinite Scroll Query
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query'
 import {
-  image,
+  getImage,
   albumAndArtist,
   category,
   price,
   releaseDate,
   getCheckbox,
-  playButton
+  getPlayButton
 } from './sections/columns/columns'
 import { SpotifySearchResult } from '../../../../types/spotify.types'
 import { useAppDispatch, useAppState } from '../../../../state/AppStateHooks'
 import { TrackListData } from '../Tracks/TrackTable'
 import styles from './AlbumTableContainer.module.css'
 import { BatchResponse, getAlbumsInBatch } from '../../../../services/services'
+import { useIsMobile } from '../../../../hooks/useIsMobile'
 
 export type CheckedAlbumDict = {
   [K in SpotifySearchResult['id']]: boolean
@@ -181,6 +182,7 @@ export default function AlbumTableContainer() {
 
 
 function VirtualizedTable({ data, scrollableContainerRef }: { data: AlbumItemTableData[], scrollableContainerRef: React.RefObject<HTMLDivElement> }) {
+  const isMobile = useIsMobile()
   const appDispatch = useAppDispatch()
   const { areAllAlbumsSelected } = useAppState().rsb
 
@@ -231,17 +233,17 @@ function VirtualizedTable({ data, scrollableContainerRef }: { data: AlbumItemTab
       // eslint-disable-next-line react-hooks/exhaustive-deps
     },[])
 
-
+  console.log('!isMobile -> ', isMobile);
   const columns = React.useMemo(
     () => [
       getCheckbox({ areAllAlbumsSelected, handleSelectAll, handleSelectCheckbox }),
-      image,
-      playButton,
+      getImage({ isMobile }),
+      getPlayButton({ isMobile }),
       albumAndArtist,
       category,
       releaseDate,
       price,
-    ], [areAllAlbumsSelected, handleSelectAll, handleSelectCheckbox]
+    ], [areAllAlbumsSelected, handleSelectAll, handleSelectCheckbox, isMobile]
   )
 
   // TABLE LOGIC //
@@ -276,7 +278,7 @@ function TableHeader({ table }: { table: Table<AlbumItemTableData> }) {
       style={{
         display: 'grid',
         position: 'sticky',
-        top: 0,
+        top: -1,
         left: 0,
         padding: 0,
         zIndex: 1,
@@ -287,7 +289,11 @@ function TableHeader({ table }: { table: Table<AlbumItemTableData> }) {
       {table.getHeaderGroups().map(headerGroup => (
         <tr 
           key={headerGroup.id} 
-          style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}
+          style={{ 
+            display: 'flex', 
+            width: '100%', 
+            justifyContent: 'space-between' 
+          }}
         >
           {headerGroup.headers.map(header => {
             return (
@@ -425,6 +431,7 @@ function TableBodyRow({
   rowVirtualizer: Virtualizer<HTMLDivElement, Element>, 
   virtualRow: VirtualItem 
 }) {
+  const isMobile = useIsMobile()
   // TrackTable Logic
   const [tracklistVisible, setTrackListVisible] = useState<{ albumId: string | null }>({ albumId: null })
   
@@ -474,7 +481,7 @@ function TableBodyRow({
           position: 'absolute',
           transform: `translateY(${virtualRow.start}px)`, //this should always be a `style` as it changes on scroll
           width: '100%',
-          justifyContent: 'space-between',
+          justifyContent: isMobile ? 'start' : 'space-between',
         }}
         className={`
           ${styles.albumRows}
@@ -503,6 +510,7 @@ function TableCell({ cell }: { cell: Cell<AlbumItemTableData, unknown> }) {
         width: cell.column.getSize(),
         justifyContent: 'center'
       }}
+      className={cell.column.columnDef.meta?.className}
     >
       {flexRender(cell.column.columnDef.cell, cell.getContext())}
     </td>
