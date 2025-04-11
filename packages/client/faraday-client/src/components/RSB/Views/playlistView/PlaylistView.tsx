@@ -5,6 +5,7 @@ import TrackTable from "../../Tables/Tracks/TrackTable";
 import styles from './PlaylistView.module.css'
 import sharedStyles from '../SharedStyles.module.css'
 import { HeaderPlaylistView } from "./components/PlaylistComponents";
+import { FaradayLogo } from "../../../../logos/FaradayLogo";
 
 export function PlaylistView() {
   const { tracksCollection: tracks } = useAppState().playlist
@@ -38,8 +39,6 @@ export function PlaylistView() {
 
   return (
     <section id='playlistView' className={sharedStyles.albumCollection}>
-      {!showPlaylist && <PlaylistEmptyContainer />}
-      {showPlaylist &&
         <div className={styles.playlistViewContainer}>
         <span 
           style={{ 
@@ -50,18 +49,18 @@ export function PlaylistView() {
             zIndex: 'var(--z-3)'
           }}
         >
-          <HeaderPlaylistView />
+          <HeaderPlaylistView playlistHasTracks={!!showPlaylist} />
         </span>
+
+        {!showPlaylist && <PlaylistEmptyContainer />}
         
-        <span style={{ gridArea: 'playlist'}}>
+        {showPlaylist && <span style={{ gridArea: 'playlist'}}>
           <TrackTable
             data={tracks}
             key={'playlist-table'}
           />
-        </span>
+        </span>}
         </div>
-      }
-
     </section>
   )
 }
@@ -69,9 +68,10 @@ export function PlaylistView() {
 const PlaylistEmptyContainer = () => {
   const dispatch = useAppDispatch();
   const { isLoading } = useAppState().playlist;
+  
   return (
   <div className={styles.playlistEmptyContainer}>
-    {isLoading && <div>isLoading</div>}
+    <IsLoading isLoading={isLoading} />
     {!isLoading && <div className={styles.playlistEmptyPlaceholder}>
       <p>No tracks selected for your playlist yet</p>
       <button
@@ -81,5 +81,15 @@ const PlaylistEmptyContainer = () => {
       </button>
     </div>}
   </div>
+  )
+}
+
+function IsLoading({ isLoading }: { isLoading: boolean }) {
+  if (!isLoading) return null
+  return (
+    <div className={styles.IsLoadingContainer}>
+      <FaradayLogo className={styles.logo} />
+      <p>Loading...</p>
+    </div>
   )
 }
