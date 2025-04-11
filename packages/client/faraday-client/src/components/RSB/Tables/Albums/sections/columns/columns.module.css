@@ -1,5 +1,27 @@
+/* TODO remove 👇 */
+tr.tableRow {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.rowDataImgWrapper{
+  display: flex;
+  justify-content: center;
+  width: 150px;
+}
+.rowPlayButtonWrapper{
+  display: flex;
+  justify-content: center;
+  width: 60px;
+}
+/* TODO remove 👆 */
+
+
 .rowDataImg {
-  width: 6rem;
+  --img-size: 6rem;
+  width: var(--img-size);
+  height: var(--img-size);
   aspect-ratio: 1/1;
   /* for bg-image */
   background-size: cover;
@@ -55,14 +77,15 @@ input[type="checkbox"].rowDataCheckbox{
   align-items: center;
 }
 .rowDataCheckboxLabel {
+  --label-size: 1.25em;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 0.5em;
   background: inherit;
   border-radius: 50%;
-  width: 1.25em;
-  height: 1.25em;
+  width: var(--label-size);
+  height: var(--label-size);
   aspect-ratio: 1 / 1;
   cursor: pointer;
   border-color:var(--grey-500);
@@ -114,4 +137,37 @@ input[type="checkbox"].rowDataCheckbox{
 .playButton:not(.isDisabled):focus svg,
 .playButton:not(.isDisabled):hover svg {
   fill: var(--yellow-4)
+}
+
+
+
+/* Mobile size layout */
+@media screen and (max-width: 430px) {
+  .rowDataImg {
+    --img-size: 4rem;
+  }
+  .rowDataAvailability,
+  .rowDataAlbum,
+  .rowDataArtist {
+    padding-left: var(--p-1);
+  }
+  .rowDataAlbum {
+    gap: var(--g-0);
+    /* width: 100%; */
+    padding: var(--p-1);
+  }
+  .rowDataAlbum p:first-child {
+    /* font-weight: 800; */
+  }
+  .rowDataCheckboxLabel {
+    --label-size: 1em;
+    padding: var(--p-2);
+  }
+  /* COLUMN WIDTHS */
+  .rowDataImgWrapper{
+    width: 100px;
+  }
+  .rowPlayButtonWrapper{
+    width: 60px;
+  }
 }
