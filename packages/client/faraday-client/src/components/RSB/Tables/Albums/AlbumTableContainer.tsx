@@ -44,7 +44,6 @@ export default function AlbumTableContainer() {
     areAllAlbumsSelected 
   } = useAppState().rsb
 
-  console.log('!RENDER AlbumTableContainer -> ');
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const [parentElementHeight, setParentElementHeight] = useState<number|null>(null)
 
@@ -182,8 +181,6 @@ export default function AlbumTableContainer() {
 
 
 function VirtualizedTable({ data, scrollableContainerRef }: { data: AlbumItemTableData[], scrollableContainerRef: React.RefObject<HTMLDivElement> }) {
-  console.log('!RENDER  VirtualizedTable-> ' );
-  
   const appDispatch = useAppDispatch()
   const { areAllAlbumsSelected } = useAppState().rsb
 
@@ -351,8 +348,7 @@ function TableBody ({
   table: Table<AlbumItemTableData>, 
   scrollableContainerRef: React.RefObject<HTMLDivElement> 
 }){
-  const { scrollToTop, shouldScroll } = useAppState().rsb
-  console.log('!RENDER TableBody  shouldScroll-> ', scrollToTop, shouldScroll);
+  const { scrollToTop } = useAppState().rsb
 
   // VIRTUALIZER LOGIC //
   // Important: Keep the row virtualizer in the lowest component possible to avoid unnecessary re-renders.
@@ -460,7 +456,6 @@ function TableBodyRow({
     setTrackListVisible({ albumId: isSelected ? null : albumId })
     
     // Record ScrollTop
-    console.log('!setScrollToTop -> ', row.index);
     dispatch({ type: 'setScrollToTop', scrollToTop: row.index })
     dispatch({ type: 'setShouldScroll', shouldScroll: true })
   }

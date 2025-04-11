@@ -2,28 +2,9 @@
   grid-area: footer;
   background-color: var(--bg-dark-2);
   max-height: 3rem;
+  min-height: 3rem;
   padding: 0.5rem 1rem;
   position: relative;
+  overflow: hidden;
 }
 
-/* .trackTableContainer {
-  height: 0px;
-  overflow-y: scroll;
-  position: absolute;
-  bottom: 100%;
-  left: 0;
-  width: 100%;
-  z-index: var(--z-3);
-  background-color: var(--bg-dark-1);
-  transition: 
-    transform 1s ease-in-out, 
-    opacity 1s ease-in-out,
-    height 1s ease-in-out;
-}
-.trackTableContainer.isClosed{
-  transform: translateY(0);
-}
-.trackTableContainer.isOpen{
-  transform: translateY(0);
-  opacity: 1;
-} */

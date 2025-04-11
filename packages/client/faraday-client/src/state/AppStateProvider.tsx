@@ -41,6 +41,7 @@ type AppState = {
     totalCollectionCount: number
   },
   player: {
+    audioRef: React.RefObject<HTMLAudioElement> | null,
     audioUrl: string | null,
     track: TrackListData | null,
     controls : {
@@ -88,6 +89,7 @@ const initialAppState: AppState = {
     totalCollectionCount: 0
   },
   player: {
+    audioRef: null,
     audioUrl: null,
     track: null,
     controls: {
@@ -131,6 +133,7 @@ type ActionTypes =
 // Main album collection
 | { type: 'setAlbumCollection', albums: SpotifySearchResult[] | null }
 // Player
+| { type: 'setAudioRef', audioRef: AppState['player']['audioRef'] }
 | { type: 'setAudioUrl', track: TrackListData | null }
 | { type: 'setControls', controls: Partial<AppState['player']['controls']> }
 // User
@@ -386,10 +389,26 @@ function stateReducer(state: AppState, action: ActionTypes) {
       };
     }
     // Player Reducers
+    case 'setAudioRef': {
+      const { audioRef } = action;
+      return { 
+        ...state,
+        player: { 
+          ...state.player, 
+          audioRef
+        }
+      };
+    }
     case 'setAudioUrl': {
       return { 
         ...state,
-        player: { ...state.player, audioUrl: action.track?.preview_url || null, track: action.track }
+        player: { 
+          ...state.player, 
+          audioUrl: action.track?.preview_url || null, 
+          track: action.track,
+          isPlaying: false,
+          isPaused: false,
+        }
       };
     }
     case 'setControls': {

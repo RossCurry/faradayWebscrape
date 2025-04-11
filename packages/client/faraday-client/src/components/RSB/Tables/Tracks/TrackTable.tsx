@@ -29,7 +29,6 @@ export default function TrackTable({
   data,
   albumId,
 }: TrackTableProps) {
-  console.log('!RENDER TrackTable -> ');
   const dispatch = useAppDispatch()
   const tableTracksRef = useRef<HTMLTableElement>(null)
   const [sorting, setSorting] = useState<SortingState>([])

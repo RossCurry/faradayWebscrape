@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import styles from '../Player.module.css'
 import { useAppDispatch, useAppState } from '../../../../../state/AppStateHooks';
 import { faradayLogo } from '../../../../../logos/FaradayLogo';
@@ -21,7 +21,7 @@ export function PlayerTrackImage() {
 export function PlayerTrackDetails() {
   const { track } = useAppState().player;
   return (
-    <div className={styles.playerTrackInfo}>
+    <div className={`${styles.playerTrackInfo} truncate`}>
       <p className={styles.playerTrackName}>{track?.name}</p>
       <p>{track?.artists.map(a => a.name).join(', ')}</p>
     </div>
@@ -36,7 +36,7 @@ const Time = ({ time }: { time: number | undefined; }) => {
   }, [time]);
   // if (formattedTime === null) return null;
   return (
-    <p style={{ width: '50px' }}>{formattedTime || '00:00'}</p>
+    <p style={{ width: '50px', padding: 0, margin: 0 }}>{formattedTime || '00:00'}</p>
   );
 };
 
@@ -82,35 +82,35 @@ const ProgressBar = ({ getCurrentTime, totalTime }: { getCurrentTime: () => numb
 };
 
 
-export function PlayerControls({ audioRef }: { audioRef: React.RefObject<HTMLAudioElement>; }) {
+export function PlayerControls() {
   const dispatch = useAppDispatch();
-  const { controls } = useAppState().player;
+  const { controls, audioRef } = useAppState().player;
 
   // Plays the audio
   function handlePlay() {
-    console.log('!handlePlay -> ', !!audioRef.current);
-    if (!audioRef.current) return;
+    console.log('!handlePlay -> ', !!audioRef?.current);
+    if (!audioRef?.current) return;
     audioRef.current?.play();
     dispatch({ type: 'setControls', controls: { isPlaying: true } });
   }
 
   // Pauses the audio
   function handlePause() {
-    console.log('!handlePause -> ', !!audioRef.current);
-    if (!audioRef.current) return;
+    console.log('!handlePause -> ', !!audioRef?.current);
+    if (!audioRef?.current) return;
     audioRef.current?.pause();
     dispatch({ type: 'setControls', controls: { isPlaying: false } });
   }
 
   // Gets the current playback position in seconds
   function getCurrentTime() {
-    if (!audioRef.current) return 0;
+    if (!audioRef?.current) return 0;
     return audioRef.current.currentTime;
   }
 
   // Sets whether the audio is muted
   function handleSetMuted() {
-    if (!audioRef.current) return;
+    if (!audioRef?.current) return;
     const toogleValue = !controls.isMuted;
     audioRef.current.muted = toogleValue;
     dispatch({ type: 'setControls', controls: { isMuted: toogleValue } });
