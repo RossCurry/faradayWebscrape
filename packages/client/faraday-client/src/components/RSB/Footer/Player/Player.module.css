@@ -72,8 +72,11 @@
 .player fieldset button:active{
   background-color: #73737378;
 }
-.player fieldset button.playerButtonMute.isMuted {
+.player fieldset button.muteButton.isMuted {
   background-color: #73737378;
+}
+.timeContainer{
+  display: flex;
 }
 
 .progressBarContainer {
@@ -89,4 +92,64 @@
   width: 0%; /* Initial width */
   background-color: #76c7c0; /* Progress bar color */
   transition: width 750ms ; /* Smooth width transition */
+}
+
+/* Mobile size layout */
+@media screen and (max-width: 820px) {
+  .smScreenProgressBar{
+    display: none;
+  }
+}
+/* Mobile size layout */
+@media screen and (max-width: 430px) {
+  .player {
+    max-width: 430px ;  
+    font-size: small;
+    display: grid;
+    grid-template-areas: 
+      "img trackInfo controls"
+      "progress-bar progress-bar progress-bar ";
+    grid-template-columns: 1fr 8fr 1fr;
+    grid-template-rows: 9fr 1fr;
+    gap: var(--g-2);
+    padding: var(--p-1);
+  }
+  .playerImg{
+    width: 2rem;
+    height: 2rem;
+  }
+  .player fieldset {
+    display: grid;
+    grid-template-areas: 
+      "time play mute";
+    gap: .2rem;
+  }
+  .player fieldset button {
+    --button-size: 2rem;
+    font-size: .2rem;
+  }
+  .playButton{
+    grid-area: play;
+  }
+  .timeContainer{
+    grid-area: time;
+  }
+  /* .timeContainer p:first-of-type {
+    display: block;
+  }
+  .timeContainer p {
+    display: none;
+  } */
+  .progressBarContainer {
+    grid-area: progress-bar;
+    display: none;
+  }
+  .muteButton{
+    display: none;
+    grid-area: mute;
+  }
+  .smScreenProgressBar{
+    display: block;
+    width: 100%;
+  }
 }

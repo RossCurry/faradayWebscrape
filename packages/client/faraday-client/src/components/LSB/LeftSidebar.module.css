@@ -1,3 +1,4 @@
+
 .leftSidebar {
   grid-area: left-sidebar;
   height: 100%;
@@ -26,15 +27,6 @@
   container-type: inline-size;
 }
 
-@media screen and (max-width: 820px) {
-  .leftSidebar {
-    height: fit-content;
-  }
-  .playlistHeader{
-    flex-direction: row;
-    justify-content: start;
-  }
-}
 
 .playlistHeaderButtonSelected{
   border-color: #FFFF00;
@@ -103,4 +95,30 @@
 }
 .playlistItemInfo:hover{
   background: rgba(201, 201, 200, 0.411);
+}
+
+/* Tablet size layout */
+@media screen and (max-width: 820px) {
+  .leftSidebar {
+    height: fit-content;
+    border-radius: var(--r-0);
+  }
+  .playlistHeader{
+    flex-direction: row;
+    justify-content: start;
+  }
+}
+
+/* Mobile size layout */
+@media screen and (max-width: 430px) {
+  .leftSidebar {
+    height: 100% ;
+    border-radius: var(--r-0);
+    padding-top: var(--p-1);
+  }
+  .playlistHeader{
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+  }
 }

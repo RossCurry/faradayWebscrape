@@ -18,7 +18,7 @@
   margin-right: var(--m-4); */
 }
 
-
+/* Tablet size layout */
 @media screen and (max-width: 820px) {
   .appLayout {
     grid-template-areas:
@@ -27,5 +27,20 @@
     "right-sidebar right-sidebar";
     grid-template-columns: 6fr;
     grid-template-rows: auto auto 3fr;
+    gap: var(--g-1);
+  } 
+}
+
+/* Mobile size layout */
+@media screen and (max-width: 430px) {
+  .appLayout {
+    grid-template-areas:
+    "header header"
+    "right-sidebar right-sidebar"
+    "left-sidebar left-sidebar";
+    grid-template-columns: 6fr;
+    grid-template-rows:  auto 1fr 65px;
+    gap: var(--g-0);
+    max-width: 430px;
   } 
 }

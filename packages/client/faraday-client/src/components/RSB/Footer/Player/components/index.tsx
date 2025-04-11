@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, CSSProperties } from 'react';
 import styles from '../Player.module.css'
 import { useAppDispatch, useAppState } from '../../../../../state/AppStateHooks';
 import { faradayLogo } from '../../../../../logos/FaradayLogo';
@@ -51,17 +51,17 @@ const CurrentTime = ({ getCurrentTime, duration }: { getCurrentTime: () => numbe
   });
 
   return (
-    <>
+    <span className={styles.timeContainer}>
       {/* <p>preview</p> */}
       <Time time={currentTime || 0} />
-      {'/'}
+      <p style={{ margin:0, padding:0}}>/</p>
       <Time time={duration} />
-    </>
+    </span>
   );
 
 };
 
-const ProgressBar = ({ getCurrentTime, totalTime }: { getCurrentTime: () => number; totalTime: number; }) => {
+const ProgressBar = ({ getCurrentTime, totalTime, className }: { getCurrentTime: () => number; totalTime: number; className?: CSSModuleClasses | string }) => {
   const [currentTime, setCurrentTime] = useState<number>(0);
   const progress = currentTime / totalTime * 100;
 
@@ -73,7 +73,7 @@ const ProgressBar = ({ getCurrentTime, totalTime }: { getCurrentTime: () => numb
   });
 
   return (
-    <div className={styles.progressBarContainer}>
+    <div className={`${styles.progressBarContainer} ${className || ''}`}>
       <div
         className={styles.progressBar} id="progress-bar"
         style={{ width: `${progress}%` }} />
@@ -122,26 +122,34 @@ export function PlayerControls() {
   }
 
   return (
-    <fieldset>
-      {/* Play */}
-      {!controls.isPlaying && <IconButton
-        Icon={PlayIcon}
-        handleOnClick={handlePlay}
-        text='' />}
-      {/* Pause */}
-      {controls.isPlaying && <IconButton
-        Icon={PauseIcon}
-        handleOnClick={handlePause}
-        text='' />}
-      {/* PROGESS BAR */}
-      <CurrentTime getCurrentTime={getCurrentTime} duration={getDuration()} />
-      <ProgressBar getCurrentTime={getCurrentTime} totalTime={getDuration()} />
-      {/* VOLUME CONTROLS - at least MUTE */}
-      <IconButton
-        Icon={controls.isMuted ? VolumeOff : VolumeOn}
-        handleOnClick={handleSetMuted}
-        text=''
-        className={`${styles.playerButtonMute}`} />
-    </fieldset>
+    <>
+      <fieldset>
+        {/* Play */}
+        {!controls.isPlaying && <IconButton
+          Icon={PlayIcon}
+          handleOnClick={handlePlay}
+          text='' 
+          className={styles.playButton} 
+          />}
+        {/* Pause */}
+        {controls.isPlaying && <IconButton
+          Icon={PauseIcon}
+          handleOnClick={handlePause}
+          text='' 
+          className={styles.playButton}
+          />}
+        {/* PROGESS BAR */}
+        <CurrentTime getCurrentTime={getCurrentTime} duration={getDuration()} />
+        <ProgressBar getCurrentTime={getCurrentTime} totalTime={getDuration()} />
+        {/* VOLUME CONTROLS - at least MUTE */}
+        <IconButton
+          Icon={controls.isMuted ? VolumeOff : VolumeOn}
+          handleOnClick={handleSetMuted}
+          text=''
+          className={styles.muteButton} 
+          />
+      </fieldset>
+      <ProgressBar getCurrentTime={getCurrentTime} totalTime={getDuration()} className={styles.smScreenProgressBar} />
+    </>
   );
 }
