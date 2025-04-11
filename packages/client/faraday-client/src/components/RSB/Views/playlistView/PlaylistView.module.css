@@ -15,3 +15,24 @@
   display: grid;
   place-items: center;
 }
+
+.IsLoadingContainer {
+  padding: 2em;
+}
+
+.IsLoadingContainer .logo {
+  width: 3em;
+  aspect-ratio: 1/1;
+  object-fit: contain;
+  border-radius: 50%;
+  animation: logoRotate forwards 2s linear infinite;
+}
+
+@keyframes logoRotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

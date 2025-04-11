@@ -8,12 +8,15 @@ import sharedStyles from '../../SharedStyles.module.css'
 import Tooltip from "../../../../Shared/Tooltip/Tooltip";
 import { DialogCreatePlaylist } from "../../../../Dialogs/DialogCreatePlaylist/DialogCreatePlaylist";
 
-export const HeaderPlaylistView = () => {
+export const HeaderPlaylistView = ({playlistHasTracks}: {playlistHasTracks:boolean}) => {
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
   
   return (
-    <header className={sharedStyles.viewHeaderShared}>
-        <ResetPlaylistButton />
+    <header className={`
+        ${sharedStyles.viewHeaderShared}
+        ${!playlistHasTracks ? styles.centeredHeader : ''}
+      `}>
+      {playlistHasTracks && <ResetPlaylistButton />}
       <TracksCollectionStats />
       <fieldset>
         <CreatePlaylistButton setOpenDialog={setIsDialogOpen} />
@@ -50,7 +53,7 @@ export function CreatePlaylistButton({ setOpenDialog }: { setOpenDialog: React.D
   const handleOnClick = () => {
     setOpenDialog(true)
   }
-  // TODO prob better to disable the button
+  
   if (!tracksCollection) return null
   return (
     <div>
