@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, CSSProperties } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import styles from '../Player.module.css'
 import { useAppDispatch, useAppState } from '../../../../../state/AppStateHooks';
 import { faradayLogo } from '../../../../../logos/FaradayLogo';
