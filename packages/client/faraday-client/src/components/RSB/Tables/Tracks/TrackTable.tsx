@@ -35,6 +35,7 @@ export default function TrackTable({
   const tableTracksRef = useRef<HTMLTableElement>(null)
   const [sorting, setSorting] = useState<SortingState>([])
   const customPlaylist = useAppState().playlist.custom;
+  const { view } = useAppState().rsb;
 
   const dataWithCheckbox = useMemo(() => data.map(track => {
     return {
@@ -55,12 +56,12 @@ export default function TrackTable({
   const columns = React.useMemo(
     () => [
       albumId ? getCheckbox({ areAllTracksSelected, allTracksIds, albumId }) : null,
-      getImage({ isMobile }),
+      getImage({ isMobile, view }),
       getPlayButton({ isMobile }),
       trackNumber,
       songAndArtist,
       duration,
-    ].filter(notNull), [areAllTracksSelected, allTracksIds, albumId, isMobile]
+    ].filter(notNull), [areAllTracksSelected, allTracksIds, albumId, isMobile, view]
   )
 
   const handleOnClick = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {

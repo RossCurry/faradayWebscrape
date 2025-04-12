@@ -7,9 +7,10 @@ import { CheckCircleIcon, CheckCircleIconFilled, LibraryAddIcon, LibraryRemoveIc
 import React, { useCallback } from "react"
 import { useAppDispatch, useAppState } from "../../../../../state/AppStateHooks"
 import { msToFormattedDuration } from "../../../../../utils/msToTime"
+import { Views } from "../../../../../state/constants"
 
-export const getImage = ({ isMobile }: { isMobile: boolean }) => {
-  if (isMobile) return null;
+export const getImage = ({ isMobile, view }: { isMobile: boolean, view: Views }) => {
+  if (isMobile && view === 'albumDetail') return null;
   const image: AccessorColumnDef<TrackListColumnData, { url: TrackListColumnData["imageUrl"] }> = {
     accessorFn: ({ imageUrl }) => {
       return {
