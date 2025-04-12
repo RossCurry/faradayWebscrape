@@ -15,10 +15,10 @@ import { useVirtualizer, VirtualItem, Virtualizer } from '@tanstack/react-virtua
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query'
 import {
   getImage,
-  albumAndArtist,
-  category,
-  price,
-  releaseDate,
+  getAlbumAndArtist,
+  getCategory,
+  getPrice,
+  getReleaseDate,
   getCheckbox,
   getPlayButton
 } from './sections/columns/columns'
@@ -28,6 +28,7 @@ import { TrackListData } from '../Tracks/TrackTable'
 import styles from './AlbumTableContainer.module.css'
 import { BatchResponse, getAlbumsInBatch } from '../../../../services/services'
 import { useIsMobile } from '../../../../hooks/useIsMobile'
+import { ActionTypes, AppStateDispatch } from '../../../../state/AppStateProvider'
 
 export type CheckedAlbumDict = {
   [K in SpotifySearchResult['id']]: boolean
@@ -36,6 +37,20 @@ export type CheckedTrackDict = {
   [K in SpotifySearchResult['trackList'][number]['id']]: boolean
 }
 export type AlbumItemTableData = SpotifySearchResult & { isChecked: boolean }
+
+// const updateTrackIds = (data: AlbumItemTableData[], dispatch: (value: ActionTypes) => void ) => {
+//   // List of all track ids
+//   const allTrackIds = data.reduce((tracks, album) => {
+//       const trackIds = album.trackList.map(track => track.id)
+//       return tracks.concat(trackIds)
+//     },[] as string[])
+//   dispatch({ type: '', trackIds: allTrackIds })
+// }
+
+// Helper filter function to let typescript know that there are no null values
+function notNull<T>(value: T | null | undefined): value is T {
+  return value != null;
+}
 
 export default function AlbumTableContainer() {
   const dispatch = useAppDispatch()
@@ -184,36 +199,7 @@ export default function AlbumTableContainer() {
 function VirtualizedTable({ data, scrollableContainerRef }: { data: AlbumItemTableData[], scrollableContainerRef: React.RefObject<HTMLDivElement> }) {
   const isMobile = useIsMobile()
   const appDispatch = useAppDispatch()
-  const { areAllAlbumsSelected } = useAppState().rsb
-
   const tableAlbumsRef = useRef<HTMLTableElement>(null)
-  
-
-  // List of all track ids
-  const allTrackIds = useMemo(() => {
-      return data.reduce((tracks, album) => {
-        const trackIds = album.trackList.map(track => track.id)
-        return tracks.concat(trackIds)
-      },[] as string[])
-    }, [data])
-
-
-  // Callback for Header Checkbox
-  const handleSelectAll = useCallback((checkboxValue?: boolean) => {
-      const addAll = !!checkboxValue
-      // Modify playlist and checkbox selection
-      if (addAll){
-        // add all tracks to the custom playlist
-        appDispatch({type: 'addTracksToCustomPlaylist', trackIds: allTrackIds })
-        appDispatch({ type: 'selectAllAlbums' })
-      } else {
-        appDispatch({ type: 'resetCustomPlaylist' })
-        appDispatch({ type: 'deselectAllAlbums' })
-      }
-      // Toggle
-      appDispatch({ type: 'setAllAlbumsSelected', areSelected: !areAllAlbumsSelected })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    },[allTrackIds, areAllAlbumsSelected])
   
   // Callback for album row Checkbox
   const handleSelectCheckbox = useCallback((trackList: TrackListData[], isChecked: boolean, albumId: string) => {
@@ -233,17 +219,21 @@ function VirtualizedTable({ data, scrollableContainerRef }: { data: AlbumItemTab
       // eslint-disable-next-line react-hooks/exhaustive-deps
     },[])
 
-  console.log('!isMobile -> ', isMobile);
   const columns = React.useMemo(
-    () => [
-      getCheckbox({ areAllAlbumsSelected, handleSelectAll, handleSelectCheckbox }),
+    () => {
+      const cols = [
+      getCheckbox({ handleSelectCheckbox }),
       getImage({ isMobile }),
       getPlayButton({ isMobile }),
-      albumAndArtist,
-      category,
-      releaseDate,
-      price,
-    ], [areAllAlbumsSelected, handleSelectAll, handleSelectCheckbox, isMobile]
+      getAlbumAndArtist({ isMobile }),
+      getCategory({ isMobile }),
+      getReleaseDate({ isMobile }),
+      getPrice({ isMobile }),
+      // Some columns are only for mobile
+    ].filter(notNull)
+    return cols
+    },
+    [handleSelectCheckbox, isMobile]
   )
 
   // TABLE LOGIC //
@@ -253,9 +243,9 @@ function VirtualizedTable({ data, scrollableContainerRef }: { data: AlbumItemTab
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(), //client-side sorting
     enableColumnResizing: true, // Allow user resizing (optional)
+    
   })
 
-  
   return (
     <table
     id='table_albums'
@@ -273,6 +263,9 @@ function VirtualizedTable({ data, scrollableContainerRef }: { data: AlbumItemTab
 }
 
 function TableHeader({ table }: { table: Table<AlbumItemTableData> }) {
+  const isMobile = useIsMobile()
+  // Dont show header on mobile layout
+  if (isMobile) return null
   return (
     <thead
       style={{

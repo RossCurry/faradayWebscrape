@@ -37,7 +37,7 @@ export function ConnectToSpotifyButton(){
       onClick={() => connectToSpoti()}
       style={{ display: 'flex', alignItems: 'center', gap: '0.5rem'}}
     >
-      <p style={{ margin: 0, padding: 0 }}>Connect to Spotify</p> 
+      <p style={{ margin: 0, padding: 0 }}>Connect</p> 
       <SpotifyGreenLogo width={24} height={24} />
     </button>
   )
