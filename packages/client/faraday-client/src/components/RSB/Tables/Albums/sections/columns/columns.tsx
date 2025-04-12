@@ -113,7 +113,7 @@ export const getAlbumAndArtist = ({ isMobile }: { isMobile: boolean }) => {
     sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
     size: 300,
     minSize: 200,
-    maxSize: 500,
+    maxSize: isMobile ? 300 : 500,
 
   }
   return albumAndArtist
@@ -189,6 +189,7 @@ export const getPrice = ({ isMobile }: { isMobile: boolean }) => {
 } 
 
 export const getPopularity = ({ isMobile }: { isMobile: boolean }) => {
+  if (isMobile) return null
   const popularity: AccessorColumnDef<AlbumItemTableData, SpotifySearchResult["popularity"]> = {
     accessorFn: row => row.popularity,
     id: 'popularity',
@@ -220,6 +221,7 @@ export const getReleaseDate = ({ isMobile }: { isMobile: boolean }) => {
 }
 
 export const getGenre = ({ isMobile }: { isMobile: boolean }) => {
+  if (isMobile) return null
   const genre: AccessorColumnDef<AlbumItemTableData, SpotifySearchResult["genres"]> = {
     accessorFn: row => row.genres,
     id: 'genre',

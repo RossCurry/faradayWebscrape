@@ -81,7 +81,6 @@ const User = () => {
 
 function LoggedIn(){
   const { user } = useAppState()
-  const isMobile = useIsMobile()
   if (!user) return null;
   const { display_name } = user
 
