@@ -11,8 +11,6 @@ td {}
   display: table;
   border-spacing: 0;
   margin: 0 auto;
-  --trackListRowHeight: 3rem;
-  --trackListNumTracks: 3;
   width: calc(100% - 4rem)
 }
 
@@ -43,6 +41,11 @@ td {}
   background: inherit;
   text-align: left;
 }
-/* .table_tracks .albumRows:hover {
-  background: rgba(201, 201, 200, 0.411);
-} */
+
+
+/* Mobile size layout */
+@media screen and (max-width: 430px) {
+  .table_tracks {
+    width: calc(100% - 1.25rem)
+  }
+}

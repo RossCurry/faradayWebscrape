@@ -5,6 +5,7 @@
 .trackTableContainer {
   grid-area: table;
   overflow-y: scroll;
+  overflow-x: hidden;
   background-color: var(--bg-dark-1);
 }
 
@@ -100,4 +101,20 @@
   background-color: red;
   top: 0;
   right: 0;
+}
+
+@media screen and (max-width: 430px) {
+  .trackTableContainer .trackTableHeader {
+    /* grid-template-areas: 
+    "closeButton albumImg albumInfo links"
+    "closeButton albumImg albumInfo albumStats"
+  ; */
+    grid-template-areas: 
+      "closeButton albumImg links"
+      "closeButton albumImg links"
+      "closeButton albumInfo albumStats"
+    ;
+    grid-template-columns: 0.25fr 3fr 1fr;
+    grid-row: 1fr 1fr 1fr;
+  }
 }

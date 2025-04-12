@@ -28,7 +28,8 @@ import { TrackListData } from '../Tracks/TrackTable'
 import styles from './AlbumTableContainer.module.css'
 import { BatchResponse, getAlbumsInBatch } from '../../../../services/services'
 import { useIsMobile } from '../../../../hooks/useIsMobile'
-import { ActionTypes, AppStateDispatch } from '../../../../state/AppStateProvider'
+import { notNull } from '../../../../utils/notNull'
+
 
 export type CheckedAlbumDict = {
   [K in SpotifySearchResult['id']]: boolean
@@ -38,19 +39,7 @@ export type CheckedTrackDict = {
 }
 export type AlbumItemTableData = SpotifySearchResult & { isChecked: boolean }
 
-// const updateTrackIds = (data: AlbumItemTableData[], dispatch: (value: ActionTypes) => void ) => {
-//   // List of all track ids
-//   const allTrackIds = data.reduce((tracks, album) => {
-//       const trackIds = album.trackList.map(track => track.id)
-//       return tracks.concat(trackIds)
-//     },[] as string[])
-//   dispatch({ type: '', trackIds: allTrackIds })
-// }
 
-// Helper filter function to let typescript know that there are no null values
-function notNull<T>(value: T | null | undefined): value is T {
-  return value != null;
-}
 
 export default function AlbumTableContainer() {
   const dispatch = useAppDispatch()
