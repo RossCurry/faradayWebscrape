@@ -8,31 +8,34 @@ import React, { useCallback } from "react"
 import { useAppDispatch, useAppState } from "../../../../../state/AppStateHooks"
 import { msToFormattedDuration } from "../../../../../utils/msToTime"
 
-
-export const image: AccessorColumnDef<TrackListColumnData, { url: TrackListColumnData["imageUrl"] }> = {
-  accessorFn: ({ imageUrl }) => {
-    return {
-      url: imageUrl,
-    }
-  },
-  id: 'image',
-  cell: info => {
-    const { url } = info.getValue()
-    return (
-      <>
-        <div
-          className={styles.trackRowDataImg}
-          style={{
-            backgroundImage: `url(${url})`
-          }}
-        />
-      </>
-    )
-  },
-  header: () => null,
-  enableSorting: false,
-  size: 50,
-  maxSize: 50,
+export const getImage = ({ isMobile }: { isMobile: boolean }) => {
+  if (isMobile) return null;
+  const image: AccessorColumnDef<TrackListColumnData, { url: TrackListColumnData["imageUrl"] }> = {
+    accessorFn: ({ imageUrl }) => {
+      return {
+        url: imageUrl,
+      }
+    },
+    id: 'image',
+    cell: info => {
+      const { url } = info.getValue()
+      return (
+        <>
+          <div
+            className={styles.trackRowDataImg}
+            style={{
+              backgroundImage: `url(${url})`
+            }}
+          />
+        </>
+      )
+    },
+    header: () => null,
+    enableSorting: false,
+    size: 50,
+    maxSize: 50,
+  }
+  return image
 }
 
 export const songAndArtist: AccessorColumnDef<TrackListColumnData, TrackListColumnData> = {
@@ -96,12 +99,20 @@ export const artists: AccessorColumnDef<TrackListColumnData, TrackListColumnData
 export const trackNumber: AccessorColumnDef<TrackListColumnData, TrackListColumnData["track_number"]> = {
   accessorFn: row => row.track_number,
   id: 'trackNumber',
-  cell: info => <span className={styles.rowDataTrackNumber}>{info.getValue()}</span>,
+  cell: info => {
+    return (
+      <span 
+      // className={styles.rowDataTrackNumber}
+      >
+        {info.getValue()}
+      </span>
+    ) 
+  },
   header: () => null,
   // header: () => <span className={styles.headerTrackNumber}>#</span>,
   sortUndefined: 'last', //force undefined values to the end
   sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
-  size: 50
+  // size: 50
 }
 
 export const player: AccessorColumnDef<TrackListColumnData, TrackListColumnData["preview_url"]> = {
@@ -220,51 +231,54 @@ export const getCheckbox = ({
   return checkBox
 }
 
-export const playButton: AccessorColumnDef<TrackListColumnData, TrackListColumnData> = {
-  accessorFn: (data) => data || null,
-  id: 'play',
-  cell: function PlayButtonTracklist(info){
-    const dispatch = useAppDispatch();
-    const { audioUrl } = useAppState().player
-    const view = useAppState().rsb.view
-    const id = React.useId()
-    const track = info.getValue()
-    const preview_url = track?.preview_url
-    // TODO add isPlaying state from Player controls
-    const isPlaying = audioUrl === preview_url;
-    const isDisabled = !preview_url;
-    const isPlaylistView = view === 'playlist';
-
-    if (isPlaylistView) return null;
-    return (
-      <span className={styles.rowDataCentered} key={`tracklist-playbutton-${id}`}>
-        <Tooltip 
-          Component={
-            <IconButton 
-              Icon={PlayIconFilled}
-              handleOnClick={(e) => { 
-                e?.stopPropagation()
-                dispatch({ type: 'setAudioUrl', track })
-              }}
-              text=""
-              className={`
-                ${styles.playButton}
-                ${preview_url ? '' : styles.isDisabled}
-                ${isPlaying ? styles.isPlaying : ''}
-              `}
-              disabled={isDisabled}
-            />
-          }
-          tooltipText={'No preview available'}
-          // TODO need to have a different approach to the tracklist. not overlay
-          hideTooltip={true}
-        />
-      </span>
-    )
-  },
-  header: () => null,
-  enableSorting: false,
-  // column size options
-  // enableResizing: true // default
-  size: 60
+export const getPlayButton = ({ isMobile }: { isMobile: boolean }) => {
+  const playButton: AccessorColumnDef<TrackListColumnData, TrackListColumnData> = {
+    accessorFn: (data) => data || null,
+    id: 'play',
+    cell: function PlayButtonTracklist(info){
+      const dispatch = useAppDispatch();
+      const { audioUrl } = useAppState().player
+      const view = useAppState().rsb.view
+      const id = React.useId()
+      const track = info.getValue()
+      const preview_url = track?.preview_url
+      // TODO add isPlaying state from Player controls
+      const isPlaying = audioUrl === preview_url;
+      const isDisabled = !preview_url;
+      const isPlaylistView = view === 'playlist';
+  
+      if (isPlaylistView) return null;
+      return (
+        <span className={styles.rowDataCentered} key={`tracklist-playbutton-${id}`}>
+          <Tooltip 
+            Component={
+              <IconButton 
+                Icon={PlayIconFilled}
+                handleOnClick={(e) => { 
+                  e?.stopPropagation()
+                  dispatch({ type: 'setAudioUrl', track })
+                }}
+                text=""
+                className={`
+                  ${styles.playButton}
+                  ${preview_url ? '' : styles.isDisabled}
+                  ${isPlaying ? styles.isPlaying : ''}
+                `}
+                disabled={isDisabled}
+              />
+            }
+            tooltipText={'No preview available'}
+            // TODO need to have a different approach to the tracklist. not overlay
+            hideTooltip={true}
+          />
+        </span>
+      )
+    },
+    header: () => null,
+    enableSorting: false,
+    // column size options
+    // enableResizing: true // default
+    size: isMobile ? 10 : 60
+  }
+  return playButton;
 }

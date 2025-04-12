@@ -1,6 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react'
 import {
-  ColumnDef,
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
@@ -10,15 +9,17 @@ import {
 } from '@tanstack/react-table'
 import styles from './TrackTable.module.css'
 import {
-  image,
+  getImage,
   songAndArtist,
   duration,
   trackNumber,
   getCheckbox,
-  playButton
+  getPlayButton
 } from './columns/columns'
 import { SpotifySearchResult } from '../../../../types/spotify.types'
 import { useAppDispatch, useAppState } from '../../../../state/AppStateHooks'
+import { useIsMobile } from '../../../../hooks/useIsMobile'
+import { notNull } from '../../../../utils/notNull'
 
 export type TrackListData = SpotifySearchResult["trackList"][number] & { imageUrl?: string }
 export type TrackListColumnData = TrackListData & { isChecked: boolean }
@@ -30,6 +31,7 @@ export default function TrackTable({
   albumId,
 }: TrackTableProps) {
   const dispatch = useAppDispatch()
+  const isMobile = useIsMobile()
   const tableTracksRef = useRef<HTMLTableElement>(null)
   const [sorting, setSorting] = useState<SortingState>([])
   const customPlaylist = useAppState().playlist.custom;
@@ -53,12 +55,12 @@ export default function TrackTable({
   const columns = React.useMemo(
     () => [
       albumId ? getCheckbox({ areAllTracksSelected, allTracksIds, albumId }) : null,
-      image,
-      playButton,
+      getImage({ isMobile }),
+      getPlayButton({ isMobile }),
       trackNumber,
       songAndArtist,
       duration,
-    ], [areAllTracksSelected, allTracksIds, albumId]
+    ].filter(notNull), [areAllTracksSelected, allTracksIds, albumId, isMobile]
   )
 
   const handleOnClick = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent>) => {
@@ -91,8 +93,7 @@ export default function TrackTable({
   }
 
   const table = useReactTable({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    columns: columns.filter(Boolean) as ColumnDef<TrackListColumnData, any>[],
+    columns,
     data: dataWithCheckbox,
     // debugTable: true,
     getCoreRowModel: getCoreRowModel(),
