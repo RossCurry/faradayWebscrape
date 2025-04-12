@@ -6,6 +6,7 @@ import { connectToSpoti } from '../../../services/services';
 import { useAppDispatch, useAppState } from '../../../state/AppStateHooks';
 import Tooltip from '../../Shared/Tooltip/Tooltip';
 import { SpotifyGreenLogo } from '../../../logos';
+import { useIsMobile } from '../../../hooks/useIsMobile';
 
 
 export default function SpotifyConnect() {
@@ -45,6 +46,7 @@ export function ConnectToSpotifyButton(){
 
 const User = () => {
   const { user } = useAppState()
+  const isMobile = useIsMobile()
   if (!user) return null;
   const { display_name, images } = user
 
@@ -61,7 +63,7 @@ const User = () => {
     {images.length
       ? 
         <div className={styles.userInfoContainer}>
-          <h4>{display_name}</h4>
+          {!isMobile && <h4>{display_name}</h4>}
           <div
             className={styles.userImage}
             style={inlineImageStyles}
@@ -79,6 +81,7 @@ const User = () => {
 
 function LoggedIn(){
   const { user } = useAppState()
+  const isMobile = useIsMobile()
   if (!user) return null;
   const { display_name } = user
 
