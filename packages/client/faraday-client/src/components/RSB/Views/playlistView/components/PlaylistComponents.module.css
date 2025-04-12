@@ -55,3 +55,23 @@ fieldset {
   /* font-weight: 300;
   background-color: rgb(244, 235, 70); */
 }
+
+@media screen and (max-width: 430px) {
+  .mobileHeaderGrid {
+    display: grid;
+    grid-template-areas:
+      "resetButton createPlaylistButton"
+      "stats stats";
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+  .headerResetButton{
+    grid-area: resetButton;
+  }
+  .headerStats{
+    grid-area: stats;
+  }
+  .headerCreateButton{
+    grid-area: createPlaylistButton;
+  }
+}

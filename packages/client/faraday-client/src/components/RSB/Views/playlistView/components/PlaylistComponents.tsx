@@ -14,13 +14,18 @@ export const HeaderPlaylistView = ({playlistHasTracks}: {playlistHasTracks:boole
   return (
     <header className={`
         ${sharedStyles.viewHeaderShared}
+        ${styles.mobileHeaderGrid}
         ${!playlistHasTracks ? styles.centeredHeader : ''}
       `}>
-      {playlistHasTracks && <ResetPlaylistButton />}
-      <TracksCollectionStats />
-      <fieldset>
+      <span className={styles.headerResetButton}>
+        <ResetPlaylistButton />
+      </span>
+      <span className={styles.headerStats}>
+        <TracksCollectionStats />
+      </span>
+      <span className={styles.headerCreateButton}>
         <CreatePlaylistButton setOpenDialog={setIsDialogOpen} />
-      </fieldset>
+      </span>
       <DialogCreatePlaylist
         setOpenDialog={setIsDialogOpen}
         isDialogOpen={isDialogOpen}
@@ -30,11 +35,13 @@ export const HeaderPlaylistView = ({playlistHasTracks}: {playlistHasTracks:boole
 }
 
 function ResetPlaylistButton() {
+  const { tracksCollection } = useAppState().playlist
   const dispatch = useAppDispatch()
   const handleReset = () => {
     dispatch({ type: 'resetCustomPlaylist' })
     dispatch({ type: 'updateView', view: 'albums', playlistId: null })
   }
+  if (!tracksCollection) return null
   return (
     <IconButton
       handleOnClick={handleReset}
