@@ -7,6 +7,7 @@ import IconButton from '../../Shared/IconButton/IconButton'
 import { DialogPlaylistSuccess } from './Components/DialogPlaylistSuccess'
 import { DialogPlaylistError } from './Components/DialogPlaylistError'
 import { SendPlaylist } from './Components/SendPlaylist'
+import { useIsMobile } from '../../../hooks/useIsMobile'
 
 export function DialogCreatePlaylist({
   setOpenDialog,
@@ -14,6 +15,7 @@ export function DialogCreatePlaylist({
 }: {
   setOpenDialog: React.Dispatch<React.SetStateAction<boolean>>, isDialogOpen: boolean
 }) {
+  const isMobile = useIsMobile();
   const { title, tracksCollection } = useAppState().playlist
   const dialogRef = React.useRef<HTMLDialogElement>(null)
   const [response, setResponse] = useState<'ok' | 'error' | null>(null)
@@ -71,7 +73,7 @@ export function DialogCreatePlaylist({
         <IconButton
           handleOnClick={handleOnCloseDialog}
           Icon={ArrowBackIcon}
-          text={'Back'}
+          text={isMobile ? '' : 'Back'}
           className={styles.closeDialogButton}
         />
         {!response && <h3>Add your playlist to Spotify</h3>}
