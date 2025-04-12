@@ -104,7 +104,7 @@ const initialAppState: AppState = {
   user: null
 }
 
-type ActionTypes = 
+export type ActionTypes = 
 // Playlist
 | { type: 'addTrackToCustomPlaylist', trackId: string }
 | { type: 'deleteTrackFromCustomPlaylist', trackId: string }

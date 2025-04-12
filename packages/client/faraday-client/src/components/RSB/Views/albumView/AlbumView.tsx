@@ -1,5 +1,7 @@
+import { useIsMobile } from "../../../../hooks/useIsMobile"
 import Footer from "../../Footer"
 import AlbumTableContainer from "../../Tables/Albums/AlbumTableContainer"
+import { HeaderAlbumTableView } from "../../Tables/Albums/sections/columns/components/HeaderAlbumTableView"
 
 import sharedStyles from '../SharedStyles.module.css'
 import { AlbumCount } from "./components/AlbumCount"
@@ -24,10 +26,13 @@ export function AlbumView() {
 }
 
 function HeaderAlbumView() {
-
+  const isMobile = useIsMobile()
   return (
     <header className={sharedStyles.viewHeaderShared}>
-      <AlbumCount />
+      <span style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        {isMobile && <HeaderAlbumTableView />}
+        <AlbumCount />
+      </span>
       <FilterSection />
     </header>
   )

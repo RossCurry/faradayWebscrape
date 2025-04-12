@@ -144,7 +144,7 @@ input[type="checkbox"].rowDataCheckbox{
 /* Mobile size layout */
 @media screen and (max-width: 430px) {
   .rowDataImg {
-    --img-size: 4rem;
+    --img-size: 5rem;
   }
   .rowDataAvailability,
   .rowDataAlbum,
