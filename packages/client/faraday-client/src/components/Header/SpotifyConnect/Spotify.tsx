@@ -7,9 +7,11 @@ import { useAppDispatch, useAppState } from '../../../state/AppStateHooks';
 import Tooltip from '../../Shared/Tooltip/Tooltip';
 import { SpotifyGreenLogo } from '../../../logos';
 import { useIsMobile } from '../../../hooks/useIsMobile';
+import IconButton from '../../Shared/IconButton/IconButton';
 
 
 export default function SpotifyConnect() {
+  const isMobile = useIsMobile()
   const { user } = useAppState()
   const isUserLoggedIn = !!user
 
@@ -18,11 +20,11 @@ export default function SpotifyConnect() {
       {!isUserLoggedIn 
       ? 
         <div className={styles.connectToSpotifyButton}>
-          <Tooltip
+          {isMobile ? null : <Tooltip
             Component={<InfoIcon />}
             tooltipText="Log into Spotify to create a playlist."
             componentStyle={{ width: '24px', height: '24px', marginRight: '8px' }}
-          />
+          />}
           <ConnectToSpotifyButton />
         </div>
       :
@@ -34,13 +36,12 @@ export default function SpotifyConnect() {
 
 export function ConnectToSpotifyButton(){
   return (
-    <button 
-      onClick={() => connectToSpoti()}
-      style={{ display: 'flex', alignItems: 'center', gap: '0.5rem'}}
-    >
-      <p style={{ margin: 0, padding: 0 }}>Connect</p> 
-      <SpotifyGreenLogo width={24} height={24} />
-    </button>
+    <IconButton 
+      text='Connect'
+      Icon={() => <SpotifyGreenLogo width={24} height={24} />}
+      handleOnClick={() => connectToSpoti()}
+      className={styles.connectToSpotifyButton}
+    />
   )
 }
 

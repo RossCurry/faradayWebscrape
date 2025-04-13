@@ -1,5 +1,6 @@
 import React from 'react'
 import styles from './Tooltip.module.css'
+import { useIsMobile } from '../../../hooks/useIsMobile'
 
 type TooltipProps = {
   Component: React.ReactElement,
@@ -11,6 +12,7 @@ type TooltipProps = {
 export default function Tooltip({ Component, tooltipText, componentStyle = {}, hideTooltip, position = 'left'}: TooltipProps) {
   const popoverId = `popover-id-${React.useId()}`
   const anchorNameId = `--anchor-id-${React.useId()}`
+  const isMobile = useIsMobile()
 
   return (
     <div
@@ -19,7 +21,7 @@ export default function Tooltip({ Component, tooltipText, componentStyle = {}, h
       style={{ ...componentStyle, ['anchor-name']: anchorNameId } as unknown as React.CSSProperties}
     >
       {Component}
-      {hideTooltip ? null :
+      {isMobile || hideTooltip ? null :
       <div 
         className={`
           ${styles.popover}
