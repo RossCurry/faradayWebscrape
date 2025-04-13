@@ -6,6 +6,7 @@ import { FaradayLogo } from '../../../../logos/FaradayLogo';
 import { useAppState, useAppDispatch } from '../../../../state/AppStateHooks';
 import IconButton from '../../../Shared/IconButton/IconButton';
 import styles from './DialogComponent.module.css'
+import { useIsMobile } from '../../../../hooks/useIsMobile';
 
 export function SendPlaylist({ handleOnClick: handleAddPlaylist }: { handleOnClick: () => void }) {
   return (
@@ -83,11 +84,13 @@ function PlaylistTitle() {
 }
 
 function Logos() {
+  const isMobile = useIsMobile()
+  const logoSize = isMobile ? 115 : '7em'
   return (
     <section className={styles.logosContainer}>
       <FaradayLogo className={styles.faradaylogo} />
       <DoubleArrowIcon width={'100px'} height={'100px'} />
-      <SpotifyGreenLogo width={'7em'} height={'7em'} />
+      <SpotifyGreenLogo width={logoSize} height={logoSize} />
     </section>
   )
 }

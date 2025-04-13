@@ -133,3 +133,9 @@ textarea.playlistTitleInput {
 .successMessage svg {
   fill: rgb(11, 105, 15);
 }
+
+@media screen and (max-width: 430px) {
+  .faradaylogo {
+    width: 75px;
+  }
+}

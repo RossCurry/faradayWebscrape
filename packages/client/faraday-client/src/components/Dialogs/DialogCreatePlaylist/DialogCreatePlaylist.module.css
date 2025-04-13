@@ -40,10 +40,27 @@ dialog[open].dialogCreatePlaylist::backdrop  {
   left: 0;
 }
 
-.dialogContainer{}
+.dialogContainer{
+  width: 100%;
+  height: 100%;
+}
 
 .dialogContainer h3 {
   padding: 0;
   margin: 0;
 }
 
+@media screen and (max-width: 430px) {
+  dialog {
+    min-width: 90dvw;
+    /* height: 30dvw; */
+    padding: 0;
+    justify-self: center;
+    align-self: center;
+    grid-column-start: 1;
+    grid-column: span 2;
+    grid-row-start: 1;
+    grid-row: span 2;
+  }
+  
+}
