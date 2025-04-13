@@ -79,10 +79,15 @@ export function DialogCreatePlaylist({
         {!response && <h3>Add your playlist to Spotify</h3>}
       </header>
       <div className={styles.dialogContainer}>
-        {!response && <SendPlaylist handleOnClick={handleOnClick} />}
+        {!response && 
+          <SendPlaylist handleOnClick={handleOnClick} />
+        } 
         {response &&
           response === 'ok'
-          ? <DialogPlaylistSuccess playlistUrl={createdPlaylistUrl} closeDialog={handleOnCloseDialog} />
+          ? <DialogPlaylistSuccess 
+            playlistUrl={createdPlaylistUrl} 
+            closeDialog={handleOnCloseDialog} 
+            />
           : response === 'error'
             ? <DialogPlaylistError />
             : null
