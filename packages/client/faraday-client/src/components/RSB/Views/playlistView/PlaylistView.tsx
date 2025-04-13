@@ -6,6 +6,8 @@ import styles from './PlaylistView.module.css'
 import sharedStyles from '../SharedStyles.module.css'
 import { HeaderPlaylistView } from "./components/PlaylistComponents";
 import { FaradayLogo } from "../../../../logos/FaradayLogo";
+import IconButton from "../../../Shared/IconButton/IconButton";
+import { ListIcon } from "../../../../icons";
 
 export function PlaylistView() {
   const { tracksCollection: tracks } = useAppState().playlist
@@ -74,11 +76,11 @@ const PlaylistEmptyContainer = () => {
     <IsLoading isLoading={isLoading} />
     {!isLoading && <div className={styles.playlistEmptyPlaceholder}>
       <p>No tracks selected for your playlist yet</p>
-      <button
-        onClick={() => dispatch({ type: 'updateView', view: 'albums', playlistId: null })}
-      >
-        Go to Collection
-      </button>
+      <IconButton
+        handleOnClick={() => dispatch({ type: 'updateView', view: 'albums', playlistId: null })}
+        text="Go to Collection"
+        Icon={ListIcon}
+      />
     </div>}
   </div>
   )
