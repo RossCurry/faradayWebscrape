@@ -253,7 +253,7 @@ function stateReducer(state: AppState, action: ActionTypes) {
       const updatedAlbums = { ...state.rsb.selectedAlbums, [action.albumId]: true }
 
       // Quick and dirty localStorage
-      updateLocalStorageSelectedAlbums(updatedAlbums, state.rsb.areAllAlbumsSelected)
+      updateLocalStorageSelectedAlbums(updatedAlbums, setAllAlbumsSelected)
 
       return { 
         ...state,
@@ -302,6 +302,9 @@ function stateReducer(state: AppState, action: ActionTypes) {
     }
     case 'setAllAlbumsSelected': {
       const { areSelected } = action;
+      // Quick and dirty localStorage
+      updateLocalStorageSelectedAlbums(state.rsb.selectedAlbums, areSelected)
+
       return { 
         ...state,
         rsb: { ...state.rsb, areAllAlbumsSelected: areSelected } 

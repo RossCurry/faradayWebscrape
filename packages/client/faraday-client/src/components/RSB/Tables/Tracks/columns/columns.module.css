@@ -83,6 +83,6 @@ input[type="checkbox"].rowDataCheckbox{
   fill: var(--yellow-4)
 }
 
-.rowDataTrackNumber{
+td:has(span.rowDataTrackNumber) {
   text-align: center;
 }

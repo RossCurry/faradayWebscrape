@@ -48,4 +48,7 @@ td {}
   .table_tracks {
     width: calc(100% - 1.25rem)
   }
+  .table_tracks td {
+    min-width: 30px;
+  }
 }
