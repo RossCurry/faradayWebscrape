@@ -5,6 +5,7 @@ import { faradayLogo } from '../../../../../logos/FaradayLogo';
 import { PlayIcon, PauseIcon, VolumeOff, VolumeOn } from '../../../../../icons';
 import { msToFormattedDuration } from '../../../../../utils/msToTime';
 import IconButton from '../../../../Shared/IconButton/IconButton';
+import { useIsMobile } from '../../../../../hooks/useIsMobile';
 
 
 export function PlayerTrackImage() {
@@ -84,6 +85,7 @@ const ProgressBar = ({ getCurrentTime, totalTime, className }: { getCurrentTime:
 
 export function PlayerControls() {
   const dispatch = useAppDispatch();
+  const isMobile = useIsMobile();
   const { controls, audioRef } = useAppState().player;
 
   // Plays the audio
@@ -149,7 +151,7 @@ export function PlayerControls() {
           className={styles.muteButton} 
           />
       </fieldset>
-      <ProgressBar getCurrentTime={getCurrentTime} totalTime={getDuration()} className={styles.smScreenProgressBar} />
+      {isMobile && <ProgressBar getCurrentTime={getCurrentTime} totalTime={getDuration()} className={styles.smScreenProgressBar} />}
     </>
   );
 }

@@ -10,11 +10,11 @@ import {
 import styles from './TrackTable.module.css'
 import {
   getImage,
-  songAndArtist,
   duration,
   trackNumber,
   getCheckbox,
-  getPlayButton
+  getPlayButton,
+  getSongAndArtist
 } from './columns/columns'
 import { SpotifySearchResult } from '../../../../types/spotify.types'
 import { useAppDispatch, useAppState } from '../../../../state/AppStateHooks'
@@ -55,11 +55,11 @@ export default function TrackTable({
 
   const columns = React.useMemo(
     () => [
-      albumId ? getCheckbox({ areAllTracksSelected, allTracksIds, albumId }) : null,
+      getCheckbox({ areAllTracksSelected, allTracksIds, albumId }),
       getImage({ isMobile, view }),
       getPlayButton({ isMobile }),
       trackNumber,
-      songAndArtist,
+      getSongAndArtist({ isMobile }),
       duration,
     ].filter(notNull), [areAllTracksSelected, allTracksIds, albumId, isMobile, view]
   )
@@ -86,11 +86,6 @@ export default function TrackTable({
       }
       return
     }
-
-    // TODO need a more robust fix for this
-    // if (track.preview_url){
-    //   dispatch({ type: 'setAudioUrl', track })
-    // }
   }
 
   const table = useReactTable({

@@ -39,27 +39,31 @@ export const getImage = ({ isMobile, view }: { isMobile: boolean, view: Views })
   return image
 }
 
-export const songAndArtist: AccessorColumnDef<TrackListColumnData, TrackListColumnData> = {
-  accessorFn: row => row,
-  id: 'songInfo',
-  cell: info => {
-    const { name, artists } = info.getValue()
-    const artist = artists.map(artist => artist.name).join(', ')
-    const song = name
-    return (
-      <div className={styles.rowDataTrack}>
-        <p>{song}</p>
-        <p>{artist}</p>
-      </div>
-    )
-  },
-  header: () => null,
-  // header: () => <span>Title</span>,
-  sortingFn: (a, b) => {
-    return a.original.name.localeCompare(b.original.name)
-  },
-  sortUndefined: 'last', //force undefined values to the end
-  sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
+export const getSongAndArtist = ({ isMobile }: { isMobile: boolean }) => {
+  const songAndArtist: AccessorColumnDef<TrackListColumnData, TrackListColumnData> = {
+    accessorFn: row => row,
+    id: 'songInfo',
+    cell: info => {
+      const { name, artists } = info.getValue()
+      const artist = artists.map(artist => artist.name).join(', ')
+      const song = name
+      return (
+        <div className={styles.rowDataTrack}>
+          <p>{song}</p>
+          <p>{artist}</p>
+        </div>
+      )
+    },
+    header: () => null,
+    // header: () => <span>Title</span>,
+    sortingFn: (a, b) => {
+      return a.original.name.localeCompare(b.original.name)
+    },
+    sortUndefined: 'last', //force undefined values to the end
+    sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
+    maxSize: isMobile ? 200 : 600,
+  }
+  return songAndArtist
 }
 
 export const title: AccessorColumnDef<TrackListColumnData, TrackListColumnData["name"]> = {
@@ -103,7 +107,7 @@ export const trackNumber: AccessorColumnDef<TrackListColumnData, TrackListColumn
   cell: info => {
     return (
       <span 
-      // className={styles.rowDataTrackNumber}
+      className={styles.rowDataTrackNumber}
       >
         {info.getValue()}
       </span>
@@ -140,7 +144,7 @@ export const getCheckbox = ({
 }: {
   areAllTracksSelected: boolean,
   allTracksIds: string[],
-  albumId: string
+  albumId?: string
 }) => {
   
   const checkBox: AccessorColumnDef<TrackListColumnData, { trackId: TrackListColumnData['id'], isChecked: boolean }> = {
@@ -152,10 +156,7 @@ export const getCheckbox = ({
       const inputId = `tracklist-checkbox-id-${trackId?.toString()}`
 
       const handleCheckbox = () => (e: React.ChangeEvent<HTMLElement>) => {
-        console.log('!handleCheckbox -> ', isChecked);
         e.stopPropagation()
-        // const { value: trackId, checked } = e.target as HTMLInputElement
-        // const checked = !isChecked;
         if (!isChecked){
           dispatch({ type: 'addTrackToCustomPlaylist', trackId: trackId })
         } else {
@@ -195,8 +196,9 @@ export const getCheckbox = ({
       const isPlaylistView = view === 'playlist';
 
       const handleOnChangeHeader = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        // There is no albumId in playlist view. We also dont show the header in playlist view
+        if (!albumId) return;
         const checked = e.target.checked;
-        console.log('!handleOnChangeHeader -> ', areAllTracksSelected, checked);
         if (checked){
           dispatch({ type: 'addSelectedAlbum', albumId })
           dispatch({ type: 'addTracksToCustomPlaylist', trackIds: allTracksIds })
@@ -204,7 +206,7 @@ export const getCheckbox = ({
           dispatch({ type: 'deleteSelectedAlbum', albumId })
           dispatch({ type: 'deleteTracksFromCustomPlaylist', trackIds: allTracksIds })
         }
-      },[])
+      },[dispatch])
 
       // Don't show this in the playlist
       if (isPlaylistView) return null
@@ -281,5 +283,5 @@ export const getPlayButton = ({ isMobile }: { isMobile: boolean }) => {
     // enableResizing: true // default
     size: isMobile ? 10 : 60
   }
-  return playButton;
+  return isMobile ? null : playButton;
 }
