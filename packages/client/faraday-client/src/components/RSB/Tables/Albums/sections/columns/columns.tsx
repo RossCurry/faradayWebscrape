@@ -247,14 +247,15 @@ export const getCheckbox = ({
       const { albumId, isChecked, trackList } = info.getValue()
       const inputId = `album-checkbox-id-${albumId?.toString()}`
 
-      const handleOnClick = (e: React.MouseEvent<HTMLDivElement | HTMLInputElement | SVGAElement>) => {
+      const handleOnClick = (e: React.MouseEvent<HTMLDivElement | HTMLInputElement | SVGAElement | HTMLLabelElement>) => {
+        e.preventDefault()
         e.stopPropagation()
         handleSelectCheckbox(trackList, !isChecked, albumId)
       }
       
       return (
         <div className={styles.rowDataCheckboxWrapper} onClick={handleOnClick}>
-          <label htmlFor={inputId} className={styles.rowDataCheckboxLabel}>
+          <label htmlFor={inputId} className={styles.rowDataCheckboxLabel} onClick={handleOnClick}>
             {isChecked 
               ? <RemoveIcon />
               : <AddIcon  /> 
@@ -264,7 +265,7 @@ export const getCheckbox = ({
               type="checkbox" 
               value={albumId} 
               checked={isChecked}
-              onChange={(e) => handleSelectCheckbox(trackList, e.target.checked, albumId)}
+              onChange={()=>{}}
               id={inputId}
               style={{display: 'none'}}
               ref={inputRef}
