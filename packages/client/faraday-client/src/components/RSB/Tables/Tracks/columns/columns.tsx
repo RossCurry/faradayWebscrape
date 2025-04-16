@@ -234,7 +234,7 @@ export const getCheckbox = ({
   return checkBox
 }
 
-export const getPlayButton = ({ isMobile }: { isMobile: boolean }) => {
+export const getPlayButton = ({ isMobile, view }: { isMobile: boolean, view: Views }) => {
   const playButton: AccessorColumnDef<TrackListColumnData, TrackListColumnData> = {
     accessorFn: (data) => data || null,
     id: 'play',
@@ -283,5 +283,6 @@ export const getPlayButton = ({ isMobile }: { isMobile: boolean }) => {
     // enableResizing: true // default
     size: isMobile ? 10 : 60
   }
-  return isMobile ? null : playButton;
+  const hidePlayButton = isMobile && view === 'playlist';
+  return hidePlayButton ? null : playButton;
 }
