@@ -57,7 +57,7 @@ export default function TrackTable({
     () => [
       getCheckbox({ areAllTracksSelected, allTracksIds, albumId }),
       getImage({ isMobile, view }),
-      getPlayButton({ isMobile }),
+      getPlayButton({ isMobile, view }),
       trackNumber,
       getSongAndArtist({ isMobile }),
       duration,
