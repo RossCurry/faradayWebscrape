@@ -264,7 +264,6 @@ function TableHeader({ table }: { table: Table<AlbumItemTableData> }) {
         left: 0,
         padding: 0,
         zIndex: 1,
-        // backgroundColor: '#324658'
       }}
       className={styles.tableHeader}
     >

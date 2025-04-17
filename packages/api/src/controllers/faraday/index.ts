@@ -36,8 +36,6 @@ faradayRouter.get("/api/faraday/albums/batch",
     const { mongo } = ctx.services
     if (!mongo) throw new Error('No mongo object found')
 
-    console.log('!ctx.params -> ', ctx.params);
-    console.log('!ctx.query -> ', ctx.query);
     const { limit, offset, availability } = ctx.query
     const filters = {
       availability
