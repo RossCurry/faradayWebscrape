@@ -177,20 +177,24 @@ export default class SpotifyMongo extends BaseConnection {
       ...match,
       'faraday.link': { $exists: true },
       'spotify.trackInfo': { $exists: true },
-      $or: [{ notFound: false }, { notFound: { $exists: false } }],
+      $or: [
+        { notFound: false }, 
+        { notFound: { $exists: false }},
+        { isError: false }, 
+        { isError: { $exists: false }}
+      ],
       ...parsedFilters
     }
-    console.log('!notFoundMatch -> ', notFoundMatch);
     const albums = await albumCollection?.find(
       notFoundMatch || {},
       {
         ...!fullProjection ? { projection: albumProjection} : {},
         limit,
-        skip: offset
+        skip: offset,
+        sort: { createdDate: - 1 }
       }
     ).toArray()
-    console.log('!albums.length -> ', albums?.length);
-    // TODO improve this return type
+    
     const spotifyData: Array<Partial<any> & { _id: string }> | undefined = (albums || []).map(album => ({ _id: album._id.toString(), ...album.spotify, ...album.faraday }))
     /**
      * ReMap the trackInfo data.
