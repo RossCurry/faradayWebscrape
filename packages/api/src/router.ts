@@ -53,13 +53,13 @@ export interface AppContext extends Application.ExtendableContext {
     spotify: SpotifyApi,
     previewLinks: PreviewLinks,
   }
-} 
+}
 
 type AppParamContext = Application.ParameterizedContext<AppState>
-// type App = Application<AppState, AppContext>
 
 
 function createServices(){
+  console.log('!createServices -> ');
   // initialize services
   const services = {
     codeVerifier: new CodeVerifier(),
@@ -77,7 +77,8 @@ function createRouter({ services }: { services: AppContext['services'] }){
   // Add services to the Context
   router.use(
     (async (ctx, next) => {
-      console.log('!Initialize data state & add Services -> ');
+      console.log('!Initialize data state -> ');
+      console.log('!Add Services -> ');
       ctx.state.data = {}
       ctx.services = services
       console.log('!Services added -> ', Object.keys(ctx.services));
@@ -88,7 +89,7 @@ function createRouter({ services }: { services: AppContext['services'] }){
 }
 
 
-const router = createRouter({ 
+const router = createRouter({
   services: createServices()
 })
 
@@ -97,10 +98,5 @@ router.use(faradayRouter.routes(), faradayRouter.allowedMethods())
 router.use(spotifyRouter.routes(), spotifyRouter.allowedMethods())
 router.use(userRouter.routes(), userRouter.allowedMethods())
 
-// router.get('/api/faraday/playlists', test)
-
-// async function test(ctx: AppParamContext, _next: Application.Next) {
-//   ctx.body = { foo: 'bar' }
-// }
 
 export default router;

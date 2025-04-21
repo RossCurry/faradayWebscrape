@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import styles from './app.module.css'
 
@@ -13,28 +13,30 @@ import useGetAndSetUserInfo from './hooks/useGetAndSetUserInfo'
 
 
 function App({ redirected }: { redirected?: true }) {
+  const isRedirectedRef = useRef(!!redirected)
+  // Call this hook to get the user info if we are not redirected
   useGetAndSetUserInfo(redirected)
 
-  const [isUserdataLoading, setIsUserdataLoading] = useState<boolean>(false)
   const dispatch = useAppDispatch();
   const { searchParams } = useQuery()
   const navigate = useNavigate()
-  
+
   useEffect(() => {
     async function updateUserInfo(){
+      // Using ref to avoid re-renders calling getUserInfoWithCode twice
+      isRedirectedRef.current = false;
+      console.log('!updateUserInfo -> ', redirected, 'code', !!searchParams.get('code'));
       const code = searchParams.get('code')
       if (!code) return;
       const userInfo = await getUserInfoWithCode(code)
-      
+
       // Update Store
       dispatch({ type: 'setUserInfo', userInfo })
-      setIsUserdataLoading(false)
-      
+
       // Navigate back to the main app removing the redirect and code
       navigate('/')
     }
-    if (redirected && !isUserdataLoading) {
-      setIsUserdataLoading(true)
+    if (isRedirectedRef?.current) {
       updateUserInfo()
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps

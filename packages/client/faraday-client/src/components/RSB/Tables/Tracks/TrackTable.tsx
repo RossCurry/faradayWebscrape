@@ -55,12 +55,12 @@ export default function TrackTable({
 
   const columns = React.useMemo(
     () => [
-      getCheckbox({ areAllTracksSelected, allTracksIds, albumId }),
-      getImage({ isMobile, view }),
       getPlayButton({ isMobile, view }),
+      getImage({ isMobile, view }),
       trackNumber,
       getSongAndArtist({ isMobile }),
       duration,
+      getCheckbox({ areAllTracksSelected, allTracksIds, albumId }),
     ].filter(notNull), [areAllTracksSelected, allTracksIds, albumId, isMobile, view]
   )
 
