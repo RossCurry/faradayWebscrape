@@ -211,13 +211,13 @@ function VirtualizedTable({ data, scrollableContainerRef }: { data: AlbumItemTab
   const columns = React.useMemo(
     () => {
       const cols = [
-      getCheckbox({ handleSelectCheckbox }),
-      getImage({ isMobile }),
-      getPlayButton({ isMobile }),
-      getAlbumAndArtist({ isMobile }),
-      getCategory({ isMobile }),
-      getReleaseDate({ isMobile }),
-      getPrice({ isMobile }),
+        getPlayButton({ isMobile }),
+        getImage({ isMobile }),
+        getAlbumAndArtist({ isMobile }),
+        getCheckbox({ handleSelectCheckbox }),
+        getCategory({ isMobile }),
+        getReleaseDate({ isMobile }),
+        getPrice({ isMobile }),
       // Some columns are only for mobile
     ].filter(notNull)
     return cols

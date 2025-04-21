@@ -6,3 +6,5 @@ export CLIENT_NAME=${CLIENT_NAME}
 export PORT=${PORT}
 export DB_CONN_STRING=connection_string
 export DB_NAME=name_of_db
+export JWT_SECRET=secretForJWTSignature
+export NODE_ENV=environmentMode

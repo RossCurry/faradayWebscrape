@@ -9,7 +9,7 @@ type SnapshotResponse = {
 }
 
 class SpotifyApi {
-  
+
   constructor(){
     console.log('!SpotifyApi  constructor-> ')
   }
@@ -17,24 +17,24 @@ class SpotifyApi {
   async redirectToSpotifyAuthorize() {
     const client_id = process.env.CLIENT_ID
     if (!client_id) throw new Error('Missing env variable: CLIENT_ID');
-    
+
     const authorizationEndpoint = "https://accounts.spotify.com/authorize";
     const scope = 'user-read-private user-read-email playlist-read-private playlist-read-collaborative playlist-modify-private playlist-modify-public';
     const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     const randomValues = crypto.getRandomValues(new Uint8Array(64));
     const randomString = randomValues.reduce((acc, x) => acc + possible[x % possible.length], "");
-  
+
     const code_verifier = randomString;
     const data = new TextEncoder().encode(code_verifier);
     const hashed = await crypto.subtle.digest('SHA-256', data);
-  
+
     const code_challenge_base64 = btoa(String.fromCharCode(...new Uint8Array(hashed)))
       .replace(/=/g, '')
       .replace(/\+/g, '-')
       .replace(/\//g, '_');
-  
+
     // window.localStorage.setItem('code_verifier', code_verifier);
-  
+
     const authUrl = new URL(authorizationEndpoint)
     const params = {
       response_type: 'code',
@@ -44,7 +44,7 @@ class SpotifyApi {
       code_challenge: code_challenge_base64,
       redirect_uri: REDIRECTS.redirect,
     };
-  
+
     authUrl.search = new URLSearchParams(params).toString();
     return {authUrl, codeVerifier: code_verifier }; // Redirect the user to the authorization server for login
   }
@@ -53,7 +53,7 @@ class SpotifyApi {
     const tokenEndpoint = "https://accounts.spotify.com/api/token";
     const client_id = process.env.CLIENT_ID
     if (!client_id) throw new Error('Missing env variable: CLIENT_ID');
-  
+
     const response = await fetch(tokenEndpoint, {
       method: 'POST',
       headers: {
@@ -67,7 +67,7 @@ class SpotifyApi {
         code_verifier: codeChallenge,
       }),
     });
-  
+
     const spotiResponse: PKCE_RES | PKCE_ERROR_RES = await response.json();
 
     if ('error' in spotiResponse) {
@@ -87,7 +87,7 @@ class SpotifyApi {
       'Authorization': `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`,
       'Content-Type': 'application/x-www-form-urlencoded'
     }
-  
+
     const body = await fetch(tokenEndpoint, {
       method: 'POST',
       headers: authHeaders,
@@ -97,24 +97,24 @@ class SpotifyApi {
         refresh_token: refreshToken
       }),
     });
-    
+
     const response = await body.json();
     if ('error' in response) throw new Error('Error from spotify API', { cause: response })
     return response as AuthToken;
   }
 
   async createPlaylist({
-      accessToken, 
-      userId, 
-      playlistTitle, 
+      accessToken,
+      userId,
+      playlistTitle,
       description
     }: {
-      accessToken: string, 
-      userId: string, 
-      playlistTitle: string, 
+      accessToken: string,
+      userId: string,
+      playlistTitle: string,
       description: string
     }){
-    
+
     const url = `https://api.spotify.com/v1/users/${userId}/playlists`
     const authString = `Bearer ${accessToken}`
     const body = {
@@ -170,7 +170,7 @@ class SpotifyApi {
       batches = getBatches(playlistTracks, 100)
     }
     console.log('!batches.length -> ', batches.length);
-    
+
     // This needs to be sequential for rate limiting reasons on SPotify API
     const snapshots: SnapshotResponse[] = []
     for await (const [i, uriBatch] of batches.entries()){
@@ -181,7 +181,7 @@ class SpotifyApi {
         uris: uriBatch,
         position: i === 0 ? 0 : i * 100
       }
-      
+
       const authString = `Bearer ${accessToken}`
       try {
         const response = await fetch(playlistEndpoint, {
@@ -204,6 +204,7 @@ class SpotifyApi {
   }
 
   async getUserInfo(accessToken: string){
+    let justInCaseResponse;
     try {
         const authString = `Bearer ${accessToken}`
         const currentUserURL = 'https://api.spotify.com/v1/me'
@@ -212,14 +213,18 @@ class SpotifyApi {
             Authorization: authString
           }
         })
+        justInCaseResponse = response
         const jsonResponse: SpotifyUserProfile = await response.json()
         return jsonResponse
       } catch (error) {
+        if (error instanceof Error) {
+          error.cause = justInCaseResponse
+        }
         throw error
       }
   }
 
-  
+
 };
 
 export default SpotifyApi;

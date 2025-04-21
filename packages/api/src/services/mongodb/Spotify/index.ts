@@ -177,11 +177,19 @@ export default class SpotifyMongo extends BaseConnection {
       ...match,
       'faraday.link': { $exists: true },
       'spotify.trackInfo': { $exists: true },
-      $or: [
-        { notFound: false }, 
-        { notFound: { $exists: false }},
-        { isError: false }, 
-        { isError: { $exists: false }}
+      $and: [
+        {
+          $or: [
+            { notFound: false }, 
+            { notFound: { $exists: false }},
+          ],
+        },
+        {
+          $or: [
+            { isError: false }, 
+            { isError: { $exists: false }}
+          ],
+        }
       ],
       ...parsedFilters
     }
@@ -191,10 +199,13 @@ export default class SpotifyMongo extends BaseConnection {
         ...!fullProjection ? { projection: albumProjection} : {},
         limit,
         skip: offset,
-        sort: { createdDate: - 1 }
+        sort: {
+          "spotify.trackInfo.items.preview_url": -1, // songs with preview first
+        }
       }
     ).toArray()
     
+    // TODO do sorting by date and then both mappings together
     const spotifyData: Array<Partial<any> & { _id: string }> | undefined = (albums || []).map(album => ({ _id: album._id.toString(), ...album.spotify, ...album.faraday }))
     /**
      * ReMap the trackInfo data.
