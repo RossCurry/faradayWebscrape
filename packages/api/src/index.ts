@@ -31,7 +31,7 @@ app.use(cors({
   origin: (ctx) => {
     const origin = ctx.req.headers.origin;
     console.log('!origin -> ', origin, );
-    if (origin === 'http://faraday.rosscurry.dev' || origin === 'http://localhost:5173') {
+    if (origin === 'https://faraday.rosscurry.dev' || origin === 'http://localhost:5173') {
       console.log('!returning origin -> ', origin);
       return origin;
     }
