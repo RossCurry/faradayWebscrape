@@ -22,12 +22,13 @@ function App({ redirected }: { redirected?: true }) {
   const navigate = useNavigate()
 
   useEffect(() => {
+    // Called when we are redirected from Spotify
     async function updateUserInfo(){
       // Using ref to avoid re-renders calling getUserInfoWithCode twice
       isRedirectedRef.current = false;
-      console.log('!updateUserInfo -> ', redirected, 'code', !!searchParams.get('code'));
       const code = searchParams.get('code')
       if (!code) return;
+      
       const userInfo = await getUserInfoWithCode(code)
 
       // Update Store

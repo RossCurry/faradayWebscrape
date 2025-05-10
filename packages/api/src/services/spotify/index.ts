@@ -203,28 +203,27 @@ class SpotifyApi {
 
   }
 
+  // This is throwing an error
   async getUserInfo(accessToken: string){
-    let justInCaseResponse;
-    try {
-        const authString = `Bearer ${accessToken}`
-        const currentUserURL = 'https://api.spotify.com/v1/me'
-        const response = await fetch(currentUserURL, {
-          headers: {
-            Authorization: authString
-          }
-        })
-        justInCaseResponse = response
-        const jsonResponse: SpotifyUserProfile = await response.json()
-        return jsonResponse
-      } catch (error) {
-        if (error instanceof Error) {
-          error.cause = justInCaseResponse
-        }
-        throw error
+    const authString = `Bearer ${accessToken}`
+    // In development mode, all users must be preregistered
+    const currentUserURL = 'https://api.spotify.com/v1/me'
+    const response = await fetch(currentUserURL, {
+      headers: {
+        Authorization: authString
       }
+    })
+
+    // when everything is good
+    if (response.ok){
+      const jsonResponse: SpotifyUserProfile = await response.json()
+      return jsonResponse
+    }
+
+    // when something goes wrong
+    const notOkMessage = await response.text()
+    throw new Error(notOkMessage, { cause: { status: response.status, code: response.statusText }})
   }
-
-
 };
 
 export default SpotifyApi;
