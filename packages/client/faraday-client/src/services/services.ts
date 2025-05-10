@@ -5,7 +5,7 @@ import { Filter } from "../types/app.types"
 
 console.log('!import.meta.env -> ', import.meta.env);
 // export const baseUrlDev =  import.meta.env.VITE_BASE_URL
-export const baseUrlDev =  import.meta.env.PROD ? 'https://api.rosscurry.dev/faraday/' : 'http://localhost:3000/api/'
+export const baseUrlDev =  import.meta.env.PROD ? 'https://api.rosscurry.dev/faraday/api' : 'http://localhost:3000/api/'
 console.log('!baseUrlDev -> ', baseUrlDev);
 
 export async function connectToSpoti(){
