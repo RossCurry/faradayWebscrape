@@ -28,17 +28,18 @@ const outputDir = '/Users/ross.curry/ross/faradayWebScrape/packages/api/dist'
 app.use(koaStatic.default(path.join(outputDir, 'public')));
 
 app.use(cors({
-  // origin: process.env.PRODUCTION ? process.env.CLIENT_URL : "http://127.0.0.1:5500",
   origin: (ctx) => {
     const origin = ctx.req.headers.origin;
     console.log('!origin -> ', origin, );
-    // Allow requests from http://127.0.0.1:5500
-    if (origin === 'http://rosscurry.dev' || origin === 'http://localhost:5173') {
+    if (origin === 'http://faraday.rosscurry.dev' || origin === 'http://localhost:5173') {
       console.log('!returning origin -> ', origin);
       return origin;
     }
-    // Or allow all origins (not recommended for production)
-    return '*';
+    if (process.env.NODE_ENV === 'development'){
+      // Or allow all origins (not for production)
+      return '*';
+    }
+    return 'false'; // Disallow all other origins
   },
   credentials: true, // Enable cookies to be sent,
   methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify allowed methods
