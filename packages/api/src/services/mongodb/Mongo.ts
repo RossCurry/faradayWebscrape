@@ -1,9 +1,9 @@
-import mongoDB, { Db, ObjectId, WithId } from 'mongodb'
 import dotenv from 'dotenv';
+dotenv.config();
+import mongoDB from 'mongodb'
 import SpotifyMongo from './Spotify/index.js';
 import FaradayMongo from './Faraday/index.js';
 import UserMongo from './User/index.js';
-dotenv.config();
 
 
 export default class MongoDb {
@@ -32,11 +32,11 @@ export default class MongoDb {
     const connectionString  = process.env.DB_CONN_STRING
     const faradayDB = process.env.DB_NAME
     if (!connectionString || !faradayDB) throw new Error('No connection string or no DB Name for mongo db');
-  
+
     const client: mongoDB.MongoClient = new mongoDB.MongoClient(connectionString);
     await client.connect();
     const db: mongoDB.Db = client.db(faradayDB);
-       
+
     console.log(`Successfully connected to database: ${db.databaseName}`);
     return db
   }
