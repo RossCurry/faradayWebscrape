@@ -1,3 +1,7 @@
+// env variables
+import dotenv from 'dotenv';
+dotenv.config();
+
 import Koa from "koa"
 import logger from "koa-logger"
 import json from "koa-json"
@@ -9,9 +13,7 @@ import path from 'node:path'
 // router
 import router, { AppContext, AppState } from './router.js';
 
-// env variables
-import dotenv from 'dotenv';
-dotenv.config();
+
 
 const __dirname = url.fileURLToPath(new URL(import.meta.url))
 
@@ -25,7 +27,7 @@ const app = new Koa<AppState, AppContext>();
 const outputDir = '/Users/ross.curry/ross/faradayWebScrape/packages/api/dist'
 app.use(koaStatic.default(path.join(outputDir, 'public')));
 
-app.use(cors({ 
+app.use(cors({
   // origin: process.env.PRODUCTION ? process.env.CLIENT_URL : "http://127.0.0.1:5500",
   origin: (ctx) => {
     const origin = ctx.req.headers.origin;
