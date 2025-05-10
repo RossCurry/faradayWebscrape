@@ -30,7 +30,7 @@ export async function connectToSpoti(){
     } else {
       const jsonRes = await response.json()
       throw Error(jsonRes)
-    }    
+    }
   } catch (error) {
     console.log('!Failed fetch to connection route -> ', error);
   }
@@ -40,13 +40,13 @@ const DESCRIPTION = 'Faraday Collection of what is available on Spotify'
 export async function createPlaylist(playlistTitle: string, playlistTracks: SpotifySearchResult["trackList"]) {
   const createPath = 'spotify/playlist/create';
   const token = window.localStorage.getItem('jwt') || ''
-  
+
   const url = new URL(baseUrlDev + createPath)
   url.searchParams.set('playlistTitle', playlistTitle)
   url.searchParams.set('description', DESCRIPTION)
-  
+
   const trackUris = playlistTracks.map(track => track.uri)
-  
+
   try {
     const response = await fetch(url.toString(), {
       method: 'POST',
@@ -61,7 +61,7 @@ export async function createPlaylist(playlistTitle: string, playlistTracks: Spot
       credentials: 'include',
     })
     const jsonRes: { playlist: SpotifyPlaylist } | { error: string} = await response.json()
-    
+
     if (response.ok) {
       if ('playlist' in jsonRes) return jsonRes.playlist
       return false
@@ -94,13 +94,13 @@ export async function getAlbumsInBatch({
   sorting,
   filters,
 }: {
-  offset: number, 
-  batchSize: number, 
-  cursor: number, 
+  offset: number,
+  batchSize: number,
+  cursor: number,
   sorting?: SortingState,
   filters: Filter
 }){
-  
+
   const getAlbumsPath = 'faraday/albums/batch'
   const url = new URL(baseUrlDev + getAlbumsPath)
   url.searchParams.set('limit', batchSize.toString())
@@ -112,11 +112,11 @@ export async function getAlbumsInBatch({
 
   const response = await fetch(url.toString())
   if (response.ok){
-    const jsonRes: { 
-      data: SpotifySearchResult[], 
-      totalCount: number 
+    const jsonRes: {
+      data: SpotifySearchResult[],
+      totalCount: number
     } = await response.json()
-    
+
     if (sorting?.length) {
       // TODO implement sorting another request
       // const sort = sorting[0] as ColumnSort
@@ -133,7 +133,7 @@ export async function getAlbumsInBatch({
     const totalFetched = offset + batchSize
     // TODO improvement: get url from BE
     const nextCursor = cursor + 1
-    
+
     return {
       data,
       meta: {
@@ -172,7 +172,7 @@ export async function getUserInfoWithToken(token: string) {
         Authorization: `Bearer ${token}`
       }
     })
-    
+
 
     if (response.ok) {
       // token will be refreshed on BE
@@ -181,7 +181,7 @@ export async function getUserInfoWithToken(token: string) {
         const token = getTokenFromAuthorizationHeader(authHeader)
         window.localStorage.setItem('jwt', token)
       }
-      
+
       const jsonResponse: { userInfo: SpotifyUserProfile | null } = await response.json()
       return jsonResponse.userInfo
     }
@@ -203,7 +203,11 @@ export async function getUserInfoWithToken(token: string) {
   return null
 }
 
-
+/**
+ * Called when redirected from spotify
+ * @param code
+ * @returns userInfo
+ */
 export async function getUserInfoWithCode(code: string) {
   const verifyPath = `user/verify`
   const url = new URL(baseUrlDev + verifyPath)
@@ -215,13 +219,13 @@ export async function getUserInfoWithCode(code: string) {
     // token will be refreshed on BE
     const authHeader = response.headers.get('Authorization');
     const jsonResponse: { userInfo: SpotifyUserProfile | null } = await response.json()
-    
+
     if (authHeader){
       const token = getTokenFromAuthorizationHeader(authHeader)
       window.localStorage.setItem('jwt', token)
     }
 
-    return jsonResponse.userInfo || null 
+    return jsonResponse.userInfo || null
   }
 
   return null
