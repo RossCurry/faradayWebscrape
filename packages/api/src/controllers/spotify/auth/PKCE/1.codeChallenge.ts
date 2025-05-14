@@ -1,7 +1,7 @@
 import { REDIRECTS } from "../authRedirects.constants.js";
 
 const authorizationEndpoint = "https://accounts.spotify.com/authorize";
-const scope = 'user-read-private user-read-email playlist-read-private playlist-read-collaborative playlist-modify-private playlist-modify-public';
+const scope = 'playlist-read-private playlist-read-collaborative playlist-modify-private playlist-modify-public';
 
 
 /**
