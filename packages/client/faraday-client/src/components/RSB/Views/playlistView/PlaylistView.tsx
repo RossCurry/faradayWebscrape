@@ -11,6 +11,7 @@ import { ListIcon } from "../../../../icons";
 
 export function PlaylistView() {
   const { tracksCollection: tracks } = useAppState().playlist
+  const { areAllAlbumsSelected, filters } = useAppState().rsb
   const dispatch = useAppDispatch();
   const { custom } = useAppState().playlist
   const ids = useMemo(() => Object.keys(custom), [custom])
@@ -21,8 +22,8 @@ export function PlaylistView() {
   useEffect(()=>{
     async function updateAlbums(){
       dispatch({ type: 'setIsLoading', isLoading: true })
-      const tracksCollection = await getTracksByIds(ids)
-      if (tracksCollection){ 
+      const tracksCollection = await getTracksByIds(ids, areAllAlbumsSelected, filters.availability)
+      if (tracksCollection){
         dispatch({ type: 'setCustomTracksCollection', tracks: tracksCollection })
         dispatch({ type: 'setIsLoading', isLoading: false })
       }
@@ -42,11 +43,11 @@ export function PlaylistView() {
   return (
     <section id='playlistView' className={sharedStyles.albumCollection}>
         <div className={styles.playlistViewContainer}>
-        <span 
-          style={{ 
-            gridArea: 'header', 
-            position: 'sticky', 
-            top: 0, 
+        <span
+          style={{
+            gridArea: 'header',
+            position: 'sticky',
+            top: 0,
             left: 0,
             zIndex: 'var(--z-3)'
           }}
@@ -55,7 +56,7 @@ export function PlaylistView() {
         </span>
 
         {!showPlaylist && <PlaylistEmptyContainer />}
-        
+
         {showPlaylist && <span style={{ gridArea: 'playlist'}}>
           <TrackTable
             data={tracks}
@@ -70,7 +71,7 @@ export function PlaylistView() {
 const PlaylistEmptyContainer = () => {
   const dispatch = useAppDispatch();
   const { isLoading } = useAppState().playlist;
-  
+
   return (
   <div className={styles.playlistEmptyContainer}>
     <IsLoading isLoading={isLoading} />

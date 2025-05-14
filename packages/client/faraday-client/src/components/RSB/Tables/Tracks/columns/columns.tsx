@@ -106,12 +106,12 @@ export const trackNumber: AccessorColumnDef<TrackListColumnData, TrackListColumn
   id: 'trackNumber',
   cell: info => {
     return (
-      <span 
+      <span
       className={styles.rowDataTrackNumber}
       >
         {info.getValue()}
       </span>
-    ) 
+    )
   },
   header: () => null,
   // header: () => <span className={styles.headerTrackNumber}>#</span>,
@@ -146,7 +146,7 @@ export const getCheckbox = ({
   allTracksIds: string[],
   albumId?: string
 }) => {
-  
+
   const checkBox: AccessorColumnDef<TrackListColumnData, { trackId: TrackListColumnData['id'], isChecked: boolean }> = {
     accessorFn: row => ({ trackId: row.id, isChecked: row.isChecked }),
     id: 'checkbox',
@@ -163,25 +163,26 @@ export const getCheckbox = ({
           dispatch({ type: 'deleteTrackFromCustomPlaylist', trackId: trackId })
         }
       }
-      
+
       return (
-        <div 
+        <div
           onClick={handleCheckbox}
+          style={{ display: 'flex', justifyContent: 'center'}}
           >
-          <label 
-            htmlFor={inputId} 
+          <label
+            htmlFor={inputId}
             className={styles.rowDataCheckboxLabel}
           >
-            {isChecked 
+            {isChecked
               ? <CheckCircleIconFilled fill={'#facc15'}  />
-              : <CheckCircleIcon  /> 
+              : <CheckCircleIcon  />
             }
             <input
 
               id={inputId}
               style={{display:'none'}}
-              type="checkbox" 
-              value={trackId} 
+              type="checkbox"
+              value={trackId}
               checked={isChecked}
               onChange={handleCheckbox}
             />
@@ -211,8 +212,12 @@ export const getCheckbox = ({
       // Don't show this in the playlist
       if (isPlaylistView) return null
       return (
-        <label htmlFor={checkBoxId} className={styles.rowDataCentered}>
-          <Tooltip 
+        <label
+          htmlFor={checkBoxId}
+          className={styles.rowDataCentered}
+          style={{ display: 'flex', justifyContent: 'center'}}
+        >
+          <Tooltip
             Component={areAllTracksSelected ? <LibraryRemoveIcon /> : <LibraryAddIcon />}
             tooltipText={areAllTracksSelected ? "Remove All" : "Select All"}
             position="right"
@@ -220,8 +225,8 @@ export const getCheckbox = ({
           <input
             id={checkBoxId}
             className={styles.rowDataCheckbox}
-            type="checkbox" 
-            value={'all'} 
+            type="checkbox"
+            value={'all'}
             checked={areAllTracksSelected}
             onChange={handleOnChangeHeader}
             style={{display: 'none'}}
@@ -249,15 +254,15 @@ export const getPlayButton = ({ isMobile, view }: { isMobile: boolean, view: Vie
       const isPlaying = audioUrl === preview_url;
       const isDisabled = !preview_url;
       const isPlaylistView = view === 'playlist';
-  
+
       if (isPlaylistView) return null;
       return (
         <span className={styles.rowDataCentered} key={`tracklist-playbutton-${id}`}>
-          <Tooltip 
+          <Tooltip
             Component={
-              <IconButton 
+              <IconButton
                 Icon={PlayIconFilled}
-                handleOnClick={(e) => { 
+                handleOnClick={(e) => {
                   e?.stopPropagation()
                   dispatch({ type: 'setAudioUrl', track })
                 }}
