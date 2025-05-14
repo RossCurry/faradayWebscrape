@@ -5,6 +5,8 @@ import { FaradayItemData } from "#controllers/faraday/getItemData.js"
 import BaseConnection from "../BaseConnection.js"
 // import { GetSpotifyDataFilter, GetSpotifyDataMatch } from "../_refactored/_index.js"
 
+type GetAllFilter = 'all'|'sold out'|'available'| null
+
 export type GetSpotifyDataFilters = {
   availability?: 'all'|'sold out'|'available'
 }
@@ -29,9 +31,9 @@ export default class SpotifyMongo extends BaseConnection {
   }
 
   /**
-   * Sets Spotify data from faraday webscrape data 
-   * @param data 
-   * @returns 
+   * Sets Spotify data from faraday webscrape data
+   * @param data
+   * @returns
    */
   async setSpotifyData(data: AppState["data"]["searchResults"], faradayData: WithId<FaradayItemData>[]) {
     console.log('!setSpotifyData -> ', data?.length);
@@ -124,8 +126,8 @@ export default class SpotifyMongo extends BaseConnection {
    * This is the main GET for the landing page.
    * At the moment, just return everything
    * Will have to figure out a limit
-   * @param match 
-   * @returns 
+   * @param match
+   * @returns
    */
   async getSpotifyAlbumData({
     match,
@@ -134,9 +136,9 @@ export default class SpotifyMongo extends BaseConnection {
     filters,
     fullProjection,
   }: {
-    match?: Record<string, any>, 
-    limit?: number, 
-    offset?: number, 
+    match?: Record<string, any>,
+    limit?: number,
+    offset?: number,
     filters?: GetSpotifyDataFilters,
     fullProjection?: boolean
   }) {
@@ -180,13 +182,13 @@ export default class SpotifyMongo extends BaseConnection {
       $and: [
         {
           $or: [
-            { notFound: false }, 
+            { notFound: false },
             { notFound: { $exists: false }},
           ],
         },
         {
           $or: [
-            { isError: false }, 
+            { isError: false },
             { isError: { $exists: false }}
           ],
         }
@@ -204,7 +206,7 @@ export default class SpotifyMongo extends BaseConnection {
         }
       }
     ).toArray()
-    
+
     // TODO do sorting by date and then both mappings together
     const spotifyData: Array<Partial<any> & { _id: string }> | undefined = (albums || []).map(album => ({ _id: album._id.toString(), ...album.spotify, ...album.faraday }))
     /**
@@ -236,7 +238,7 @@ export default class SpotifyMongo extends BaseConnection {
         case 'sold out':
           parsedFilters['faraday.isSoldOut'] = true
           break;
-      
+
         default:
           break;
       }
@@ -292,18 +294,34 @@ export default class SpotifyMongo extends BaseConnection {
 
   /**
     * Returns track info for ids given
+    * if getAll is selected, returns allIds for a given selection
     */
-  async getSpotifyTracksById(trackIds: string[]) {
+  async getSpotifyTracksById(trackIds: string[], getAll: GetAllFilter) {
     if (!this.db) throw new Error('No DB found')
     const albumCollection = this.db.collection('albums')
     if (!albumCollection) throw new Error('No albumCollection found')
-    const match = {
-      'spotify.trackInfo.items.id': { $in: trackIds }
+
+    let match;
+    if (!getAll){
+      match = {
+        'spotify.trackInfo.items.id': { $in: trackIds }
+      }
     }
+    else {
+      const allMatch = { 'spotify.trackInfo.items.id': { $exists: true }}
+      const availableMatch = { 'spotify.trackInfo.items.id': { $exists: true }, 'faraday.isSoldOut': false }
+      const soldOutMatch = { 'spotify.trackInfo.items.id': { $exists: true }, 'faraday.isSoldOut': true }
+      match = getAll === 'all'
+        ? allMatch
+        : getAll === 'available'
+          ? availableMatch
+          : soldOutMatch
+    }
+
     const tracks = await albumCollection.aggregate([
       { $match: match }, // returns the matching document
       { $unwind: '$spotify.trackInfo.items' },
-      { $match: { 'spotify.trackInfo.items.id': { $in: trackIds } } }, // Match only the tracks
+      { $match: match }, // Match only the tracks
       {
         $project: {
           artists: '$spotify.trackInfo.items.artists',
@@ -377,22 +395,22 @@ export default class SpotifyMongo extends BaseConnection {
     try {
       const albumsCollection = this.db.collection('albums')
       if (!albumsCollection) throw new Error('No albums collecion found')
-      
+
         const bulkOps = albumsTracksData.map(album => ({
         updateOne: {
           filter: { _id: album.albumId }, // Important: Convert _id to ObjectId
           update: { $set: { 'spotify.trackInfo.items': album.trackList } }, // Update the fields
         }
       }));
-  
+
       const result = await albumsCollection.bulkWrite(bulkOps);
-  
+
       console.log(`Modified ${result.modifiedCount} documents, inserted ${result.upsertedCount}`);
-  
+
       if (result.hasWriteErrors()) {
         console.error('Bulk write errors:', result.getWriteErrors());
       }
-  
+
     } catch (error) {
       console.error('Error during bulk update:', error);
     }

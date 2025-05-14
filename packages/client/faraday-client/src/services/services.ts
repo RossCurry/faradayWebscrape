@@ -242,7 +242,7 @@ export async function getAvailablePlaylists(){
 }
 
 // TODO send user id
-export async function getTracksByIds(trackIds: string[]){
+export async function getTracksByIds(trackIds: string[], areAllAlbumsSelected: boolean, selectionType: Filter['availability']){
   const getTracksPath = 'spotify/tracks'
   const response = await fetch(baseUrlDev + getTracksPath, {
     method: 'POST',
@@ -250,7 +250,7 @@ export async function getTracksByIds(trackIds: string[]){
       'Content-type': 'application/json',
       'Accept': 'application/json',
     },
-    body: JSON.stringify({ trackIds })
+    body: JSON.stringify({ trackIds, getAll: areAllAlbumsSelected ? selectionType : null })
   })
   if (response.ok){
     const jsonRes: SpotifySearchResult["trackList"] = await response.json()
