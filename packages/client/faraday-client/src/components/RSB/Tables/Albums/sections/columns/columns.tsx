@@ -29,7 +29,7 @@ export const getImage = ({ isMobile }: { isMobile: boolean }) => {
               backgroundImage: `url(${url})`
             }}
           >
-            {isSoldOut && <div className={styles.albumItemSoldOut}></div>}
+            {/* {isSoldOut && <div className={styles.albumItemSoldOut}></div>} */}
           </div>
         </>
       )
@@ -58,14 +58,14 @@ export const getPlayButton = ({ isMobile }: { isMobile: boolean }) => {
       // TODO include is playing state
       const isPlaying = audioUrl === preview_url
       const isDisabled = !preview_url;
-  
+
       return (
         <span className={styles.rowDataCentered} key={keyId}>
-          <Tooltip 
+          <Tooltip
             Component={
-              <IconButton 
+              <IconButton
                 Icon={PlayIconFilled}
-                handleOnClick={(e) => { 
+                handleOnClick={(e) => {
                   e?.stopPropagation()
                   dispatch({ type: 'setAudioUrl', track: { ...firstTrack, imageUrl: data.image.url } })
                 }}
@@ -98,13 +98,14 @@ export const getAlbumAndArtist = ({ isMobile }: { isMobile: boolean }) => {
     accessorFn: row => row,
     id: 'albumInfo',
     cell: info => {
-      const { name, artists } = info.getValue() as SpotifySearchResult
+      const { name, artists, isSoldOut } = info.getValue() as SpotifySearchResult
       const artist = artists?.join(', ')
       const album = name
       return (
-        <div className={styles.rowDataAlbum}>
-          <p>{album}</p>
-          <p>{artist}</p>
+        <div className={styles.rowDataAlbum} style={{ position: 'relative'}}>
+          <p className={styles.albumTitle}>{album}</p>
+          <p className={styles.albumArtist}>{artist}</p>
+          {isSoldOut && <div className={styles.albumItemSoldOut}>Sold Out</div>}
         </div>
       )
     },
@@ -186,7 +187,7 @@ export const getPrice = ({ isMobile }: { isMobile: boolean }) => {
     sortDescFirst: false, //first sort order will be ascending (nullable values can mess up auto detection of sort order)
   }
   return price
-} 
+}
 
 export const getPopularity = ({ isMobile }: { isMobile: boolean }) => {
   if (isMobile) return null
@@ -252,18 +253,18 @@ export const getCheckbox = ({
         e.stopPropagation()
         handleSelectCheckbox(trackList, !isChecked, albumId)
       }
-      
+
       return (
         <div className={styles.rowDataCheckboxWrapper} onClick={handleOnClick}>
           <label htmlFor={inputId} className={styles.rowDataCheckboxLabel} onClick={handleOnClick}>
-            {isChecked 
+            {isChecked
               ? <RemoveIcon />
-              : <AddIcon  /> 
+              : <AddIcon  />
             }
             <input
               className={styles.rowDataCheckbox}
-              type="checkbox" 
-              value={albumId} 
+              type="checkbox"
+              value={albumId}
               checked={isChecked}
               onChange={()=>{}}
               id={inputId}

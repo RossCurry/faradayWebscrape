@@ -13,6 +13,8 @@
   position: relative;
   padding: 0;
   margin: 0;
+  /* Spotify requirements */
+  border-radius: 2px;
 }
 
 .rowDataTrack {
@@ -61,7 +63,7 @@ input[type="checkbox"].rowDataCheckbox{
   height: 40px;
   aspect-ratio: 1/1;
   border-radius: 50% ;
-  transition: 
+  transition:
     background-color 200ms ease-in-out
     ;
 }

@@ -28,6 +28,8 @@ tr.tableRow {
   background-position: center;
   background-repeat: no-repeat;
   position: relative;
+  /* Spotify requirements */
+  border-radius: 4px;
 }
 
 .rowDataAvailability,
@@ -36,19 +38,27 @@ tr.tableRow {
   padding-left: 1em;
 }
 .rowDataAlbum {
-  display: flex;
+  display: grid;
+  grid-template-areas:
+    "albumTitle soldOut"
+    "albumArtist soldOut"
+  ;
   flex-direction: column;
   gap: var(--g-2);
   width: 100%;
-  padding: 1em;
+  padding: var(--p-3);
 }
 
 .rowDataAlbum p {
   margin: 0;
   padding: 0;
 }
-.rowDataAlbum p:first-child {
+.rowDataAlbum .albumTitle {
+  grid-area: albumTitle;
   font-weight: 800;
+}
+.rowDataAlbum .albumArtist {
+  grid-area: albumArtist;
 }
 
 .rowDataAvailability {
@@ -104,15 +114,34 @@ input[type="checkbox"].rowDataCheckbox{
   fill: var(--dark-1);
 } */
 
-.albumItemSoldOut {
+/* .albumItemSoldOut {
+  --size: 20px;
   content: '';
   position: absolute;
-  width: 40px;
+  width: var(--size);
   aspect-ratio: 1/1;
   border-radius: 50%;
   background-color: red;
-  top: 0;
-  right: 0;
+  top: var(--size);
+  right: 0px;
+} */
+
+/* Spotify requirements */
+.albumItemSoldOut {
+  grid-area: soldOut;
+  align-self: flex-start;
+  justify-self: flex-end;
+  --size: 10px;
+  content: '';
+  /* position: absolute; */
+  width: fit-content;
+  border-radius: 6px;
+  padding: 0 var(--p-2);
+  background-color: rgb(196, 74, 74);
+  top: 50%;
+  right: 0px;
+  font-weight: light;
+  font-size: small;
 }
 
 .playButton {
@@ -120,7 +149,7 @@ input[type="checkbox"].rowDataCheckbox{
   height: 40px;
   aspect-ratio: 1/1;
   border-radius: 50% ;
-  transition: 
+  transition:
     background-color 200ms ease-in-out
     ;
 }
@@ -145,6 +174,8 @@ input[type="checkbox"].rowDataCheckbox{
 @media screen and (max-width: 430px) {
   .rowDataImg {
     --img-size: 5rem;
+    /* Spotify requirements */
+    border-radius: 2px;
   }
   .rowDataAvailability,
   .rowDataAlbum,
