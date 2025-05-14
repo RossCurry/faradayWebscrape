@@ -20,7 +20,7 @@ export const getImage = ({ isMobile }: { isMobile: boolean }) => {
     },
     id: 'image',
     cell: info => {
-      const { isSoldOut, url } = info.getValue()
+      const { url } = info.getValue()
       return (
         <>
           <div
@@ -29,7 +29,6 @@ export const getImage = ({ isMobile }: { isMobile: boolean }) => {
               backgroundImage: `url(${url})`
             }}
           >
-            {/* {isSoldOut && <div className={styles.albumItemSoldOut}></div>} */}
           </div>
         </>
       )
