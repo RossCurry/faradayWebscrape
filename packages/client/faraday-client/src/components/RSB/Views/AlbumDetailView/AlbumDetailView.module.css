@@ -13,7 +13,7 @@
   display: grid;
   grid-template-columns: 0.25fr 1fr 3fr 1fr;
   grid-row: 1fr;
-  grid-template-areas: 
+  grid-template-areas:
     "closeButton albumImg albumInfo links"
     "closeButton albumImg albumInfo albumStats"
   ;
@@ -47,6 +47,8 @@
   background-position: center;
   background-repeat: no-repeat;
   position: relative;
+  /* Spotify requirements */
+  border-radius: 4px;
 }
 
 .trackTableHeader h2,
@@ -92,7 +94,26 @@
   justify-content: flex-start;
 }
 
+/* Spotify Requirements */
 .albumItemSoldOut {
+  grid-area: albumInfo;
+  align-self: flex-start;
+  justify-self: flex-end;
+  --size: 10px;
+  content: '';
+  /* position: absolute; */
+  width: fit-content;
+  min-width: fit-content;
+  border-radius: 6px;
+  padding: 0 var(--p-2);
+  background-color: rgb(196, 74, 74);
+  top: 2px;
+  left: -20%;
+  font-weight: light;
+  font-size: small;
+}
+
+/* .albumItemSoldOut {
   content: '';
   position: absolute;
   width: 40px;
@@ -101,15 +122,15 @@
   background-color: red;
   top: 0;
   right: 0;
-}
+} */
 
 @media screen and (max-width: 430px) {
   .trackTableContainer .trackTableHeader {
-    /* grid-template-areas: 
+    /* grid-template-areas:
     "closeButton albumImg albumInfo links"
     "closeButton albumImg albumInfo albumStats"
   ; */
-    grid-template-areas: 
+    grid-template-areas:
       "closeButton albumImg links"
       "closeButton albumImg links"
       "closeButton albumInfo albumStats"
