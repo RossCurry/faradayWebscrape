@@ -1,7 +1,7 @@
-import { 
-  createContext, 
-  ReactNode, 
-  useReducer, 
+import {
+  createContext,
+  ReactNode,
+  useReducer,
   Dispatch,
 } from 'react';
 import { CONSTANTS, Views } from './constants';
@@ -104,7 +104,7 @@ const initialAppState: AppState = {
   user: null
 }
 
-export type ActionTypes = 
+export type ActionTypes =
 // Playlist
 | { type: 'addTrackToCustomPlaylist', trackId: string }
 | { type: 'deleteTrackFromCustomPlaylist', trackId: string }
@@ -155,9 +155,9 @@ function stateReducer(state: AppState, action: ActionTypes) {
       // Quick and dirty local storage solution
       updateLocalStoragePlaylist(updatedList)
 
-      return { 
-        ...state, 
-        playlist: { ...state.playlist, custom: updatedList } 
+      return {
+        ...state,
+        playlist: { ...state.playlist, custom: updatedList }
       };
     }
     case 'deleteTrackFromCustomPlaylist': {
@@ -167,9 +167,9 @@ function stateReducer(state: AppState, action: ActionTypes) {
       // Quick and dirty local storage solution
       updateLocalStoragePlaylist(playlist)
 
-      return { 
-        ...state, 
-        playlist: { ...state.playlist, custom: playlist } 
+      return {
+        ...state,
+        playlist: { ...state.playlist, custom: playlist }
       };
     }
     case 'addTracksToCustomPlaylist': {
@@ -181,9 +181,9 @@ function stateReducer(state: AppState, action: ActionTypes) {
       // Quick and dirty local storage solution
       updateLocalStoragePlaylist(playlist)
 
-      return { 
-        ...state, 
-        playlist: { ...state.playlist, custom: playlist } 
+      return {
+        ...state,
+        playlist: { ...state.playlist, custom: playlist }
       };
     }
     case 'deleteTracksFromCustomPlaylist': {
@@ -195,9 +195,9 @@ function stateReducer(state: AppState, action: ActionTypes) {
       // Quick and dirty local storage solution
       updateLocalStoragePlaylist(playlist)
 
-      return { 
-        ...state, 
-        playlist: { ...state.playlist, custom: playlist } 
+      return {
+        ...state,
+        playlist: { ...state.playlist, custom: playlist }
       };
     }
     case 'resetCustomPlaylist': {
@@ -206,21 +206,21 @@ function stateReducer(state: AppState, action: ActionTypes) {
       updateLocalStoragePlaylist(null)
       updateLocalStorageSelectedAlbums(null, areAllAlbumsSelected)
 
-      return { 
-        ...state, 
-        playlist: { 
-          ...state.playlist, 
-          custom: {}, 
-          tracksCollection: null 
+      return {
+        ...state,
+        playlist: {
+          ...state.playlist,
+          custom: {},
+          tracksCollection: null
         },
-        rsb: { ...state.rsb, 
-          selectedAlbums: {}, 
-          areAllAlbumsSelected 
+        rsb: { ...state.rsb,
+          selectedAlbums: {},
+          areAllAlbumsSelected
         }
       };
     }
     case 'setCustomTracksCollection': {
-      return { 
+      return {
         ...state,
         playlist: { ...state.playlist, tracksCollection: action.tracks }
       }
@@ -239,10 +239,10 @@ function stateReducer(state: AppState, action: ActionTypes) {
     }
     // RSB Reducers
     case 'updateView': {
-      return { 
+      return {
         ...state,
         playlist: { ...state.playlist, selectedPlaylist: action.playlistId },
-        rsb: { ...state.rsb, view: action.view } 
+        rsb: { ...state.rsb, view: action.view }
       };
     }
     case 'addSelectedAlbum': {
@@ -255,13 +255,13 @@ function stateReducer(state: AppState, action: ActionTypes) {
       // Quick and dirty localStorage
       updateLocalStorageSelectedAlbums(updatedAlbums, setAllAlbumsSelected)
 
-      return { 
+      return {
         ...state,
-        rsb: { 
-          ...state.rsb, 
+        rsb: {
+          ...state.rsb,
           selectedAlbums: updatedAlbums,
           areAllAlbumsSelected: setAllAlbumsSelected
-        } 
+        }
       };
     }
     case 'deleteSelectedAlbum': {
@@ -271,7 +271,7 @@ function stateReducer(state: AppState, action: ActionTypes) {
       // Quick and dirty localStorage
       updateLocalStorageSelectedAlbums(copy, state.rsb.areAllAlbumsSelected)
 
-      return { 
+      return {
         ...state,
         rsb: { ...state.rsb, selectedAlbums: copy }
       };
@@ -285,9 +285,9 @@ function stateReducer(state: AppState, action: ActionTypes) {
       // Quick and dirty localStorage
       updateLocalStorageSelectedAlbums(allSelected, areAllAlbumsSelected)
 
-      return { 
+      return {
         ...state,
-        rsb: { ...state.rsb, selectedAlbums: allSelected, areAllAlbumsSelected } 
+        rsb: { ...state.rsb, selectedAlbums: allSelected, areAllAlbumsSelected }
       };
     }
     case 'deselectAllAlbums': {
@@ -295,9 +295,9 @@ function stateReducer(state: AppState, action: ActionTypes) {
       // Quick and dirty localStorage
       updateLocalStorageSelectedAlbums(null, areAllAlbumsSelected)
 
-      return { 
+      return {
         ...state,
-        rsb: { ...state.rsb, selectedAlbums: {}, areAllAlbumsSelected } 
+        rsb: { ...state.rsb, selectedAlbums: {}, areAllAlbumsSelected }
       };
     }
     case 'setAllAlbumsSelected': {
@@ -305,29 +305,28 @@ function stateReducer(state: AppState, action: ActionTypes) {
       // Quick and dirty localStorage
       updateLocalStorageSelectedAlbums(state.rsb.selectedAlbums, areSelected)
 
-      return { 
+      return {
         ...state,
-        rsb: { ...state.rsb, areAllAlbumsSelected: areSelected } 
-      }; 
+        rsb: { ...state.rsb, areAllAlbumsSelected: areSelected }
+      };
     }
     // TODO might need to remove these
     case 'scrollAction': {
       const { scrollAction } = action;
-      return { 
+      return {
         ...state,
-        rsb: { ...state.rsb, scrollAction } 
-      }; 
+        rsb: { ...state.rsb, scrollAction }
+      };
     }
     case 'setScrollElement': {
       const { scrollElement } = action;
-      return { 
+      return {
         ...state,
-        rsb: { ...state.rsb, scrollElement } 
-      }; 
+        rsb: { ...state.rsb, scrollElement }
+      };
     }
     case 'setOpenAlbumInfo': {
       const { openAlbumInfo } = action;
-      console.log('!REDUCER setOpenAlbumInfo -> ', openAlbumInfo);
       return { 
         ...state,
         rsb: { ...state.rsb, openAlbumInfo }
@@ -335,36 +334,36 @@ function stateReducer(state: AppState, action: ActionTypes) {
     }
     case 'setTableContainerHeight': {
       const { tableContainerHeight } = action;
-      return { 
+      return {
         ...state,
         rsb: { ...state.rsb, tableContainerHeight }
       };
     }
     case 'setShowTrackTableOverlay': {
       const { showTrackTableOverlay } = action;
-      return { 
+      return {
         ...state,
         rsb: { ...state.rsb, showTrackTableOverlay }
       };
     }
     case 'setScrollToTop': {
       const { scrollToTop } = action;
-      return { 
+      return {
         ...state,
         rsb: { ...state.rsb, scrollToTop }
       };
     }
     case 'setShouldScroll': {
       const { shouldScroll } = action;
-      return { 
+      return {
         ...state,
         rsb: { ...state.rsb, shouldScroll }
       };
     }
     case 'setFilters': {
       const { filters } = action;
-      
-      return { 
+
+      return {
         ...state,
         rsb: { ...state.rsb, filters: {
           ...state.rsb.filters,
@@ -374,19 +373,19 @@ function stateReducer(state: AppState, action: ActionTypes) {
     }
     case 'setTotalCollectionCount': {
       const { totalCollectionCount } = action;
-      
-      return { 
+
+      return {
         ...state,
-        rsb: { 
+        rsb: {
           ...state.rsb,
           totalCollectionCount
         }
       }
     };
-    
+
     // Album Reducers
     case 'setAlbumCollection': {
-      return { 
+      return {
         ...state,
         albumCollection: action.albums
       };
@@ -394,20 +393,20 @@ function stateReducer(state: AppState, action: ActionTypes) {
     // Player Reducers
     case 'setAudioRef': {
       const { audioRef } = action;
-      return { 
+      return {
         ...state,
-        player: { 
-          ...state.player, 
+        player: {
+          ...state.player,
           audioRef
         }
       };
     }
     case 'setAudioUrl': {
-      return { 
+      return {
         ...state,
-        player: { 
-          ...state.player, 
-          audioUrl: action.track?.preview_url || null, 
+        player: {
+          ...state.player,
+          audioUrl: action.track?.preview_url || null,
           track: action.track,
           isPlaying: false,
           isPaused: false,
@@ -416,10 +415,10 @@ function stateReducer(state: AppState, action: ActionTypes) {
     }
     case 'setControls': {
       const { controls } = action;
-      return { 
+      return {
         ...state,
-        player: { 
-          ...state.player,  
+        player: {
+          ...state.player,
           controls: {
             ...state.player.controls,
             ...controls
@@ -429,7 +428,7 @@ function stateReducer(state: AppState, action: ActionTypes) {
     }
     // User Reducers
     case 'setUserInfo': {
-      return { 
+      return {
         ...state,
         user: action.userInfo
       }

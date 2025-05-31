@@ -90,7 +90,6 @@ export function PlayerControls() {
 
   // Plays the audio
   function handlePlay() {
-    console.log('!handlePlay -> ', !!audioRef?.current);
     if (!audioRef?.current) return;
     audioRef.current?.play();
     dispatch({ type: 'setControls', controls: { isPlaying: true } });
@@ -98,7 +97,6 @@ export function PlayerControls() {
 
   // Pauses the audio
   function handlePause() {
-    console.log('!handlePause -> ', !!audioRef?.current);
     if (!audioRef?.current) return;
     audioRef.current?.pause();
     dispatch({ type: 'setControls', controls: { isPlaying: false } });
@@ -130,14 +128,14 @@ export function PlayerControls() {
         {!controls.isPlaying && <IconButton
           Icon={PlayIcon}
           handleOnClick={handlePlay}
-          text='' 
-          className={styles.playButton} 
+          text=''
+          className={styles.playButton}
           />}
         {/* Pause */}
         {controls.isPlaying && <IconButton
           Icon={PauseIcon}
           handleOnClick={handlePause}
-          text='' 
+          text=''
           className={styles.playButton}
           />}
         {/* PROGESS BAR */}
@@ -148,7 +146,7 @@ export function PlayerControls() {
           Icon={controls.isMuted ? VolumeOff : VolumeOn}
           handleOnClick={handleSetMuted}
           text=''
-          className={styles.muteButton} 
+          className={styles.muteButton}
           />
       </fieldset>
       {isMobile && <ProgressBar getCurrentTime={getCurrentTime} totalTime={getDuration()} className={styles.smScreenProgressBar} />}

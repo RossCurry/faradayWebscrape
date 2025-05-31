@@ -26,7 +26,6 @@ export function DialogCreatePlaylist({
       // TODO Loading state
       const playlistInfo = await createPlaylist(title, tracksCollection)
       if (playlistInfo) {
-        console.log('!FE playlistInfo -> ', playlistInfo);
         setCreatedPlaylistUrl(playlistInfo.external_urls.spotify)
         setResponse('ok')
       } else {

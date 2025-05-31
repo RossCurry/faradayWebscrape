@@ -22,7 +22,6 @@ export function getLocalStorageSelectedAlbums(): Record<string, boolean>{
 }
 
 export function getLocalStorageAreAllAlbumsSelected() {
-  console.log('!localStorage.getItem(areAllAlbumsSelected) -> ', Boolean(localStorage.getItem('areAllAlbumsSelected')));
   const strValue = localStorage.getItem('areAllAlbumsSelected');
   return strValue === 'true' ? true : false
 }

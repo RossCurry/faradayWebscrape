@@ -35,10 +35,9 @@ export function PersistentAudioPlayer() {
       }, { signal: abort.signal });
 
 
-      // Make sure to only autoplay on a new song. 
+      // Make sure to only autoplay on a new song.
       // otherwise component mount will trigger the song.
       const isNewSong = prevTrack !== audioUrl
-      console.log('!isNewSong -> ', isNewSong);
       if (isNewSong) {
         audioRef.current.play()
         dispatch({ type: 'setControls', controls: { isPlaying: true } })
@@ -51,7 +50,7 @@ export function PersistentAudioPlayer() {
     }
     // Trigger the effect whenever the audioUrl changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [audioUrl]); 
+  }, [audioUrl]);
 
   // moving the audio element to the top level of the app to avoid rerendering
   return (

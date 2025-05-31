@@ -21,7 +21,6 @@ export default function useGetAndSetUserInfo(redirected?: boolean) {
     const token = window.localStorage.getItem('jwt')
     if (token) {
       const isTokenExpired = getIsJwtExpired(token);
-      console.log('!useGetAndSetUserInfo isTokenExpired -> ', isTokenExpired);
       if (!isTokenExpired) {
         getAndSetUserInfo(token, dispatch)
       }

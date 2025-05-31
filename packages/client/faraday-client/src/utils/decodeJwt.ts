@@ -10,7 +10,7 @@ export function getIsJwtExpired(token: string) {
       // Check if Token is expired
       return expirationTime < new Date()
     } else {
-      console.log('Token does not have an expiration field.');
+      console.warn('Token does not have an expiration field.');
     }
   } catch (error) {
     console.error('Invalid token format:', error);

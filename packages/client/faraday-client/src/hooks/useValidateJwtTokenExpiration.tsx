@@ -6,7 +6,6 @@ export default function useValidateJwtTokenExpiration() {
     const token = window.localStorage.getItem('jwt')
     if (token) {
       const isTokenExpired = getIsJwtExpired(token)
-      console.log('!useValidateJwtTokenExpiration  => isTokenExpired -> ', isTokenExpired);
       if (isTokenExpired){
         window.localStorage.removeItem('jwt')
       }
