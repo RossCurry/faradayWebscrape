@@ -72,7 +72,7 @@ function PlaylistTitle() {
         />
 
         <div className={`
-          ${styles.playlistTitleEditIcon} 
+          ${styles.playlistTitleEditIcon}
           ${textAreaHasFocus ? styles.hasFocus : ''}
           `}>
           <EditIcon />
@@ -85,7 +85,7 @@ function PlaylistTitle() {
 
 function Logos() {
   const isMobile = useIsMobile()
-  const logoSize = isMobile ? 115 : '7em'
+  const logoSize = isMobile ? 75 : '7em'
   return (
     <section className={styles.logosContainer}>
       <FaradayLogo className={styles.faradaylogo} />

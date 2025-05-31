@@ -1,10 +1,11 @@
-import { CheckCircleIcon } from "../../../../icons"
+import { CheckCircleIcon, OpenInNew } from "../../../../icons"
+import IconButton from "../../../Shared/IconButton/IconButton";
 import styles from './DialogComponent.module.css'
 
-export function DialogPlaylistSuccess({ 
-  playlistUrl, 
-  closeDialog 
-}: { 
+export function DialogPlaylistSuccess({
+  playlistUrl,
+  closeDialog
+}: {
   playlistUrl?: string | null;
   closeDialog: () => void;
 }) {
@@ -27,7 +28,12 @@ export function DialogPlaylistSuccess({
       {playlistUrl &&
         <>
           <p>Check out your new playlist</p>
-          <button onClick={handleOpenPlaylistInSpoti}>Open in Spotify</button>
+          <IconButton
+            handleOnClick={handleOpenPlaylistInSpoti}
+            Icon={OpenInNew}
+            text={'Open in Spotify'}
+            className={styles.sendPlaylistButton}
+          />
         </>
       }
     </section>

@@ -7,11 +7,14 @@ dialog {
 }
 
  dialog[open].dialogCreatePlaylist {
+  background-color:  var(--bg-dark-1);
+ }
+
+ dialog .dialogWrapper {
   display: flex;
   flex-direction: column;
   gap: 1em;
   padding: 1em;
-  background-color:  var(--bg-dark-1);
   border-radius: 8px;
   color: #E4E4E4;
 }
@@ -20,10 +23,9 @@ dialog[open].dialogCreatePlaylist::backdrop  {
 }
 
 .dialogHeader {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr;
   position: relative;
   padding: 1em 0em;
 }
@@ -32,12 +34,14 @@ dialog[open].dialogCreatePlaylist::backdrop  {
   padding: 0;
   margin: 0;
   text-align: center;
+  justify-self: center;
+  align-self: center;
 }
 
 .closeDialogButton {
   background-color: transparent;
-  position: absolute;
-  left: 0;
+  justify-self: start;
+  align-self: center;
 }
 
 .dialogContainer{
@@ -51,6 +55,18 @@ dialog[open].dialogCreatePlaylist::backdrop  {
 }
 
 @media screen and (max-width: 430px) {
+  dialog[open].dialogCreatePlaylist {
+    display: grid;
+    justify-content: center;
+    align-content: center;
+    width: 100dvw;
+    height: 100dvh;
+    padding: 0;
+    overflow: hidden;
+  }
+  dialog[open].dialogWrapper {
+    min-width: (100dvw - 2rem);
+  }
   dialog {
     min-width: 90dvw;
     /* height: 30dvw; */
@@ -62,5 +78,8 @@ dialog[open].dialogCreatePlaylist::backdrop  {
     grid-row-start: 1;
     grid-row: span 2;
   }
-  
+  .closeDialogButton {
+    justify-self: auto;
+  }
+
 }

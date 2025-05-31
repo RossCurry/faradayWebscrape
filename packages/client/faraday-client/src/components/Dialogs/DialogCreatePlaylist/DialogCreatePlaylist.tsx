@@ -69,30 +69,35 @@ export function DialogCreatePlaylist({
     <dialog
       ref={dialogRef}
       className={styles.dialogCreatePlaylist}
-    > <header className={styles.dialogHeader}>
-        <IconButton
-          handleOnClick={handleOnCloseDialog}
-          Icon={ArrowBackIcon}
-          text={isMobile ? '' : 'Back'}
-          className={styles.closeDialogButton}
-        />
-        {!response && <h3>Add your playlist to Spotify</h3>}
-      </header>
-      <div className={styles.dialogContainer}>
-        {!response && 
-          <SendPlaylist handleOnClick={handleOnClick} />
-        } 
-        {response &&
-          response === 'ok'
-          ? <DialogPlaylistSuccess 
-            playlistUrl={createdPlaylistUrl} 
-            closeDialog={handleOnCloseDialog} 
+    >
+      <section
+        className={styles.dialogWrapper}
+      >
+        <header className={styles.dialogHeader}>
+          <IconButton
+            handleOnClick={handleOnCloseDialog}
+            Icon={ArrowBackIcon}
+            text={isMobile ? '' : 'Back'}
+            className={styles.closeDialogButton}
+          />
+          {!response && <h3>Add your playlist to Spotify</h3>}
+        </header>
+        <div className={styles.dialogContainer}>
+          {!response &&
+            <SendPlaylist handleOnClick={handleOnClick} />
+          }
+          {response &&
+            response === 'ok'
+            ? <DialogPlaylistSuccess
+              playlistUrl={createdPlaylistUrl}
+              closeDialog={handleOnCloseDialog}
             />
-          : response === 'error'
-            ? <DialogPlaylistError />
-            : null
-        }
-      </div>
+            : response === 'error'
+              ? <DialogPlaylistError />
+              : null
+          }
+        </div>
+      </section>
     </dialog>
   )
 }

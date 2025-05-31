@@ -43,8 +43,9 @@
 }
 
 .playlistTitle textarea.playlistTitleInput {
-  font-size: 2em; 
-  font-weight: bold; 
+  font-size: 2em;
+  font-weight: bold;
+  color: var(--white);
 }
 
 .playlistTitle label {
@@ -80,7 +81,7 @@ textarea.playlistTitleInput {
 .sendPlaylistButton:hover {
   background-color: rgb(116, 111, 5);
   border-color: rgb(244, 235, 70);
-  color: rgb(244, 235, 70); 
+  color: rgb(244, 235, 70);
 }
 .sendPlaylistButton:focus svg,
 .sendPlaylistButton:hover svg {
@@ -93,8 +94,8 @@ textarea.playlistTitleInput {
   top: 1em;
   transform: translateX(0em);
   opacity: 0;
-  transition: 
-    transform 0.2s ease-in-out, 
+  transition:
+    transform 0.2s ease-in-out,
     opacity 0.2s ease-in-out;
 }
 .playlistTitleEditIcon.hasFocus {
@@ -132,6 +133,10 @@ textarea.playlistTitleInput {
 }
 .successMessage svg {
   fill: rgb(11, 105, 15);
+}
+
+.dialogButton{
+  padding: var(--p-2) var(--p-4);
 }
 
 @media screen and (max-width: 430px) {

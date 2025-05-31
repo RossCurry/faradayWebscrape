@@ -39,7 +39,7 @@ h1 {
 button {
   border-radius: 8px;
   border: 1px solid transparent;
-  padding: var(---p-1) var(--p-2);
+  padding: var(--p-1) var(--p-2);
   font-size: 1em;
   font-weight: 500;
   background-color: var(--bg-dark);
