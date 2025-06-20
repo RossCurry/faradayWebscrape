@@ -63,6 +63,7 @@ dialog[open].dialogCreatePlaylist::backdrop  {
     min-width: 100dvw;
     width: 100dvw;
     height: 100dvh;
+    min-height: 100dvh;
     justify-content: center;
     align-content: center;
     padding: 0;
