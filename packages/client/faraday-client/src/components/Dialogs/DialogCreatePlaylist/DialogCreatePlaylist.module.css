@@ -1,9 +1,10 @@
 dialog {
-  min-width: 30dvw;
+  /* min-width: 30dvw; */
   /* height: 30dvw; */
   padding: 0;
   justify-self: center;
   align-self: center;
+  border-radius: var(--r-2);
 }
 
  dialog[open].dialogCreatePlaylist {
@@ -57,26 +58,21 @@ dialog[open].dialogCreatePlaylist::backdrop  {
 @media screen and (max-width: 430px) {
   dialog[open].dialogCreatePlaylist {
     display: grid;
-    justify-content: center;
-    align-content: center;
-    width: 100dvw;
-    height: 100dvh;
-    padding: 0;
-    overflow: hidden;
-  }
-  dialog[open].dialogWrapper {
-    min-width: (100dvw - 2rem);
-  }
-  dialog {
-    min-width: 90dvw;
-    /* height: 30dvw; */
-    padding: 0;
     justify-self: center;
     align-self: center;
-    grid-column-start: 1;
-    grid-column: span 2;
-    grid-row-start: 1;
-    grid-row: span 2;
+    min-width: 100dvw;
+    width: 100dvw;
+    height: 100dvh;
+    justify-content: center;
+    align-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    overflow: hidden;
+  }
+  dialog[open] .dialogWrapper {
+    min-width: calc(100dvw - 2rem);
+    width: 100dvw - 2rem;
   }
   .closeDialogButton {
     justify-self: auto;
