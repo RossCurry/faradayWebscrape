@@ -1,5 +1,6 @@
 import Router from "koa-router"
 import mw from '#middlewares/index.js'
+import { scrapeThisIsFaraday } from '#controllers/faraday/scrapeThisIsFaraday.js'
 import Application from 'koa';
 import type { AppContext, AppState } from "../../router.js";
 import { user } from "../../constants.js";
@@ -8,6 +9,25 @@ const faradayRouter = new Router<AppState, AppContext>()
 faradayRouter.post("/api/faraday/albums/update",
   mw.faraday.scrapeFaradayStock,
   mw.faraday.setFaradayStock,
+)
+
+/**
+ * Test route to scrape a better way
+ */
+faradayRouter.get("/api/faraday/scrape",
+  async (ctx: AppContext, _next: Application.Next) => {
+    try {
+      const scapedData = await scrapeThisIsFaraday()
+      ctx.body = scapedData
+      ctx.status = 200
+    } catch (error) {
+      ctx.throw([
+        500,
+        'Error scraping data',
+        error
+      ])
+    }
+  }
 )
 
 /**
@@ -42,8 +62,8 @@ faradayRouter.get("/api/faraday/albums/batch",
     } as any
     try {
       const spotifyData = await mongo.spotify?.getSpotifyAlbumData({
-        match: {}, 
-        limit: Number(limit), 
+        match: {},
+        limit: Number(limit),
         offset:Number(offset),
         filters,
       })

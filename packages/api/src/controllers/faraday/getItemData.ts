@@ -22,22 +22,24 @@ async function getItemData(): Promise<ScrapedData> {
   // const showInBrowser = { headless: false } // launch config for debugging
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
-  
+
   // Navigate the page to a URL.
   await page.goto(FARADAY_URL);
   // Set screen size.
   await page.setViewport({width: 1080, height: 1024});
-  
+
   // Wait for...
-  await page.waitForNetworkIdle(); 
-  await page.waitForSelector('.grid-item');
-  
+  await page.waitForNetworkIdle();
+  // await page.waitForSelector('.grid-item');
+  await page.waitForSelector('.product-list-item');
+
   // Log page title
   console.log(await page.title());
-  
-  
+
+
   // Get items page 1
-  const gridItemsPage1 = await page.$$('.grid-item');
+  // const gridItemsPage1 = await page.$$('.grid-item');
+  const gridItemsPage1 = await page.$$('.product-list-item');
   console.log('!gridItemsPage1.length -> ', gridItemsPage1.length);
 
   const itemsPage1 = await getItems(gridItemsPage1)
@@ -46,11 +48,13 @@ async function getItemData(): Promise<ScrapedData> {
   await Promise.all([
     page.click('a.list-pagination-next '), // Replace with the appropriate selector
     page.waitForNavigation({ waitUntil: 'networkidle0' }), // Wait for navigation to complete
-    page.waitForSelector('.grid-item')
+    // page.waitForSelector('.grid-item')
+    page.waitForSelector('.product-list-item')
   ]);
 
   // Get items page 2
-  const gridItemsPage2 = await page.$$('.grid-item');
+  // const gridItemsPage2 = await page.$$('.grid-item');
+  const gridItemsPage2 = await page.$$('.product-list-item');
   console.log('!gridItemsPage2.length -> ', gridItemsPage2.length);
   const itemsPage2 = await getItems(gridItemsPage2)
 
@@ -117,18 +121,18 @@ async function getItems(gridItems: puppeteer.ElementHandle<Element>[]) {
       const fullCategoryString = Array.from(el.classList.values()).find(val => val.includes('category'))
       // remove 'category-' from the string
       const category = fullCategoryString?.slice(fullCategoryString.indexOf('-') + 1)
-      const linkInfo: { 
+      const linkInfo: {
         id: string,
         title: string,
         productType: string
       } = context && parseContext(context)
 
-      return { 
-        id: linkInfo?.id, 
-        title: linkInfo?.title, 
-        productType: linkInfo?.productType, 
-        isSoldOut: isSoldOut, 
-        category: category || fullCategoryString, 
+      return {
+        id: linkInfo?.id,
+        title: linkInfo?.title,
+        productType: linkInfo?.productType,
+        isSoldOut: isSoldOut,
+        category: category || fullCategoryString,
         sourceContext: context,
         price: price || '',
         link: link,
