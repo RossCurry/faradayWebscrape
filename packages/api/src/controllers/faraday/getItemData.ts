@@ -4,18 +4,20 @@ const FARADAY_URL = 'https://www.thisisfaraday.com/'
 
 export type FaradayItemData = {
   id: string,
-  title: string,
+  title?: string,
   productType: string,
   isSoldOut: boolean,
-  category: string | undefined,
+  category: string | null,
   notAvailable?: boolean,
   sourceContext: string | null,
-  price: string,
+  price?: string,
   link: string,
   linkLabel: string | null,
-  idTitle: string | undefined,
+  idTitle: string | null,
   parseError?: { message: 'not json', context: string },
+  spotifyAlbumLink?: string
 }
+
 export type ScrapedData = { cleanItems: FaradayItemData[], errorItems?: FaradayItemData[]}
 async function getItemData(): Promise<ScrapedData> {
   // Launch the browser and open a new blank page
@@ -61,13 +63,13 @@ async function getItemData(): Promise<ScrapedData> {
   const itemsData = itemsPage1.concat(itemsPage2)
 
   const cleanItems = itemsData.filter(item => !item.parseError)
-  const errorItems = itemsData.filter(item => !!item.parseError)
+  // const errorItems = itemsData.filter(item => !!item.parseError)
   console.log('!itemsData -> ', itemsData.length);
-  console.log('!errorItems -> ', { length: errorItems.length, errorItems});
+  // console.log('!errorItems -> ', { length: errorItems.length, errorItems});
   await browser.close();
   return {
-    cleanItems,
-    errorItems
+    cleanItems: [],
+    errorItems: []
   }
 }
 

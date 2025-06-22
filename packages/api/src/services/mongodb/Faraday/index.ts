@@ -5,10 +5,12 @@ import BaseConnection from "../BaseConnection.js"
 
 export default class FaradayMongo extends BaseConnection {
   collection: Collection<Document>
-
-  constructor(db: Db, collectionName = 'albums') {
+  collectionName: string
+  // albumsNew is a test collection while i modify
+  constructor(db: Db, collectionName = 'albumsNew') {
     super(db)
     this.collection = this.db.collection(collectionName);
+    this.collectionName = collectionName;
   }
 
 
@@ -17,10 +19,11 @@ export default class FaradayMongo extends BaseConnection {
     console.log('!setFaradayData -> ', data.length);
     const prevStock = await this.getFaradayData()
     console.log('!prevStock -> ', prevStock.length);
-    const prevStockIds = prevStock.map(d => d.id)
-    const albumCollection = this.db?.collection('albums')
-    if (!albumCollection) throw new Error('No album collecion found')
-    const newData = data.filter(d => !prevStockIds.includes(d.id))
+    const prevStockLinks = prevStock.map(d => d.link)
+    const albumCollection = this.db?.collection(this.collectionName)
+    if (!albumCollection) throw new Error('No album collecion found', { cause: { collectionName: this.collectionName }})
+    console.log('!prevStockLinks -> ', prevStockLinks);
+    const newData = data.filter(d => !prevStockLinks.includes(d.link))
     // TODO maybe we don't always just want to add on, or I need date info
     const newFaradayData = newData.map(d => ({ faraday: d, createdDate: new Date() }))
 
@@ -38,8 +41,10 @@ export default class FaradayMongo extends BaseConnection {
      * Update current data
      */
     const needsUpdate = prevStock.filter(prevItem => {
-      const currentItem = data.find(currentItem => currentItem.id === prevItem.id)
+      console.log('!prevItem -> ', prevItem);
+      const currentItem = data.find(currentItem => currentItem.link === prevItem.link)
       // TODO make this more extensible. Based on the types.
+      console.log('!currentItem -> ', currentItem);
       if (currentItem) {
         const newAvailablility = currentItem.isSoldOut !== prevItem.isSoldOut
         const newCategory = currentItem.category !== prevItem.category
@@ -52,8 +57,9 @@ export default class FaradayMongo extends BaseConnection {
       }
       return false
     })
+    console.log('!needsUpdate.length -> ', needsUpdate.length);
     const stockToUpdate = needsUpdate.map(prevItem => {
-      const currentItem = data.find(currentItem => currentItem.id === prevItem.id)
+      const currentItem = data.find(currentItem => currentItem.link === prevItem.link)
       if (currentItem) return { _id: prevItem._id, ...currentItem }
       return { _id: prevItem._id, notAvailable: true }
     })
@@ -77,8 +83,11 @@ export default class FaradayMongo extends BaseConnection {
     }
 
     return {
-      insertedDocs,
-      updatedDocs
+      prevStockCount: prevStock.length,
+      newDocsCount: newFaradayData.length,
+      updatedDocsCount: stockToUpdate.length,
+      // insertedDocs,
+      // updatedDocs
     }
   }
 
@@ -99,7 +108,7 @@ export default class FaradayMongo extends BaseConnection {
 
   async getFaradayData() {
     console.log('!getFaradayData -> ');
-    const albumCollection = this.db?.collection('albums')
+    const albumCollection = this.db?.collection(this.collectionName)
     const albums = await albumCollection?.find({}, {}).toArray()
     const faradayData: Array<WithId<FaradayItemData>> | undefined = albums?.map(album => ({ _id: album._id.toString(), ...album.faraday }))
     return faradayData ? faradayData : []
