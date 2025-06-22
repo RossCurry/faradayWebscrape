@@ -3,8 +3,9 @@ import Router from 'koa-router';
 import mw from '#middlewares/index.js'
 import { AppContext, AppState } from "../../router.js";
 import { getPlaylistImage } from '#middlewares/spotify/playlists/updateCoverImage.js';
-import { SpotifyTrackData } from './spotify.types.js';
+// import { SpotifyTrackData } from './spotify.types.js';
 import { searchSingleAlbum } from '#middlewares/spotify/getAlbumInfo.js';
+import { getSingleAlbumInfo } from '#middlewares/spotify/getSingleAlbumInfo.js';
 const spotifyRouter = new Router<AppState, AppContext>()
 
 // // Temporary Route to update missing genre field for existing
@@ -18,8 +19,31 @@ const spotifyRouter = new Router<AppState, AppContext>()
 spotifyRouter.post("/api/spotify/albums/update",
   mw.faraday.getFaradayStockMissingSpotifyInfo,
   mw.auth.getClientCredentialToken,
-  mw.spotify.getAlbumInfoSpotify, // expensive on requests 200+
-  mw.spotify.setSpotifyAlbumInfo,
+  // mw.spotify.getAlbumInfoSpotify, // expensive on requests 200+
+  // Use new album link to get data
+  async (ctx: AppContext, _next: Application.Next) => {
+    // data on context
+    const faradayData = ctx.state.data.faraday?.cleanItems
+    const spotifyAlbumLinks = faradayData?.map(d => d.spotifyAlbumLink).filter(Boolean) as string[]
+    console.log('!spotifyAlbumLinks -> ', spotifyAlbumLinks.length);
+    const accessToken = ctx.services.token.getEndpointInfo().access_token
+    if (!accessToken) throw new Error('No accessToken found')
+    const albumsInfo = []
+    for (const albumLink of spotifyAlbumLinks){
+      // Get data from Spotify. Includes tracks info
+      const albumInfo = await getSingleAlbumInfo(albumLink, accessToken)
+      if (!albumInfo) continue
+      // Set data in mongo
+      await ctx.services.mongo.spotify?.setSpotifyDataByAlbumLink(albumLink, albumInfo)
+      // Add to return
+      albumsInfo.push(albumInfo)
+    }
+    ctx.body = {
+      count: albumsInfo.length,
+      data: albumsInfo,
+    }
+    ctx.status = 200
+  },
 )
 
 spotifyRouter.post("/api/spotify/tracks",
@@ -28,20 +52,20 @@ spotifyRouter.post("/api/spotify/tracks",
 
 spotifyRouter.post("/api/spotify/tracks/update",
   mw.spotify.getSpotifyAlbumInfo, // from db
-  mw.auth.getClientCredentialToken, 
+  mw.auth.getClientCredentialToken,
   mw.spotify.getSpotifyTracksInfo, // from spoti api
-  mw.spotify.setSpotifyTrackInfo
+  // mw.spotify.setSpotifyTrackInfo
 )
 
 // spotifyRouter.post('/api/spotify/playlist/create',
 //   mw.auth.getClientCredentialToken,
 //   mw.spotify.playlists.CreatePlaylist,
 //   mw.spotify.playlists.PopulatePlaylist,
-// ) 
+// )
 
 // Helper route to update playlist images for user X
 spotifyRouter.post('/api/spotify/playlist/updateCoverImage/:playlistId',
-  mw.auth.getClientCredentialToken, 
+  mw.auth.getClientCredentialToken,
   mw.spotify.playlists.updateCoverImage,
 )
 
@@ -49,13 +73,13 @@ spotifyRouter.post('/api/spotify/playlist/updateCoverImage/:playlistId',
  * main request from UI to send code verification to spoti auth
  * & redirect FE to the spoti auth
  */
-spotifyRouter.get('/api/spotify/connect', 
+spotifyRouter.get('/api/spotify/connect',
   async (ctx: AppContext, _next: Application.Next) => {
     console.log('!ctx. -> ', ctx.ip);
     try {
-      const { 
-        authUrl: spotifyAuthUrl, 
-        codeVerifier: notEncoded 
+      const {
+        authUrl: spotifyAuthUrl,
+        codeVerifier: notEncoded
       } = await ctx.services.spotify.redirectToSpotifyAuthorize()
       // We need this for the authTokenRequest
       ctx.services.codeVerifier.set(notEncoded)
@@ -72,7 +96,7 @@ spotifyRouter.get('/api/spotify/connect',
  * We only get the code from the url redirect from Spotify
  * We need the codeChallenge from the previous connect step
  */
-spotifyRouter.post("/api/spotify/redirect", 
+spotifyRouter.post("/api/spotify/redirect",
   mw.auth.getPCKECredentialsToken, // use code from url
   mw.spotify.getCurrentUserFromSpotify, // get user info
   mw.spotify.playlists.CreatePlaylist, // user info needed for playlist creation
@@ -123,7 +147,7 @@ spotifyRouter.get("/api/spotify/playlists",
   mw.auth.getClientCredentialToken,
   // Get playlists
   // Find playlists missing images
-  // fetch those images 
+  // fetch those images
   // update those images in db
   // return everything updated to the FE
   async (ctx: AppContext, next: Application.Next) => {
@@ -175,7 +199,7 @@ spotifyRouter.get("/api/spotify/playlists",
 /**
  * Used to test the PreviewLink Class
  */
-spotifyRouter.post('/api/spotify/preview', 
+spotifyRouter.post('/api/spotify/preview',
   async (ctx: AppContext, _next: Application.Next)=>{
     try {
       console.log('!ctx.body -> ', ctx.body);
@@ -195,7 +219,7 @@ spotifyRouter.post('/api/spotify/preview',
 /**
  * Used to update all tracks that are missing a preview with a preview_url
  */
-spotifyRouter.post('/api/spotify/previews/update', 
+spotifyRouter.post('/api/spotify/previews/update',
   async (ctx: AppContext, _next: Application.Next)=>{
     try {
       const noPreviewMatch = 'spotify.trackInfo.items.preview_url'
@@ -244,7 +268,7 @@ spotifyRouter.get("/api/spotify/albums/search",
       const title = searchParams.get('title');
       if (!title) throw new Error("Missing required field 'title' in params");
       if (!ctx.state.accessToken) throw new Error("Missing auth access token in state");
-      
+
       const authString = `Bearer ${ctx.state.accessToken}`
       const results = await searchSingleAlbum({ title }, authString)
       ctx.body = results

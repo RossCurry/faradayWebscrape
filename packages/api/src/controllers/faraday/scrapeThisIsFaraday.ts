@@ -132,7 +132,7 @@ type LinksData = Awaited<ReturnType<typeof getMainPageItemLink>>
 /**
  * Get the links of each item
  */
-async function getSinglePageData(browser: puppeteer.Browser, linkData: Awaited<ReturnType<typeof getMainPageItemLink>>) {
+export async function getSinglePageData(browser: puppeteer.Browser, linkData: Awaited<ReturnType<typeof getMainPageItemLink>>) {
   /**
    * Browser context. methods are executed in the browser, not node
    * we can pass in vars as values to the browser context - no references or functions though
@@ -145,13 +145,13 @@ async function getSinglePageData(browser: puppeteer.Browser, linkData: Awaited<R
   const productTitle = await (await page.$$('.product-title')).at(0)?.evaluate(el => el.textContent)
   const productPrice = await (await page.$$('.product-price-value')).at(0)?.evaluate(el => el.textContent?.trim().replaceAll('€', '').trim())
   const productIsSoldout = await (await page.$$('.sold-out-status')).at(0)?.evaluate(el => el.textContent?.trim())
-  const productLinkEls = await productMeta?.$$('a') || [];
+  const productLinkEls = await page?.$$('a') || [];
 
   const productLinks = await Promise.all(productLinkEls?.map(async (anchorEl) => {
     const href = await anchorEl.evaluate(el => el.href)
     return href
   }))
-  const spotifyAlbumLink = productLinks.find(link => link.startsWith('https://open.spotify.com/intl-es/album/'))
+  const spotifyAlbumLink = productLinks.find(link => link.startsWith('https://open.spotify.com/') && link.includes('album'))
 
   const { link, linkLabel } = linkData
   const data: FaradayItemData = {

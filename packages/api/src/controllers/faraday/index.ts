@@ -1,9 +1,10 @@
 import Router from "koa-router"
 import mw from '#middlewares/index.js'
-import { scrapeThisIsFaraday } from '#controllers/faraday/scrapeThisIsFaraday.js'
+import { getSinglePageData, scrapeThisIsFaraday } from '#controllers/faraday/scrapeThisIsFaraday.js'
 import Application from 'koa';
 import type { AppContext, AppState } from "../../router.js";
 import { user } from "../../constants.js";
+import puppeteer from "puppeteer";
 const faradayRouter = new Router<AppState, AppContext>()
 
 faradayRouter.post("/api/faraday/albums/update",
@@ -18,6 +19,25 @@ faradayRouter.get("/api/faraday/scrape",
   async (ctx: AppContext, _next: Application.Next) => {
     try {
       const scapedData = await scrapeThisIsFaraday()
+      ctx.body = scapedData
+      ctx.status = 200
+    } catch (error) {
+      ctx.throw([
+        500,
+        'Error scraping data',
+        error
+      ])
+    }
+  }
+)
+
+faradayRouter.post("/api/faraday/scrape",
+  async (ctx: AppContext, _next: Application.Next) => {
+    const { url } = ctx.request.body as any
+    if (!url) throw new Error('No url field in request')
+    try {
+      const browser = await puppeteer.launch()
+      const scapedData = await getSinglePageData(browser, { link: url, linkLabel: ''})
       ctx.body = scapedData
       ctx.status = 200
     } catch (error) {

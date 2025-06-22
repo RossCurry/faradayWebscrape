@@ -6,7 +6,7 @@ import { AppContext } from "../../router.js";
 
 /**
  * Loop over Faraday list and search for a match for each listing.
- * @param ctx 
+ * @param ctx
  */
 export default async function getSpotifyTracksInfo(ctx: AppContext, next: Application.Next) {
   // TODO might have to run this consecutively
@@ -36,6 +36,9 @@ export default async function getSpotifyTracksInfo(ctx: AppContext, next: Applic
   }))
   console.log('!trackInfo -> ', allTracksInfo.filter(info => !!info));
   ctx.state.data = {
+    spotifyTrackInfo: allTracksInfo.filter(info => !!info)
+  }
+  ctx.body = {
     spotifyTrackInfo: allTracksInfo.filter(info => !!info)
   }
   await next()

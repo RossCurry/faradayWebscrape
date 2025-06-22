@@ -3,7 +3,6 @@ import { AppState } from "#router/"
 import { SpotifyAlbum, SpotifyAlbumTracksResponse, SpotifyCoverImageResponse, SpotifySearchResult, SpotifyTrackData } from "#controllers/spotify/spotify.types.js"
 import { FaradayItemData } from "#controllers/faraday/getItemData.js"
 import BaseConnection from "../BaseConnection.js"
-// import { GetSpotifyDataFilter, GetSpotifyDataMatch } from "../_refactored/_index.js"
 
 type GetAllFilter = 'all'|'sold out'|'available'| null
 
@@ -63,10 +62,35 @@ export default class SpotifyMongo extends BaseConnection {
       matchedCount
     }
   }
+  /**
+   * Sets single Spotify data from faraday webscrape data
+   * @param data
+   * @returns
+   */
+  async setSpotifyDataByAlbumLink(albumLink: string, data: Partial<SpotifyAlbum>) {
+    console.log('!setSpotifyDataByAlbumLink -> ', data.id);
+    const albumCollection = this.db?.collection('albumsNew')
+    if (!albumCollection) throw new Error('No album collecion found')
+
+    const match = {
+      'faraday.spotifyAlbumLink': albumLink
+    }
+    await albumCollection.updateOne(
+      match,
+      {
+        $set: {
+          spotify: data,
+          updatedDate: new Date()
+        }
+      }
+    )
+    return true
+  }
+
   async setSpotifyTrackData(data: AppState["data"]["spotifyTrackInfo"]) {
     console.log('!setSpotifyData -> ', data?.length);
     if (!data) throw new Error('No spotifyTrackInfo found')
-    const albumCollection = this.db?.collection('albums')
+    const albumCollection = this.db?.collection('albumsNew')
     if (!albumCollection) throw new Error('No album collecion found')
 
     const insertedDocs = await Promise.all(await data.map(async (spotifyTrackInfo) => {
@@ -115,7 +139,7 @@ export default class SpotifyMongo extends BaseConnection {
 
   async getSpotifyData(match?: Record<string, any>) {
     console.log('!getSpotifyData -> ');
-    const albumCollection = this.db?.collection('albums')
+    const albumCollection = this.db?.collection('albumsNew')
     const albums = await albumCollection?.find(match || {}, {}).toArray()
     const spotifyData: Array<SpotifySearchResult & { _id: string }> | undefined = albums?.map(album => ({ _id: album._id.toString(), ...album.spotify }))
     return spotifyData ? spotifyData : []
