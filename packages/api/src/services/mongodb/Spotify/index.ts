@@ -171,7 +171,8 @@ export default class SpotifyMongo extends BaseConnection {
       'spotify.artists': 1,
       'spotify.href': 1,
       'spotify.id': 1,
-      'spotify.image': 1,
+      // 'spotify.image': 1,
+      'spotify.images': 1,
       'spotify.name': 1,
       'faraday.category': 1,
       'faraday.isSoldOut': 1,
@@ -182,28 +183,36 @@ export default class SpotifyMongo extends BaseConnection {
       'spotify.releaseDate': 1,
       'spotify.popularity': 1,
       'spotify.genres': 1,
-      'spotify.trackInfo.items.artists': 1,
-      // 'spotify.trackInfo.items.available_markets': 1,
-      // 'spotify.trackInfo.items.disc_number': 1,
-      'spotify.trackInfo.items.duration_ms': 1,
-      // 'spotify.trackInfo.items.explicit': 1,
-      // 'spotify.trackInfo.items.external_urls': 1,
-      // 'spotify.trackInfo.items.href': 1,
-      'spotify.trackInfo.items.id': 1,
-      'spotify.trackInfo.items.name': 1,
-      'spotify.trackInfo.items.preview_url': 1,
-      'spotify.trackInfo.items.track_number': 1,
-      'spotify.trackInfo.items.type': 1,
-      'spotify.trackInfo.items.uri': 1,
-      // 'spotify.trackInfo.items.is_local': 1,
+      'spotify.tracks.items.artists': 1,
+      'spotify.tracks.items.duration_ms': 1,
+      'spotify.tracks.items.id': 1,
+      'spotify.tracks.items.name': 1,
+      'spotify.tracks.items.preview_url': 1,
+      'spotify.tracks.items.track_number': 1,
+      'spotify.tracks.items.type': 1,
+      'spotify.tracks.items.uri': 1,
+      // 'spotify.trackInfo.items.artists': 1,
+      // 'spotify.trackInfo.items.duration_ms': 1,
+      // 'spotify.trackInfo.items.id': 1,
+      // 'spotify.trackInfo.items.name': 1,
+      // 'spotify.trackInfo.items.preview_url': 1,
+      // 'spotify.trackInfo.items.track_number': 1,
+      // 'spotify.trackInfo.items.type': 1,
+      // 'spotify.trackInfo.items.uri': 1,
     }
-    const albumCollection = this.db?.collection('albums')
+    const albumCollection = this.db?.collection('albumsNew')
     const parsedFilters = this.#getParsedFilters(filters)
     const notFoundMatch = {
       ...match,
       'faraday.link': { $exists: true },
-      'spotify.trackInfo': { $exists: true },
+      // 'spotify.trackInfo': { $exists: true },
       $and: [
+        {
+          $or: [
+            // {'spotify.trackInfo': { $exists: true }},
+            {'spotify.tracks': { $exists: true }},
+          ],
+        },
         {
           $or: [
             { notFound: false },
@@ -226,7 +235,8 @@ export default class SpotifyMongo extends BaseConnection {
         limit,
         skip: offset,
         sort: {
-          "spotify.trackInfo.items.preview_url": -1, // songs with preview first
+          "spotify.tracks.items.preview_url": -1, // songs with preview first
+          // "spotify.trackInfo.items.preview_url": -1, // songs with preview first
         }
       }
     ).toArray()
@@ -237,13 +247,23 @@ export default class SpotifyMongo extends BaseConnection {
      * ReMap the trackInfo data.
      */
     const reMapped = spotifyData.map(datum => {
-      const { trackInfo, ...rest } = datum
+      const { tracks, images, artists, ...rest } = datum
       return {
         ...rest,
-        trackList: trackInfo?.items || [],
-        totalTracks: trackInfo?.items.length
+        image: images.at(1),
+        artists: artists.map((artist: { name: string }) => artist.name),
+        trackList: tracks?.items || [],
+        totalTracks: tracks?.items.length
       }
     })
+    // const reMapped = spotifyData.map(datum => {
+    //   const { trackInfo, ...rest } = datum
+    //   return {
+    //     ...rest,
+    //     trackList: trackInfo?.items || [],
+    //     totalTracks: trackInfo?.items.length
+    //   }
+    // })
     return reMapped
   }
 
@@ -322,19 +342,23 @@ export default class SpotifyMongo extends BaseConnection {
     */
   async getSpotifyTracksById(trackIds: string[], getAll: GetAllFilter) {
     if (!this.db) throw new Error('No DB found')
-    const albumCollection = this.db.collection('albums')
+    const albumCollection = this.db.collection('albumsNew')
     if (!albumCollection) throw new Error('No albumCollection found')
 
     let match;
     if (!getAll){
       match = {
-        'spotify.trackInfo.items.id': { $in: trackIds }
+        // 'spotify.trackInfo.items.id': { $in: trackIds }
+        'spotify.tracks.items.id': { $in: trackIds }
       }
     }
     else {
-      const allMatch = { 'spotify.trackInfo.items.id': { $exists: true }}
-      const availableMatch = { 'spotify.trackInfo.items.id': { $exists: true }, 'faraday.isSoldOut': false }
-      const soldOutMatch = { 'spotify.trackInfo.items.id': { $exists: true }, 'faraday.isSoldOut': true }
+      const allMatch = { 'spotify.tracks.items.id': { $exists: true }}
+      const availableMatch = { 'spotify.tracks.items.id': { $exists: true }, 'faraday.isSoldOut': false }
+      const soldOutMatch = { 'spotify.tracks.items.id': { $exists: true }, 'faraday.isSoldOut': true }
+      // const allMatch = { 'spotify.trackInfo.items.id': { $exists: true }}
+      // const availableMatch = { 'spotify.trackInfo.items.id': { $exists: true }, 'faraday.isSoldOut': false }
+      // const soldOutMatch = { 'spotify.trackInfo.items.id': { $exists: true }, 'faraday.isSoldOut': true }
       match = getAll === 'all'
         ? allMatch
         : getAll === 'available'
@@ -344,19 +368,19 @@ export default class SpotifyMongo extends BaseConnection {
 
     const tracks = await albumCollection.aggregate([
       { $match: match }, // returns the matching document
-      { $unwind: '$spotify.trackInfo.items' },
+      { $unwind: '$spotify.tracks.items' },
       { $match: match }, // Match only the tracks
       {
         $project: {
-          artists: '$spotify.trackInfo.items.artists',
-          duration_ms: '$spotify.trackInfo.items.duration_ms',
-          id: '$spotify.trackInfo.items.id',
-          name: '$spotify.trackInfo.items.name',
-          preview_url: '$spotify.trackInfo.items.preview_url',
-          track_number: '$spotify.trackInfo.items.track_number',
-          type: '$spotify.trackInfo.items.type',
-          uri: '$spotify.trackInfo.items.uri',
-          imageUrl: '$spotify.image.url',
+          artists: '$spotify.tracks.items.artists',
+          duration_ms: '$spotify.tracks.items.duration_ms',
+          id: '$spotify.tracks.items.id',
+          name: '$spotify.tracks.items.name',
+          preview_url: '$spotify.tracks.items.preview_url',
+          track_number: '$spotify.tracks.items.track_number',
+          type: '$spotify.tracks.items.type',
+          uri: '$spotify.tracks.items.uri',
+          imageUrl: { $arrayElemAt: ['$spotify.images.url', 2] },
         }
       }
     ]).toArray()

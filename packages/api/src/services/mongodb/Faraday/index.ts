@@ -41,10 +41,8 @@ export default class FaradayMongo extends BaseConnection {
      * Update current data
      */
     const needsUpdate = prevStock.filter(prevItem => {
-      console.log('!prevItem -> ', prevItem);
       const currentItem = data.find(currentItem => currentItem.link === prevItem.link)
       // TODO make this more extensible. Based on the types.
-      console.log('!currentItem -> ', currentItem);
       if (currentItem) {
         const newAvailablility = currentItem.isSoldOut !== prevItem.isSoldOut
         const newCategory = currentItem.category !== prevItem.category
