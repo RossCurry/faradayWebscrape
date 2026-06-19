@@ -203,7 +203,7 @@ spotifyRouter.post('/api/spotify/preview',
   async (ctx: AppContext, _next: Application.Next)=>{
     try {
       console.log('!ctx.body -> ', ctx.body);
-      const tracks = ctx.request.body && typeof ctx.request.body === 'object' && 'tracks' in ctx.request.body && ctx.request.body.tracks
+      const tracks = ctx.body && typeof ctx.body === 'object' && 'tracks' in ctx.body && ctx.body.tracks
       const isArray = Array.isArray(tracks);
       if (!isArray) throw new Error('Body contains no array of tracks')
       console.log('!tracks.length -> ', tracks.length);

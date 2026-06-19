@@ -33,7 +33,7 @@ faradayRouter.get("/api/faraday/scrape",
 
 faradayRouter.post("/api/faraday/scrape",
   async (ctx: AppContext, _next: Application.Next) => {
-    const { url } = ctx.request.body as any
+    const { url } = ctx.body
     if (!url) throw new Error('No url field in request')
     try {
       const browser = await puppeteer.launch()
