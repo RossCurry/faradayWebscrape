@@ -63,7 +63,11 @@ async function searchTracksSingleAlbum(albumId: string, authString: string): Pro
       if ('error' in searchResults) return { error: searchResults }
       return searchResults
     }
-    throw new Error(`Error parsing response from URL: ${getTracksURL} res: ${JSON.stringify(res)}`)
+    try {
+      throw new Error(`Error parsing response from URL: ${getTracksURL} resText: ${JSON.stringify(res.text())} res: ${JSON.stringify({ status:res.status, text: res.statusText})} `)
+    } catch (error) {
+      throw error
+    }
   } catch (error) {
     throw error
   }
