@@ -3,7 +3,7 @@ import pLimit from 'p-limit';
 import { FaradayItemData } from './getItemData.js';
 
 const BATCH_LIMIT = undefined
-const CONCURRENCY_LIMIT = 5
+const CONCURRENCY_LIMIT = 3
 const limit = pLimit(CONCURRENCY_LIMIT)
 // Or import puppeteer from 'puppeteer-core';
 const FARADAY_URL = 'https://www.thisisfaraday.com/'
@@ -38,7 +38,7 @@ export async function scrapeThisIsFaraday() {
       '--disable-accelerated-2d-canvas',
       '--no-first-run',
       '--no-zygote',
-      '--single-process', // If you're really desperate for resources, but can be less stable
+      // '--single-process', // If you're really desperate for resources, but can be less stable
       '--disable-gpu' // Often helps on servers without GPUs
     ]
   });
@@ -140,36 +140,42 @@ export async function getSinglePageData(browser: puppeteer.Browser, linkData: Aw
   // on the page - get elements and data
   // Open page
   const page = await puppeteerGetPage(browser, linkData.link)
-  // Should be 1 per page
-  const productMeta = (await page.$$('.product-meta')).at(0)
-  const productTitle = await (await page.$$('.product-title')).at(0)?.evaluate(el => el.textContent)
-  const productPrice = await (await page.$$('.product-price-value')).at(0)?.evaluate(el => el.textContent?.trim().replaceAll('€', '').trim())
-  const productIsSoldout = await (await page.$$('.sold-out')).at(0)?.evaluate(el => el.textContent?.trim())
-  const productLinkEls = await page?.$$('a') || [];
 
-  const productLinks = await Promise.all(productLinkEls?.map(async (anchorEl) => {
-    const href = await anchorEl.evaluate(el => el.href)
-    return href
-  }))
-  const spotifyAlbumLink = productLinks.find(link => link.startsWith('https://open.spotify.com/') && link.includes('album'))
+  try {
+    // Should be 1 per page
+    const productMeta = (await page.$$('.product-meta')).at(0)
+    const productTitle = await (await page.$$('.product-title')).at(0)?.evaluate(el => el.textContent)
+    const productPrice = await (await page.$$('.product-price-value')).at(0)?.evaluate(el => el.textContent?.trim().replaceAll('€', '').trim())
+    const productIsSoldout = await (await page.$$('.sold-out')).at(0)?.evaluate(el => el.textContent?.trim())
+    const productLinkEls = await page?.$$('a') || [];
 
-  const { link, linkLabel } = linkData
-  const data: FaradayItemData = {
-    id: '',
-    title: productTitle || '',
-    productType: '',
-    isSoldOut: Boolean(productIsSoldout),
-    category: null,
-    sourceContext: null,
-    price: productPrice || '',
-    link,
-    linkLabel,
-    idTitle: null,
-    spotifyAlbumLink
+    const productLinks = await Promise.all(productLinkEls?.map(async (anchorEl) => {
+      const href = await anchorEl.evaluate(el => el.href)
+      return href
+    }))
+    const spotifyAlbumLink = productLinks.find(link => link.startsWith('https://open.spotify.com/') && link.includes('album'))
+
+    const { link, linkLabel } = linkData
+    const data: FaradayItemData = {
+      id: '',
+      title: productTitle || '',
+      productType: '',
+      isSoldOut: Boolean(productIsSoldout),
+      category: null,
+      sourceContext: null,
+      price: productPrice || '',
+      link,
+      linkLabel,
+      idTitle: null,
+      spotifyAlbumLink
+    }
+    return data
+  } catch (error) {
+    console.error('Single page scrape error', error);
+  } finally {
+    // close page
+    await page.close()
   }
-  // close page
-  await page.close()
-  return data
 }
 
 
