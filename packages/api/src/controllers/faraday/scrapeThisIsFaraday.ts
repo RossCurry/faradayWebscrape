@@ -103,7 +103,7 @@ async function parseMainPageItems(browser: puppeteer.Browser, gridItems: puppete
     return limit(() => getSinglePageData(browser, linkData))
   }))
   console.log('!Data processed -> ', data.length);
-  return data
+  return data.filter(Boolean) as FaradayItemData[]
 }
 
 /*
