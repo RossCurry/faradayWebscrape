@@ -145,7 +145,16 @@ export async function getSinglePageData(browser: puppeteer.Browser, linkData: Aw
     // Should be 1 per page
     const productMeta = (await page.$$('.product-meta')).at(0)
     const productTitle = await (await page.$$('.product-title')).at(0)?.evaluate(el => el.textContent)
-    const productPrice = await (await page.$$('.product-price-value')).at(0)?.evaluate(el => el.textContent?.trim().replaceAll('€', '').trim())
+    const productPrice = await (await page.$$('.product-price-value')).at(0)?.evaluate(el => {
+      const text = el.textContent?.trim().replaceAll('€', '').trim()
+      // edge case: Precio de oferta: 24,00 Precio original: 29,00
+      const withOferta = text.includes('oferta');
+      let price = text;
+      if (withOferta){
+        price = text.substring(text.indexOf(',') - 2, text.indexOf(',') + 3)
+      }
+      return price;
+    })
     const productIsSoldout = await (await page.$$('.sold-out')).at(0)?.evaluate(el => el.textContent?.trim())
     const productLinkEls = await page?.$$('a') || [];
 
