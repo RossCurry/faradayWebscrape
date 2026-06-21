@@ -144,7 +144,7 @@ export async function getSinglePageData(browser: puppeteer.Browser, linkData: Aw
   const productMeta = (await page.$$('.product-meta')).at(0)
   const productTitle = await (await page.$$('.product-title')).at(0)?.evaluate(el => el.textContent)
   const productPrice = await (await page.$$('.product-price-value')).at(0)?.evaluate(el => el.textContent?.trim().replaceAll('€', '').trim())
-  const productIsSoldout = await (await page.$$('.sold-out-status')).at(0)?.evaluate(el => el.textContent?.trim())
+  const productIsSoldout = await (await page.$$('.sold-out')).at(0)?.evaluate(el => el.textContent?.trim())
   const productLinkEls = await page?.$$('a') || [];
 
   const productLinks = await Promise.all(productLinkEls?.map(async (anchorEl) => {
