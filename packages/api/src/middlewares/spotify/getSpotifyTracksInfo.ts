@@ -16,32 +16,36 @@ export default async function getSpotifyTracksInfo(ctx: AppContext, next: Applic
   console.log('!getSpotifyTracksInfo spotifyAlbums.length -> ', spotifyAlbums.length);
   // TODO filter those that have track info
   // const withNoTrackData = spotifyAlbums.filter()
-  const allTracksInfo = await Promise.all(spotifyAlbums.map(async (album: SpotifySearchResult) => {
-    const authString = `Bearer ${ctx.state.accessToken}`
-    if (album.id){
-      const spotifyTracks = await searchTracksSingleAlbum(album.id, authString);
-      if (!spotifyTracks) return undefined
-      if ('error' in spotifyTracks){
-        console.log('!spotifyTracks error -> ', spotifyTracks);
-        return undefined
+  try {
+    const allTracksInfo = await Promise.all(spotifyAlbums.map(async (album: SpotifySearchResult) => {
+      const authString = `Bearer ${ctx.state.accessToken}`
+      if (album.id){
+        const spotifyTracks = await searchTracksSingleAlbum(album.id, authString);
+        if (!spotifyTracks) return undefined
+        if ('error' in spotifyTracks){
+          console.log('!spotifyTracks error -> ', spotifyTracks);
+          return undefined
+        }
+        const trackData = {
+          album,
+          tracks: spotifyTracks as SpotifyAlbumTracksResponse,
+        }
+        // TODO add to DB as we get the data one by one, otherwise the rate limit kills the request
+        await ctx.services.mongo.spotify?.setSpotifyTrackData([{ album: trackData.album, tracks: trackData.tracks}])
+        return trackData
       }
-      const trackData = {
-        album,
-        tracks: spotifyTracks as SpotifyAlbumTracksResponse,
-      }
-      // TODO add to DB as we get the data one by one, otherwise the rate limit kills the request
-      await ctx.services.mongo.spotify?.setSpotifyTrackData([{ album: trackData.album, tracks: trackData.tracks}])
-      return trackData
+    }))
+    console.log('!trackInfo -> ', allTracksInfo.filter(info => !!info));
+    ctx.state.data = {
+      spotifyTrackInfo: allTracksInfo.filter(info => !!info)
     }
-  }))
-  console.log('!trackInfo -> ', allTracksInfo.filter(info => !!info));
-  ctx.state.data = {
-    spotifyTrackInfo: allTracksInfo.filter(info => !!info)
+    ctx.body = {
+      spotifyTrackInfo: allTracksInfo.filter(info => !!info)
+    }
+    await next()
+  } catch (error) {
+    ctx.throw([(error as any).status || 500, error])
   }
-  ctx.body = {
-    spotifyTrackInfo: allTracksInfo.filter(info => !!info)
-  }
-  await next()
 }
 
 async function searchTracksSingleAlbum(albumId: string, authString: string): Promise<SpotifyAlbumTracksResponse | { error?: Record<string, unknown>}> {
@@ -63,11 +67,7 @@ async function searchTracksSingleAlbum(albumId: string, authString: string): Pro
       if ('error' in searchResults) return { error: searchResults }
       return searchResults
     }
-    try {
-      throw new Error(`Error parsing response from URL: ${getTracksURL} resText: ${JSON.stringify(res.text())} res: ${JSON.stringify({ status:res.status, text: res.statusText})} `)
-    } catch (error) {
-      throw error
-    }
+    throw new Error(`Error parsing response from URL: ${getTracksURL} resText: ${JSON.stringify(res.text())} res: ${JSON.stringify({ status:res.status, text: res.statusText})} `)
   } catch (error) {
     throw error
   }
