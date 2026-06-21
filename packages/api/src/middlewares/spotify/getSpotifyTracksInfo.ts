@@ -58,15 +58,12 @@ async function searchTracksSingleAlbum(albumId: string, authString: string): Pro
       },
     })
     if (!res) throw new Error("No response")
-    const searchResults = await res.json() as unknown as SpotifyAlbumTracksResponse
     if (res.ok) {
+      const searchResults = await res.json() as unknown as SpotifyAlbumTracksResponse
+      if ('error' in searchResults) return { error: searchResults }
       return searchResults
     }
-    if ('error' in searchResults){
-      return { error: searchResults }
-    }
-
-    throw new Error(`Error parsing response from URL: ${getTracksURL} res: ${JSON.stringify(res)} parsedRes: ${JSON.stringify(searchResults)}`)
+    throw new Error(`Error parsing response from URL: ${getTracksURL} res: ${JSON.stringify(res)}`)
   } catch (error) {
     throw error
   }
